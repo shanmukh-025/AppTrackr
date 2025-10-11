@@ -2,13 +2,15 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
+const authRoutes = require('./routes/auth');
+
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Test route
+// Routes
 app.get('/', (req, res) => {
   res.json({ 
     message: 'AppTrackr API is running!',
@@ -19,6 +21,9 @@ app.get('/', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({ status: 'healthy', service: 'AppTrackr API' });
 });
+
+// Auth routes
+app.use('/api/auth', authRoutes);
 
 const PORT = process.env.PORT || 5000;
 

@@ -1,0 +1,42 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  applications Application[]
+}
+
+model Application {
+  id          String   @id @default(uuid())
+  company     String
+  position    String
+  status      String   @default("applied")
+  dateApplied DateTime @default(now())
+  jobUrl      String?
+  salaryRange String?
+  location    String?
+  notes       String?
+  logoUrl     String?
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
+}
