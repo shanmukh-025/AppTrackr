@@ -125,6 +125,15 @@
   background: #e2e8f0;
 }
 
+.edit-button {
+  background: #e6f7ff;
+  color: #0066cc;
+}
+
+.edit-button:hover {
+  background: #cce7ff;
+}
+
 .delete-button {
   background: #fee;
   color: #c53030;
@@ -136,24 +145,41 @@
 
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 80px 20px;
   color: #718096;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .empty-icon {
-  font-size: 64px;
-  margin-bottom: 16px;
+  font-size: 72px;
+  margin-bottom: 20px;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .empty-state h3 {
-  margin: 0 0 8px 0;
+  margin: 0 0 12px 0;
   color: #2d3748;
   font-size: 24px;
 }
 
 .empty-state p {
-  margin: 0;
+  margin: 0 0 24px 0;
   font-size: 16px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
 }
 
 @media (max-width: 768px) {
@@ -169,12 +195,4 @@
   .status-badge {
     align-self: flex-start;
   }
-}
-.edit-button {
-  background: #e6f7ff;
-  color: #0066cc;
-}
-
-.edit-button:hover {
-  background: #cce7ff;
 }

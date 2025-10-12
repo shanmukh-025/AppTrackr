@@ -6,6 +6,10 @@ import Signup from './components/Signup';
 import AddApplication from './components/AddApplication';
 import EditApplication from './components/EditApplication';
 import ApplicationsList from './components/ApplicationsList';
+import Analytics from './components/Analytics';
+import Pipeline from './components/Pipeline';
+import LoadingSkeleton from './components/LoadingSkeleton';
+import Toast from './components/Toast';
 import './App.css';
 
 function App() {
@@ -18,6 +22,8 @@ function App() {
   const [loadingApps, setLoadingApps] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [activeView, setActiveView] = useState('list');
+  const [toast, setToast] = useState(null);
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -47,10 +53,12 @@ function App() {
   const handleApplicationAdded = (newApp) => {
     setApplications([newApp, ...applications]);
     setShowAddModal(false);
+    setToast({ message: 'Application added successfully!', type: 'success' });
   };
 
   const handleApplicationDeleted = (id) => {
     setApplications(applications.filter(app => app.id !== id));
+    setToast({ message: 'Application deleted', type: 'success' });
   };
 
   const handleEditClick = (app) => {
@@ -64,6 +72,7 @@ function App() {
     ));
     setShowEditModal(false);
     setEditingApplication(null);
+    setToast({ message: 'Application updated successfully!', type: 'success' });
   };
 
   // Filter applications based on search and status
@@ -192,16 +201,49 @@ function App() {
             </select>
           </div>
 
-          {loadingApps ? (
-            <div className="loading-applications">
-              <p>Loading applications...</p>
-            </div>
-          ) : (
-            <ApplicationsList 
-              applications={filteredApplications}
-              onApplicationDeleted={handleApplicationDeleted}
-              onApplicationUpdated={handleEditClick}
-            />
+          {/* View Tabs */}
+          <div className="view-tabs">
+            <button 
+              className={`view-tab ${activeView === 'list' ? 'active' : ''}`}
+              onClick={() => setActiveView('list')}
+            >
+              📋 List View
+            </button>
+            <button 
+              className={`view-tab ${activeView === 'pipeline' ? 'active' : ''}`}
+              onClick={() => setActiveView('pipeline')}
+            >
+              🎯 Pipeline
+            </button>
+            <button 
+              className={`view-tab ${activeView === 'analytics' ? 'active' : ''}`}
+              onClick={() => setActiveView('analytics')}
+            >
+              📊 Analytics
+            </button>
+          </div>
+
+          {/* Analytics Section */}
+          {activeView === 'analytics' && applications.length > 0 && (
+            <Analytics applications={applications} />
+          )}
+
+          {/* Pipeline View */}
+          {activeView === 'pipeline' && (
+            <Pipeline applications={applications} />
+          )}
+
+          {/* List View */}
+          {activeView === 'list' && (
+            loadingApps ? (
+              <LoadingSkeleton />
+            ) : (
+              <ApplicationsList 
+                applications={filteredApplications}
+                onApplicationDeleted={handleApplicationDeleted}
+                onApplicationUpdated={handleEditClick}
+              />
+            )
           )}
         </main>
       </div>
@@ -221,6 +263,14 @@ function App() {
             setShowEditModal(false);
             setEditingApplication(null);
           }}
+        />
+      )}
+
+      {toast && (
+        <Toast 
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
         />
       )}
     </div>
