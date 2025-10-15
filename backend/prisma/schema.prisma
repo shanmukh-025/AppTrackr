@@ -14,6 +14,29 @@ model User {
   email     String   @unique
   password  String
   name      String?
+  
+  // New Profile Fields
+  phone           String?
+  location        String?
+  bio             String?
+  profilePicture  String?  @db.Text  
+  // Professional Info
+  currentRole     String?
+  experience      String?  // e.g., "3-5 years"
+  targetRole      String?
+  targetSalary    String?
+  skills          String?  // Comma-separated or JSON
+  
+  // Education
+  education       String?  // e.g., "Bachelor's in Computer Science"
+  university      String?
+  graduationYear  String?
+  
+  // Job Search Preferences
+  jobType         String?  // Full-time, Part-time, Contract
+  workMode        String?  // Remote, Hybrid, On-site
+  availability    String?  // Immediate, 2 weeks, 1 month
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   

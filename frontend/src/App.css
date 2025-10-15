@@ -1,3 +1,30 @@
+/* App with Sidebar Layout */
+.app-with-sidebar {
+  display: flex;
+  min-height: 100vh;
+  background: #f7fafc;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 260px;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding-top: 60px;
+  }
+}
+
+/* Keep all your existing App.css styles below */
+
+
+
+
 .App {
   min-height: 100vh;
   background: #f7fafc;

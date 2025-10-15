@@ -1,10 +1,11 @@
+
+const applicationRoutes = require('./routes/applications');
+const profileRoutes = require('./routes/profile');
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
-const applicationRoutes = require('./routes/applications');
-
 const app = express();
 
 // Middleware
@@ -28,6 +29,9 @@ app.use('/api/auth', authRoutes);
 
 // Application routes
 app.use('/api/applications', applicationRoutes);
+
+// Profile routes
+app.use('/api/profile', profileRoutes);
 
 const PORT = process.env.PORT || 5000;
 

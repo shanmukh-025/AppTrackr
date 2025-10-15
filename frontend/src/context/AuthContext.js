@@ -5,94 +5,71 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
-  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(localStorage.getItem('token') || '');
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-  // Load user on mount if token exists
-  useEffect(() => {
-    const loadUser = async () => {
-      if (token) {
-        try {
-          const response = await axios.get(`${API_URL}/api/auth/me`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          setUser(response.data.user);
-        } catch (error) {
-          console.error('Failed to fetch user:', error);
-          localStorage.removeItem('token');
-          setToken(null);
-          setUser(null);
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        setLoading(false);
-      }
-    };
-
-    loadUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
-
-  const register = async (email, password, name) => {
+  // Fetch user data from the backend
+  const fetchUser = async () => {
+    if (!token) return; // If no token, skip fetching
     try {
-      const response = await axios.post(`${API_URL}/api/auth/register`, {
-        email,
-        password,
-        name
+      const response = await axios.get(`${API_URL}/api/profile`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
-      const { token: newToken, user: newUser } = response.data;
-      localStorage.setItem('token', newToken);
-      setToken(newToken);
-      setUser(newUser);
-      return { success: true };
+      setUser(response.data.user); // Update the global user state
     } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Registration failed'
-      };
+      console.error('Failed to fetch user:', error);
     }
   };
 
+  // Refresh user data
+  const refreshUser = async () => {
+    await fetchUser();
+  };
+
+  // Login function
   const login = async (email, password) => {
     try {
       const response = await axios.post(`${API_URL}/api/auth/login`, {
         email,
         password
       });
-      const { token: newToken, user: newUser } = response.data;
-      localStorage.setItem('token', newToken);
+      const { token: newToken, user: userData } = response.data;
       setToken(newToken);
-      setUser(newUser);
+      setUser(userData);
+      localStorage.setItem('token', newToken);
       return { success: true };
     } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Login failed'
+      console.error('Login failed:', error);
+      return { 
+        success: false, 
+        error: error.response?.data?.message || 'Login failed' 
       };
     }
   };
 
+  // Logout function
   const logout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
+    setToken('');
     setUser(null);
+    localStorage.removeItem('token');
+    window.location.href = '/login'; // Redirect to login
   };
 
+  useEffect(() => {
+    fetchUser(); // Fetch user data on app load
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem('token', token);
+    } else {
+      localStorage.removeItem('token');
+    }
+  }, [token]);
+
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        loading,
-        register,
-        login,
-        logout,
-        isAuthenticated: !!user
-      }}
-    >
+    <AuthContext.Provider value={{ user, token, setToken, setUser, refreshUser, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

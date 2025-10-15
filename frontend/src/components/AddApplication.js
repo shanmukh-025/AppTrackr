@@ -60,11 +60,13 @@ function AddApplication({ onApplicationAdded, onClose }) {
       // Close modal if provided
       if (onClose) onClose();
 
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to add application');
-    } finally {
-      setLoading(false);
-    }
+    }  catch (err) {
+  console.error('Add application error:', err);
+  console.error('Error response:', err.response?.data);
+  setError(err.response?.data?.message || 'Failed to add application');
+} finally {
+  setLoading(false);
+}
   };
 
   return (
