@@ -9,25 +9,22 @@ export const AuthProvider = ({ children }) => {
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-  // Fetch user data from the backend
   const fetchUser = async () => {
-    if (!token) return; // If no token, skip fetching
+    if (!token) return;
     try {
       const response = await axios.get(`${API_URL}/api/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setUser(response.data.user); // Update the global user state
+      setUser(response.data.user);
     } catch (error) {
       console.error('Failed to fetch user:', error);
     }
   };
 
-  // Refresh user data
   const refreshUser = async () => {
     await fetchUser();
   };
 
-  // Login function
   const login = async (email, password) => {
     try {
       const response = await axios.post(`${API_URL}/api/auth/login`, {
@@ -48,16 +45,39 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout function
+  const register = async (name, email, password) => {
+    try {
+      console.log('Register function called with:', { name, email }); // Debug log
+      const response = await axios.post(`${API_URL}/api/auth/register`, {
+        name,
+        email,
+        password
+      });
+      console.log('Registration response:', response.data); // Debug log
+      const { token: newToken, user: userData } = response.data;
+      setToken(newToken);
+      setUser(userData);
+      localStorage.setItem('token', newToken);
+      return { success: true };
+    } catch (error) {
+      console.error('Registration failed:', error);
+      console.error('Error details:', error.response?.data); // Debug log
+      return { 
+        success: false, 
+        error: error.response?.data?.message || 'Registration failed' 
+      };
+    }
+  };
+
   const logout = () => {
     setToken('');
     setUser(null);
     localStorage.removeItem('token');
-    window.location.href = '/login'; // Redirect to login
+    window.location.href = '/login';
   };
 
   useEffect(() => {
-    fetchUser(); // Fetch user data on app load
+    fetchUser();
   }, [token]);
 
   useEffect(() => {
@@ -69,7 +89,18 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   return (
-    <AuthContext.Provider value={{ user, token, setToken, setUser, refreshUser, login, logout }}>
+    <AuthContext.Provider 
+      value={{ 
+        user, 
+        token, 
+        setToken, 
+        setUser, 
+        refreshUser, 
+        login, 
+        register, 
+        logout 
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

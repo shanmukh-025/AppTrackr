@@ -16,7 +16,7 @@ function Signup({ onSwitchToLogin }) {
     setError('');
     setLoading(true);
 
-    const result = await register(email, password, name);
+    const result = await register(name, email, password); // Fixed order: name, email, password
 
     if (!result.success) {
       setError(result.error);
@@ -41,6 +41,7 @@ function Signup({ onSwitchToLogin }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Your name"
+              required
             />
           </div>
 
