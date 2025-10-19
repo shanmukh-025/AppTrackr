@@ -180,6 +180,13 @@
   line-height: 1.4;
 }
 
+.badge-group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .source-badge {
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
@@ -188,6 +195,18 @@
   font-weight: 600;
   white-space: nowrap;
   text-transform: uppercase;
+}
+
+.age-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .job-company,

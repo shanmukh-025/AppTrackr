@@ -92,6 +92,22 @@ const JobSuggestions = () => {
     );
   };
 
+  const getJobAge = (postedDate) => {
+    if (!postedDate) return null;
+    
+    const now = new Date();
+    const posted = new Date(postedDate);
+    const diffTime = Math.abs(now - posted);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return { text: 'Posted today', color: '#4CAF50', icon: '🆕' };
+    if (diffDays === 1) return { text: 'Posted yesterday', color: '#4CAF50', icon: '🆕' };
+    if (diffDays <= 7) return { text: `Posted ${diffDays} days ago`, color: '#4CAF50', icon: '🆕' };
+    if (diffDays <= 14) return { text: `Posted ${diffDays} days ago`, color: '#FF9800', icon: '📅' };
+    if (diffDays <= 30) return { text: `Posted ${diffDays} days ago`, color: '#FF9800', icon: '📅' };
+    return { text: `Posted ${diffDays} days ago`, color: '#757575', icon: '📅' };
+  };
+
   const getRelevanceColor = (score) => {
     if (score >= 40) return '#4CAF50'; // Green - High relevance
     if (score >= 20) return '#FF9800'; // Orange - Medium relevance
@@ -170,7 +186,21 @@ const JobSuggestions = () => {
               <div key={job.id} className="job-card">
                 <div className="job-card-header">
                   <h3 className="job-title">{job.title}</h3>
-                  {getSourceBadge(job.source)}
+                  <div className="badge-group">
+                    {getSourceBadge(job.source)}
+                    {job.postedDate && (() => {
+                      const age = getJobAge(job.postedDate);
+                      return age ? (
+                        <span 
+                          className="age-badge" 
+                          style={{ backgroundColor: age.color }}
+                          title={new Date(job.postedDate).toLocaleDateString()}
+                        >
+                          {age.icon} {age.text}
+                        </span>
+                      ) : null;
+                    })()}
+                  </div>
                 </div>
                 
                 <p className="job-company">🏢 {job.company}</p>
