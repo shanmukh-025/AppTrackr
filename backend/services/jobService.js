@@ -60,7 +60,7 @@ class JobService {
 
       rateLimiter.incrementCount('jooble');
 
-      const jobs = this.normalizeJoobleResponse(response.data.jobs || []);
+      const jobs = await this.normalizeJoobleResponse(response.data.jobs || []);
       cacheService.set(cacheKey, jobs);
       
       console.log(`✅ Jooble: Found ${jobs.length} jobs for "${keywords}"`);
@@ -111,7 +111,7 @@ class JobService {
 
       rateLimiter.incrementCount('apijobs');
 
-      const jobs = this.normalizeAPIJobsResponse(response.data.data || []);
+      const jobs = await this.normalizeAPIJobsResponse(response.data.data || []);
       cacheService.set(cacheKey, jobs);
       
       console.log(`✅ APIJobs: Found ${jobs.length} jobs for "${keywords}"`);
@@ -147,7 +147,7 @@ class JobService {
         timeout: 10000
       });
 
-      const jobs = this.normalizeArbeitnowResponse(response.data.data || []);
+      const jobs = await this.normalizeArbeitnowResponse(response.data.data || []);
       cacheService.set(cacheKey, jobs, 3600); // Cache longer (1 hour)
       
       console.log(`✅ Arbeitnow: Found ${jobs.length} jobs for "${keywords}"`);
@@ -195,7 +195,7 @@ class JobService {
         return text.includes(keywordLower);
       });
 
-      const normalized = this.normalizeRemoteOKResponse(jobs);
+      const normalized = await this.normalizeRemoteOKResponse(jobs);
       cacheService.set(cacheKey, normalized, 3600);
       
       console.log(`✅ RemoteOK: Found ${normalized.length} jobs for "${keywords}" (DIRECT URLs)`);
@@ -238,7 +238,7 @@ class JobService {
         timeout: 10000
       });
 
-      const jobs = this.normalizeRemotiveResponse(response.data.jobs || []);
+      const jobs = await this.normalizeRemotiveResponse(response.data.jobs || []);
       cacheService.set(cacheKey, jobs, 3600);
       
       console.log(`✅ Remotive: Found ${jobs.length} jobs for "${keywords}" (DIRECT URLs)`);
@@ -315,11 +315,13 @@ class JobService {
   /**
    * Normalize Jooble API response
    */
-  normalizeJoobleResponse(jobs) {
-    return jobs.map(job => {
-      const careerPage = findCompanyCareerPage(job.company);
+  async normalizeJoobleResponse(jobs) {
+    const normalized = [];
+    
+    for (const job of jobs) {
+      const careerPage = await findCompanyCareerPage(job.company);
       
-      return {
+      normalized.push({
         id: `jooble_${job.id || Date.now()}_${Math.random()}`,
         title: job.title,
         company: job.company,
@@ -334,20 +336,24 @@ class JobService {
         postedDate: job.updated || new Date().toISOString(),
         source: 'jooble',
         redirectWarning: !careerPage // Warn if no career page available
-      };
-    });
+      });
+    }
+    
+    return normalized;
   }
 
   /**
    * Normalize APIJobs.dev response
    */
-  normalizeAPIJobsResponse(jobs) {
-    return jobs.map(job => {
+  async normalizeAPIJobsResponse(jobs) {
+    const normalized = [];
+    
+    for (const job of jobs) {
       const jobUrl = job.url || job.application_url || job.company_url;
       const companyName = job.company_name || job.company;
-      const careerPage = findCompanyCareerPage(companyName);
+      const careerPage = await findCompanyCareerPage(companyName);
       
-      return {
+      normalized.push({
         id: `apijobs_${job.id || Date.now()}_${Math.random()}`,
         title: job.title || job.position,
         company: companyName,
@@ -362,18 +368,22 @@ class JobService {
         postedDate: job.published_at || job.created_at || new Date().toISOString(),
         source: 'apijobs',
         redirectWarning: !careerPage
-      };
-    });
+      });
+    }
+    
+    return normalized;
   }
 
   /**
    * Normalize Arbeitnow API response
    */
-  normalizeArbeitnowResponse(jobs) {
-    return jobs.map(job => {
-      const careerPage = findCompanyCareerPage(job.company_name);
+  async normalizeArbeitnowResponse(jobs) {
+    const normalized = [];
+    
+    for (const job of jobs) {
+      const careerPage = await findCompanyCareerPage(job.company_name);
       
-      return {
+      normalized.push({
         id: `arbeitnow_${job.slug || Date.now()}_${Math.random()}`,
         title: job.title,
         company: job.company_name,
@@ -388,15 +398,19 @@ class JobService {
         postedDate: job.created_at || new Date().toISOString(),
         source: 'arbeitnow',
         redirectWarning: !careerPage
-      };
-    });
+      });
+    }
+    
+    return normalized;
   }
 
   /**
    * Normalize RemoteOK API response (DIRECT COMPANY URLS!)
    */
-  normalizeRemoteOKResponse(jobs) {
-    return jobs.map(job => {
+  async normalizeRemoteOKResponse(jobs) {
+    const normalized = [];
+    
+    for (const job of jobs) {
       let postedDate = new Date().toISOString();
       try {
         // RemoteOK uses Unix timestamp (in seconds)
@@ -413,9 +427,9 @@ class JobService {
       }
 
       const jobUrl = job.url || job.apply_url || '#';
-      const careerPage = findCompanyCareerPage(job.company);
+      const careerPage = await findCompanyCareerPage(job.company);
       
-      return {
+      normalized.push({
         id: `remoteok_${job.id || Date.now()}_${Math.random()}`,
         title: job.position || job.title || 'Unknown',
         company: job.company || 'Unknown',
@@ -431,18 +445,22 @@ class JobService {
         source: 'remoteok',
         redirectWarning: !careerPage,
         tags: job.tags || []
-      };
-    });
+      });
+    }
+    
+    return normalized;
   }
 
   /**
    * Normalize Remotive.io API response
    */
-  normalizeRemotiveResponse(jobs) {
-    return jobs.map(job => {
-      const careerPage = findCompanyCareerPage(job.company_name);
+  async normalizeRemotiveResponse(jobs) {
+    const normalized = [];
+    
+    for (const job of jobs) {
+      const careerPage = await findCompanyCareerPage(job.company_name);
       
-      return {
+      normalized.push({
         id: `remotive_${job.id || Date.now()}_${Math.random()}`,
         title: job.title,
         company: job.company_name || 'Unknown',
@@ -459,8 +477,10 @@ class JobService {
         redirectWarning: !careerPage,
         category: job.category || 'Software Development',
         tags: job.tags || []
-      };
-    });
+      });
+    }
+    
+    return normalized;
   }
 
   /**
