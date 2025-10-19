@@ -2,6 +2,7 @@ import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import AddApplication from '../components/AddApplication';
+import JobSuggestions from '../components/JobSuggestions';
 import './Pages.css';
 
 function Dashboard() {
@@ -89,6 +90,9 @@ function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Job Suggestions */}
+      <JobSuggestions />
 
       {/* Recent Applications */}
       <div className="dashboard-section">

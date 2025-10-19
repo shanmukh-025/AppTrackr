@@ -10,6 +10,7 @@ import Companies from './pages/Companies';
 import Analytics from './pages/Analytics';
 import Profile from './pages/Profile';
 import Resources from './pages/Resources';
+import Jobs from './pages/Jobs';
 import './App.css';
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/applications" element={<Applications />} />
+            <Route path="/jobs" element={<Jobs />} />
             <Route path="/companies" element={<Companies />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/profile" element={<Profile />} />

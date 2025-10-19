@@ -10,6 +10,7 @@ function Sidebar() {
   const navItems = [
     { path: '/dashboard', icon: '🏠', label: 'Dashboard' },
     { path: '/applications', icon: '📋', label: 'Applications' },
+    { path: '/jobs', icon: '💼', label: 'Jobs' },
     { path: '/companies', icon: '🏢', label: 'Companies' },
     { path: '/analytics', icon: '📊', label: 'Analytics' },
     { path: '/profile', icon: '👤', label: 'Profile' },
@@ -17,15 +18,29 @@ function Sidebar() {
   ];
 
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
+    console.log('Hamburger clicked - Current state:', isMobileMenuOpen);
+    setIsMobileMenuOpen(prev => {
+      console.log('Toggling from', prev, 'to', !prev);
+      return !prev;
+    });
+  };
+
+  const closeMobileMenu = () => {
+    console.log('Closing mobile menu');
+    setIsMobileMenuOpen(false);
   };
 
   return (
     <>
       {/* Mobile Header */}
-      <div className="mobile-header">
-        <button className="hamburger" onClick={toggleMobileMenu}>
-          ☰
+      <div className={`mobile-header ${isMobileMenuOpen ? 'hidden' : ''}`}>
+        <button 
+          className={`hamburger ${isMobileMenuOpen ? 'active' : ''}`} 
+          onClick={toggleMobileMenu}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
         </button>
         <div className="mobile-logo">
           <span className="logo-icon">🎯</span>
@@ -41,6 +56,10 @@ function Sidebar() {
             <span className="logo-icon">🎯</span>
             <span className="logo-text">AppTrackr</span>
           </div>
+          {/* Close button for mobile */}
+          <button className="sidebar-close-btn" onClick={closeMobileMenu}>
+            ✕
+          </button>
         </div>
 
         {/* User Info */}
@@ -67,7 +86,7 @@ function Sidebar() {
               className={({ isActive }) => 
                 `nav-item ${isActive ? 'active' : ''}`
               }
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={closeMobileMenu}
             >
               <span className="nav-icon">{item.icon}</span>
               <span className="nav-label">{item.label}</span>
@@ -85,12 +104,11 @@ function Sidebar() {
       </aside>
 
       {/* Mobile Overlay */}
-      {isMobileMenuOpen && (
-        <div 
-          className="mobile-overlay" 
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
+      <div 
+        className={`mobile-overlay ${isMobileMenuOpen ? 'active' : ''}`}
+        onClick={closeMobileMenu}
+        style={{ display: isMobileMenuOpen ? 'block' : 'none' }}
+      />
     </>
   );
 }

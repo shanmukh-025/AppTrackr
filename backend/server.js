@@ -1,6 +1,7 @@
 
 const applicationRoutes = require('./routes/applications');
 const profileRoutes = require('./routes/profile');
+const jobRoutes = require('./routes/jobs');
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -16,7 +17,8 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.json({ 
     message: 'AppTrackr API is running!',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    features: ['Job Tracking', 'Job Suggestions', 'Profile Management']
   });
 });
 
@@ -32,6 +34,9 @@ app.use('/api/applications', applicationRoutes);
 
 // Profile routes
 app.use('/api/profile', profileRoutes);
+
+// Job suggestion routes
+app.use('/api/jobs', jobRoutes);
 
 const PORT = process.env.PORT || 5000;
 
