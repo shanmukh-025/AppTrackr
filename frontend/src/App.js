@@ -11,6 +11,7 @@ import Analytics from './pages/Analytics';
 import Profile from './pages/Profile';
 import Resources from './pages/Resources';
 import Jobs from './pages/Jobs';
+import AIFeatures from './pages/AIFeatures';
 import './App.css';
 
 function App() {
@@ -51,6 +52,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/applications" element={<Applications />} />
             <Route path="/jobs" element={<Jobs />} />
+            <Route path="/ai-features" element={<AIFeatures />} />
             <Route path="/companies" element={<Companies />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/profile" element={<Profile />} />

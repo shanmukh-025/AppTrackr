@@ -20,6 +20,8 @@ model User {
   location        String?
   bio             String?
   profilePicture  String?  @db.Text  
+  resumeUrl       String?  @db.Text  // Resume file URL
+  
   // Professional Info
   currentRole     String?
   experience      String?  // e.g., "3-5 years"
@@ -37,10 +39,31 @@ model User {
   workMode        String?  // Remote, Hybrid, On-site
   availability    String?  // Immediate, 2 weeks, 1 month
   
+  // Premium Features
+  isPremium       Boolean  @default(false)
+  premiumUntil    DateTime?
+  
+  // Email Notifications
+  emailNotifications      Boolean  @default(true)
+  dailyDigest            Boolean  @default(false)
+  instantAlerts          Boolean  @default(false)
+  applicationReminders   Boolean  @default(true)
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  applications Application[]
+  applications        Application[]
+  resumeAnalysis      ResumeAnalysis[]
+  coverLetters        CoverLetter[]
+  interviewPreps      InterviewPrep[]
+  savedSearches       SavedSearch[]
+  jobShares           JobShare[]
+  sentReferrals       Referral[]       @relation("SentReferrals")
+  receivedReferrals   Referral[]       @relation("ReceivedReferrals")
+  companyReviews      CompanyReview[]
+  forumPosts          ForumPost[]
+  forumComments       ForumComment[]
+  resumes             Resume[]
 }
 
 model Application {
@@ -55,13 +78,36 @@ model Application {
   notes       String?
   logoUrl     String?
   
+  // Enhanced Fields
+  jobDescription  String?  @db.Text
+  requiredSkills  String?  // JSON array
+  experienceLevel String?  // Junior, Mid, Senior
+  jobType         String?  // Full-time, Contract, etc.
+  workMode        String?  // Remote, Hybrid, On-site
+  deadline        DateTime?
+  
+  // Timeline Fields
+  appliedDate     DateTime?
+  screeningDate   DateTime?
+  interviewDate   DateTime?
+  offerDate       DateTime?
+  rejectedDate    DateTime?
+  
+  // Follow-up
+  nextFollowUp    DateTime?
+  followUpNotes   String?
+  
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
+  activities  ApplicationActivity[]
+  
   @@index([userId])
+  @@index([status])
+  @@index([deadline])
 }
 
 model CompanyCareerPage {
@@ -78,4 +124,319 @@ model CompanyCareerPage {
   @@index([companyName])
   @@index([searchCount])
   @@map("company_career_pages")
+}
+
+// ============================================
+// PHASE 1: AI FEATURES
+// ============================================
+
+model ResumeAnalysis {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  resumeText      String   @db.Text
+  jobDescription  String?  @db.Text
+  
+  // Analysis Results
+  overallScore    Int      // 0-100
+  matchScore      Int?     // Match with job (0-100)
+  skillsMatched   String?  // JSON array
+  skillsGaps      String?  // JSON array
+  suggestions     String   @db.Text // JSON array of improvements
+  strengths       String?  @db.Text
+  weaknesses      String?  @db.Text
+  
+  createdAt       DateTime @default(now())
+  
+  @@index([userId])
+}
+
+model CoverLetter {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  company         String
+  position        String
+  jobDescription  String   @db.Text
+  
+  content         String   @db.Text
+  tone            String   @default("professional") // professional, casual, enthusiastic
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId])
+}
+
+model InterviewPrep {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  company         String
+  position        String
+  jobDescription  String   @db.Text
+  
+  questions       String   @db.Text // JSON array of questions
+  answers         String   @db.Text // JSON array of sample answers
+  tips            String?  @db.Text
+  
+  // Progress Tracking
+  preparedQuestions  String?  @db.Text // JSON array of question IDs
+  confidence         Int      @default(0) // 0-100
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId])
+}
+
+// ============================================
+// PHASE 2: ADVANCED JOB FEATURES
+// ============================================
+
+model SavedSearch {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name            String
+  query           String
+  location        String?
+  
+  // Filters
+  salaryMin       Int?
+  salaryMax       Int?
+  experienceLevel String?
+  techStack       String?  // JSON array
+  remoteOnly      Boolean  @default(false)
+  jobType         String?
+  
+  // Notifications
+  emailAlerts     Boolean  @default(false)
+  alertFrequency  String   @default("daily") // instant, daily, weekly
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId])
+}
+
+model ApplicationActivity {
+  id              String      @id @default(uuid())
+  applicationId   String
+  application     Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  
+  type            String      // applied, screening, interview, offer, rejected, follow-up
+  description     String?
+  date            DateTime    @default(now())
+  notes           String?     @db.Text
+  
+  createdAt       DateTime    @default(now())
+  
+  @@index([applicationId])
+  @@index([date])
+}
+
+// ============================================
+// PHASE 4: SOCIAL & COLLABORATION
+// ============================================
+
+model JobShare {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  jobTitle        String
+  company         String
+  jobUrl          String   @db.Text
+  jobDescription  String?  @db.Text
+  
+  sharedWith      String?  // Email or user ID
+  message         String?  @db.Text
+  
+  createdAt       DateTime @default(now())
+  
+  @@index([userId])
+}
+
+model Referral {
+  id              String   @id @default(uuid())
+  
+  senderId        String
+  sender          User     @relation("SentReferrals", fields: [senderId], references: [id], onDelete: Cascade)
+  
+  receiverId      String
+  receiver        User     @relation("ReceivedReferrals", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  company         String
+  position        String
+  jobUrl          String?  @db.Text
+  status          String   @default("pending") // pending, accepted, declined
+  message         String?  @db.Text
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([senderId])
+  @@index([receiverId])
+}
+
+model CompanyReview {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  company         String
+  position        String?
+  
+  // Ratings (1-5)
+  overallRating   Float
+  cultureRating   Float?
+  workLifeRating  Float?
+  compensationRating Float?
+  managementRating   Float?
+  
+  // Review Content
+  pros            String?  @db.Text
+  cons            String?  @db.Text
+  interviewExperience String? @db.Text
+  interviewDifficulty String? // easy, medium, hard
+  
+  // Compensation
+  salary          Int?
+  bonus           Int?
+  equity          String?
+  
+  // Verification
+  isVerified      Boolean  @default(false)
+  employmentStatus String? // current, former, interviewed
+  
+  helpful         Int      @default(0)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([company])
+}
+
+model ForumPost {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title           String
+  content         String   @db.Text
+  category        String   // tips, success-stories, questions, advice, mentor
+  tags            String?  // JSON array
+  
+  views           Int      @default(0)
+  likes           Int      @default(0)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  comments        ForumComment[]
+  
+  @@index([userId])
+  @@index([category])
+}
+
+model ForumComment {
+  id              String    @id @default(uuid())
+  postId          String
+  post            ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  content         String    @db.Text
+  likes           Int       @default(0)
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@index([postId])
+  @@index([userId])
+}
+
+// ============================================
+// PHASE 5: PREMIUM FEATURES
+// ============================================
+
+model Resume {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name            String   // e.g., "Software Engineer Resume v2"
+  template        String   @default("modern") // modern, classic, minimal, creative
+  
+  // Resume Data (JSON)
+  personalInfo    String   @db.Text
+  summary         String?  @db.Text
+  experience      String   @db.Text // JSON array
+  education       String   @db.Text // JSON array
+  skills          String   @db.Text // JSON array
+  projects        String?  @db.Text // JSON array
+  certifications  String?  @db.Text // JSON array
+  
+  // File URLs
+  pdfUrl          String?  @db.Text
+  docxUrl         String?  @db.Text
+  
+  version         Int      @default(1)
+  isActive        Boolean  @default(true)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId])
+}
+
+model AutofillData {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  
+  // Common Application Data
+  commonAnswers   String   @db.Text // JSON: frequently used answers
+  workHistory     String   @db.Text // JSON array
+  references      String?  @db.Text // JSON array
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model PremiumJob {
+  id              String   @id @default(uuid())
+  
+  title           String
+  company         String
+  description     String   @db.Text
+  requirements    String?  @db.Text
+  benefits        String?  @db.Text
+  
+  salaryMin       Int?
+  salaryMax       Int?
+  location        String?
+  workMode        String?
+  jobType         String?
+  
+  jobUrl          String   @db.Text
+  applyUrl        String?  @db.Text
+  
+  isExclusive     Boolean  @default(true)
+  isPriority      Boolean  @default(false)
+  
+  postedDate      DateTime @default(now())
+  expiresAt       DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([company])
+  @@index([postedDate])
 }

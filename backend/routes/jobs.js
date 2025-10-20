@@ -97,11 +97,22 @@ router.get('/suggestions', auth, async (req, res) => {
 
 /**
  * GET /api/jobs/search
- * Search jobs by keywords (public search)
+ * Search jobs by keywords with advanced filters
  */
 router.get('/search', auth, async (req, res) => {
   try {
-    const { keywords, location, limit, remote } = req.query;
+    const { 
+      keywords, 
+      location, 
+      limit, 
+      remote,
+      salaryMin,
+      salaryMax,
+      experienceLevel,
+      techStack,
+      jobType,
+      workMode
+    } = req.query;
 
     if (!keywords) {
       return res.status(400).json({
@@ -117,7 +128,55 @@ router.get('/search', auth, async (req, res) => {
       remote: remote === 'true'
     };
 
-    const jobs = await jobService.searchJobs(skills, options);
+    let jobs = await jobService.searchJobs(skills, options);
+
+    // Apply advanced filters
+    if (salaryMin || salaryMax) {
+      jobs = jobs.filter(job => {
+        if (!job.salary) return false;
+        const salary = parseInt(job.salary.replace(/[^0-9]/g, ''));
+        if (salaryMin && salary < parseInt(salaryMin)) return false;
+        if (salaryMax && salary > parseInt(salaryMax)) return false;
+        return true;
+      });
+    }
+
+    if (experienceLevel) {
+      const levels = experienceLevel.split(',').map(l => l.trim().toLowerCase());
+      jobs = jobs.filter(job => {
+        if (!job.experienceLevel) return false;
+        return levels.some(level => job.experienceLevel.toLowerCase().includes(level));
+      });
+    }
+
+    if (techStack) {
+      const requiredTech = techStack.split(',').map(t => t.trim().toLowerCase());
+      jobs = jobs.filter(job => {
+        const jobTech = (job.skills || []).map(s => s.toLowerCase());
+        return requiredTech.some(tech => jobTech.some(jt => jt.includes(tech)));
+      });
+    }
+
+    if (jobType) {
+      const types = jobType.split(',').map(t => t.trim().toLowerCase());
+      jobs = jobs.filter(job => {
+        if (!job.type) return false;
+        return types.some(type => job.type.toLowerCase().includes(type));
+      });
+    }
+
+    if (workMode) {
+      const modes = workMode.split(',').map(m => m.trim().toLowerCase());
+      jobs = jobs.filter(job => {
+        const location = (job.location || '').toLowerCase();
+        return modes.some(mode => {
+          if (mode === 'remote') return location.includes('remote');
+          if (mode === 'hybrid') return location.includes('hybrid');
+          if (mode === 'onsite' || mode === 'on-site') return !location.includes('remote') && !location.includes('hybrid');
+          return false;
+        });
+      });
+    }
 
     res.json({
       success: true,
@@ -125,7 +184,15 @@ router.get('/search', auth, async (req, res) => {
         jobs,
         count: jobs.length,
         keywords: skills,
-        filters: options
+        filters: {
+          ...options,
+          salaryMin,
+          salaryMax,
+          experienceLevel,
+          techStack,
+          jobType,
+          workMode
+        }
       }
     });
 
