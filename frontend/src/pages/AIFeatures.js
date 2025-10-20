@@ -59,6 +59,10 @@ const AIFeatures = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
+      console.log('📝 Sending cover letter request...');
+      console.log('Token:', token ? `${token.substring(0, 20)}...` : 'NO TOKEN');
+      console.log('Payload:', { clCompany, clPosition, clJobDesc, clTone });
+
       const response = await axios.post(
         'http://localhost:5000/api/ai/generate-cover-letter',
         {
@@ -70,9 +74,12 @@ const AIFeatures = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
+      console.log('✅ Response received:', response.data);
       setCoverLetter(response.data.coverLetter);
     } catch (error) {
       console.error('Cover letter generation error:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Full error:', error);
       alert('Failed to generate cover letter: ' + (error.response?.data?.error || error.message));
     } finally {
       setLoading(false);

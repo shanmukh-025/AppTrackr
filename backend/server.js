@@ -11,7 +11,7 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
 const { initializeStaticCompanies } = require('./utils/companyCareerPages');
-const emailService = require('./services/emailService');
+// const emailService = require('./services/emailService'); // Email service disabled
 const app = express();
 
 // Middleware
@@ -60,8 +60,8 @@ app.listen(PORT, async () => {
   // Initialize static companies in database on startup
   await initializeStaticCompanies();
   
-  // Initialize email service and schedule jobs
-  emailService.initializeTransporter();
-  emailService.scheduleDailyDigest();
-  emailService.scheduleDeadlineReminders();
+  // Email service disabled
+  // emailService.initializeTransporter();
+  // emailService.scheduleDailyDigest();
+  // emailService.scheduleDeadlineReminders();
 });

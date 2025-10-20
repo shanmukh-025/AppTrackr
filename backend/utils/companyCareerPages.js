@@ -141,20 +141,27 @@ async function findCompanyCareerPage(companyName) {
   
   // TIER 2: Learning cache (fast - ~10ms)
   try {
-    const cachedCompany = await prisma.companyCareerPage.findUnique({
-      where: { companyName: normalized }
-    });
+    const cachedCompany = await Promise.race([
+      prisma.companyCareerPage.findUnique({
+        where: { companyName: normalized }
+      }),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('DB timeout')), 5000)
+      )
+    ]);
     
     if (cachedCompany) {
       console.log(`✅ [TIER 2] Found in learning cache: ${cachedCompany.careerUrl}`);
       
-      // Update last searched time and count
-      await prisma.companyCareerPage.update({
+      // Update last searched time and count (fire and forget to avoid connection pool issues)
+      prisma.companyCareerPage.update({
         where: { id: cachedCompany.id },
         data: { 
           lastSearched: new Date(),
           searchCount: { increment: 1 }
         }
+      }).catch(err => {
+        console.warn('⚠️ Failed to update cache count:', err.message);
       });
       
       return cachedCompany.careerUrl;
@@ -171,26 +178,26 @@ async function findCompanyCareerPage(companyName) {
   const currentCount = (searchFrequency.get(normalized) || 0) + 1;
   searchFrequency.set(normalized, currentCount);
   
-  // Auto-save to database after threshold reached
+  // Auto-save to database after threshold reached (fire and forget)
   if (currentCount >= CACHE_THRESHOLD) {
-    try {
-      await prisma.companyCareerPage.create({
-        data: {
-          companyName: normalized,
-          careerUrl: generatedURL,
-          source: 'auto-generated',
-          searchCount: currentCount,
-          isVerified: false
-        }
-      });
-      console.log(`💾 [LEARNING] Saved to cache after ${currentCount} searches: ${normalized}`);
-      searchFrequency.delete(normalized); // Clear from memory
-    } catch (error) {
-      // Ignore duplicate errors (race condition)
-      if (!error.message.includes('Unique constraint')) {
-        console.warn('⚠️ Failed to save to cache:', error.message);
+    prisma.companyCareerPage.upsert({
+      where: { companyName: normalized },
+      update: { 
+        searchCount: { increment: 1 },
+        lastSearched: new Date()
+      },
+      create: {
+        companyName: normalized,
+        careerUrl: generatedURL,
+        source: 'auto-generated',
+        searchCount: currentCount,
+        isVerified: false
       }
-    }
+    }).catch(err => {
+      console.warn('⚠️ Failed to cache company:', err.message);
+    });
+    
+    searchFrequency.delete(normalized);
   } else {
     console.log(`📊 Search count for "${normalized}": ${currentCount}/${CACHE_THRESHOLD}`);
   }

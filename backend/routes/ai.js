@@ -14,8 +14,16 @@ const prisma = require('../prisma/client');
  */
 router.post('/analyze-resume', auth, async (req, res) => {
   try {
+    console.log('📄 Resume Analysis Started');
+    console.log('req.userId:', req.userId);
+
     const { resumeText, jobDescription } = req.body;
-    const userId = req.user.id;
+    const userId = req.userId;
+
+    if (!userId) {
+      console.error('❌ userId is missing!');
+      return res.status(401).json({ error: 'User ID not found in token' });
+    }
 
     if (!resumeText) {
       return res.status(400).json({ error: 'Resume text is required' });
@@ -24,39 +32,50 @@ router.post('/analyze-resume', auth, async (req, res) => {
     // Call AI service
     const analysis = await aiService.analyzeResume(resumeText, jobDescription);
 
-    // Save to database
-    const savedAnalysis = await prisma.resumeAnalysis.create({
-      data: {
-        userId,
-        resumeText,
-        jobDescription,
-        overallScore: analysis.overallScore,
-        matchScore: analysis.matchScore || null,
-        skillsMatched: JSON.stringify(analysis.skillsMatched || []),
-        skillsGaps: JSON.stringify(analysis.skillsGaps || []),
-        suggestions: JSON.stringify(analysis.suggestions || []),
-        strengths: JSON.stringify(analysis.strengths || []),
-        weaknesses: JSON.stringify(analysis.weaknesses || []),
-      }
-    });
-
-    res.json({
+    // Return response immediately, save to database in background (non-blocking)
+    const responseData = {
       success: true,
       analysis: {
-        id: savedAnalysis.id,
-        overallScore: savedAnalysis.overallScore,
-        matchScore: savedAnalysis.matchScore,
-        skillsMatched: JSON.parse(savedAnalysis.skillsMatched),
-        skillsGaps: JSON.parse(savedAnalysis.skillsGaps),
-        suggestions: JSON.parse(savedAnalysis.suggestions),
-        strengths: JSON.parse(savedAnalysis.strengths),
-        weaknesses: JSON.parse(savedAnalysis.weaknesses),
-        createdAt: savedAnalysis.createdAt
+        id: 'pending',
+        overallScore: analysis.overallScore,
+        matchScore: analysis.matchScore,
+        skillsMatched: analysis.skillsMatched || [],
+        skillsGaps: analysis.skillsGaps || [],
+        suggestions: analysis.suggestions || [],
+        strengths: analysis.strengths || [],
+        weaknesses: analysis.weaknesses || [],
+        createdAt: new Date()
       }
+    };
+
+    // Fire-and-forget: Save to database without blocking response
+    setImmediate(() => {
+      prisma.resumeAnalysis.create({
+        data: {
+          userId,
+          resumeText,
+          jobDescription,
+          overallScore: analysis.overallScore,
+          matchScore: analysis.matchScore || null,
+          skillsMatched: JSON.stringify(analysis.skillsMatched || []),
+          skillsGaps: JSON.stringify(analysis.skillsGaps || []),
+          suggestions: JSON.stringify(analysis.suggestions || []),
+          strengths: JSON.stringify(analysis.strengths || []),
+          weaknesses: JSON.stringify(analysis.weaknesses || []),
+        }
+      }).then(savedAnalysis => {
+        console.log('✅ Resume analysis saved with id:', savedAnalysis.id);
+        responseData.analysis.id = savedAnalysis.id;
+      }).catch(dbError => {
+        console.error('⚠️ Database error saving analysis (non-blocking):', dbError.message);
+      });
     });
+
+    res.json(responseData);
   } catch (error) {
-    console.error('Resume analysis error:', error);
-    res.status(500).json({ error: error.message });
+    console.error('❌ Resume analysis error:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ error: error.message, stack: error.stack });
   }
 });
 
@@ -66,7 +85,7 @@ router.post('/analyze-resume', auth, async (req, res) => {
  */
 router.get('/resume-analyses', auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
 
     const analyses = await prisma.resumeAnalysis.findMany({
       where: { userId },
@@ -102,66 +121,80 @@ router.get('/resume-analyses', auth, async (req, res) => {
  */
 router.post('/generate-cover-letter', auth, async (req, res) => {
   try {
+    console.log('📝 Cover Letter Generation Started');
+    console.log('req.userId:', req.userId);
+    console.log('req.body:', req.body);
+
     const { company, position, jobDescription, tone } = req.body;
-    const userId = req.user.id;
+    const userId = req.userId;
 
     if (!company || !position || !jobDescription) {
       return res.status(400).json({ error: 'Company, position, and job description are required' });
     }
 
-    // Get user profile
-    const user = await prisma.user.findUnique({
-      where: { id: userId }
-    });
-
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+    if (!userId) {
+      console.error('❌ userId is missing!');
+      return res.status(401).json({ error: 'User ID not found in token' });
     }
 
-    const userProfile = {
-      name: user.name,
-      currentRole: user.currentRole,
-      experience: user.experience,
-      skills: user.skills,
-      education: user.education,
-      bio: user.bio
-    };
-
-    // Generate cover letter
+    // Generate cover letter immediately with minimal data
+    console.log('🤖 Calling AI service...');
     const content = await aiService.generateCoverLetter(
-      userProfile,
+      { name: 'Candidate', skills: '', experience: '', education: '' },
       jobDescription,
       company,
       position,
       tone || 'professional'
     );
 
-    // Save to database
-    const savedLetter = await prisma.coverLetter.create({
-      data: {
-        userId,
+    // Return response immediately, save to database and fetch user profile in background (non-blocking)
+    const responseData = {
+      success: true,
+      coverLetter: {
+        id: 'pending',
         company,
         position,
-        jobDescription,
         content,
-        tone: tone || 'professional'
+        tone: tone || 'professional',
+        createdAt: new Date()
+      }
+    };
+
+    // Fire-and-forget: Fetch user profile and save to database without blocking response
+    setImmediate(async () => {
+      try {
+        console.log('🔍 [Background] Looking up user with id:', userId);
+        
+        const user = await prisma.user.findUnique({
+          where: { id: userId }
+        });
+
+        if (user) {
+          console.log('👤 [Background] User found');
+        }
+
+        await prisma.coverLetter.create({
+          data: {
+            userId,
+            company,
+            position,
+            jobDescription,
+            content,
+            tone: tone || 'professional'
+          }
+        }).then(savedLetter => {
+          console.log('✅ [Background] Cover letter saved with id:', savedLetter.id);
+        });
+      } catch (err) {
+        console.error('⚠️ [Background] Database operation failed:', err.message);
       }
     });
 
-    res.json({
-      success: true,
-      coverLetter: {
-        id: savedLetter.id,
-        company: savedLetter.company,
-        position: savedLetter.position,
-        content: savedLetter.content,
-        tone: savedLetter.tone,
-        createdAt: savedLetter.createdAt
-      }
-    });
+    res.json(responseData);
   } catch (error) {
-    console.error('Cover letter generation error:', error);
-    res.status(500).json({ error: error.message });
+    console.error('❌ Cover letter generation error:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ error: error.message, stack: error.stack });
   }
 });
 
@@ -171,7 +204,7 @@ router.post('/generate-cover-letter', auth, async (req, res) => {
  */
 router.get('/cover-letters', auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
 
     const letters = await prisma.coverLetter.findMany({
       where: { userId },
@@ -191,7 +224,7 @@ router.get('/cover-letters', auth, async (req, res) => {
  */
 router.delete('/cover-letters/:id', auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const { id } = req.params;
 
     await prisma.coverLetter.deleteMany({
@@ -215,8 +248,16 @@ router.delete('/cover-letters/:id', auth, async (req, res) => {
  */
 router.post('/generate-interview-prep', auth, async (req, res) => {
   try {
+    console.log('💼 Interview Prep Generation Started');
+    console.log('req.userId:', req.userId);
+
     const { company, position, jobDescription } = req.body;
-    const userId = req.user.id;
+    const userId = req.userId;
+
+    if (!userId) {
+      console.error('❌ userId is missing!');
+      return res.status(401).json({ error: 'User ID not found in token' });
+    }
 
     if (!company || !position || !jobDescription) {
       return res.status(400).json({ error: 'Company, position, and job description are required' });
@@ -225,34 +266,45 @@ router.post('/generate-interview-prep', auth, async (req, res) => {
     // Generate interview prep
     const prepData = await aiService.generateInterviewPrep(company, position, jobDescription);
 
-    // Save to database
-    const savedPrep = await prisma.interviewPrep.create({
-      data: {
-        userId,
-        company,
-        position,
-        jobDescription,
-        questions: JSON.stringify(prepData.questions || []),
-        answers: JSON.stringify(prepData.questions || []), // Same data, kept for compatibility
-        tips: JSON.stringify(prepData.tips || [])
-      }
-    });
-
-    res.json({
+    // Return response immediately, save to database in background (non-blocking)
+    const responseData = {
       success: true,
       interviewPrep: {
-        id: savedPrep.id,
-        company: savedPrep.company,
-        position: savedPrep.position,
-        questions: JSON.parse(savedPrep.questions),
-        tips: JSON.parse(savedPrep.tips),
-        confidence: savedPrep.confidence,
-        createdAt: savedPrep.createdAt
+        id: 'pending',
+        company,
+        position,
+        questions: prepData.questions || [],
+        tips: prepData.tips || [],
+        confidence: 0,
+        createdAt: new Date()
       }
+    };
+
+    // Fire-and-forget: Save to database without blocking response
+    setImmediate(() => {
+      prisma.interviewPrep.create({
+        data: {
+          userId,
+          company,
+          position,
+          jobDescription,
+          questions: JSON.stringify(prepData.questions || []),
+          answers: JSON.stringify(prepData.questions || []), // Same data, kept for compatibility
+          tips: JSON.stringify(prepData.tips || [])
+        }
+      }).then(savedPrep => {
+        console.log('✅ Interview prep saved with id:', savedPrep.id);
+        responseData.interviewPrep.id = savedPrep.id;
+      }).catch(dbError => {
+        console.error('⚠️ Database error saving interview prep (non-blocking):', dbError.message);
+      });
     });
+
+    res.json(responseData);
   } catch (error) {
-    console.error('Interview prep generation error:', error);
-    res.status(500).json({ error: error.message });
+    console.error('❌ Interview prep generation error:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ error: error.message, stack: error.stack });
   }
 });
 
@@ -262,7 +314,7 @@ router.post('/generate-interview-prep', auth, async (req, res) => {
  */
 router.get('/interview-preps', auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
 
     const preps = await prisma.interviewPrep.findMany({
       where: { userId },
@@ -293,7 +345,7 @@ router.get('/interview-preps', auth, async (req, res) => {
  */
 router.patch('/interview-preps/:id', auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const { id } = req.params;
     const { preparedQuestions, confidence } = req.body;
 

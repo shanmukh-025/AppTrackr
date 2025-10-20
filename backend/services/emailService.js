@@ -1,39 +1,30 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const prisma = require('../prisma/client');
 const cron = require('node-cron');
 
 class EmailService {
   constructor() {
-    // Create reusable transporter (will be configured when needed)
-    this.transporter = null;
+    // Create Resend client
+    this.resend = null;
     this.isConfigured = false;
   }
 
   /**
-   * Initialize email transporter
+   * Initialize Resend client
    */
   initializeTransporter() {
     if (this.isConfigured) return;
 
     try {
-      // Check if email credentials are configured
-      if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-        console.log('⚠️  Email service not configured. Set EMAIL_USER and EMAIL_PASSWORD in .env');
+      // Check if Resend API key is configured
+      if (!process.env.RESEND_API_KEY) {
+        console.log('⚠️  Email service not configured. Set RESEND_API_KEY in .env');
         return;
       }
 
-      this.transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-        port: parseInt(process.env.EMAIL_PORT || '587'),
-        secure: false, // true for 465, false for other ports
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASSWORD,
-        },
-      });
-
+      this.resend = new Resend(process.env.RESEND_API_KEY);
       this.isConfigured = true;
-      console.log('✅ Email service initialized');
+      console.log('✅ Email service initialized (Resend)');
     } catch (error) {
       console.error('❌ Email service initialization failed:', error.message);
     }
@@ -49,15 +40,20 @@ class EmailService {
     }
 
     try {
-      const info = await this.transporter.sendMail({
-        from: process.env.EMAIL_FROM || `"AppTrackr" <${process.env.EMAIL_USER}>`,
-        to,
+      const { data, error } = await this.resend.emails.send({
+        from: process.env.EMAIL_FROM || 'AppTrackr <onboarding@resend.dev>',
+        to: [to],
         subject,
         html,
       });
 
-      console.log('✉️  Email sent:', info.messageId);
-      return { success: true, messageId: info.messageId };
+      if (error) {
+        console.error('❌ Email send error:', error);
+        return { success: false, error: error.message };
+      }
+
+      console.log('✉️  Email sent:', data.id);
+      return { success: true, messageId: data.id };
     } catch (error) {
       console.error('❌ Email send error:', error);
       return { success: false, error: error.message };
