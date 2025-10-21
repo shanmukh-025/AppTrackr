@@ -13,11 +13,17 @@ export const AuthProvider = ({ children }) => {
     if (!token) return;
     try {
       const response = await axios.get(`${API_URL}/api/profile`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 5000 // 5 second timeout
       });
       setUser(response.data.user);
     } catch (error) {
-      console.error('Failed to fetch user:', error);
+      console.error('Failed to fetch user:', error.message);
+      // Don't fail silently - if there's an auth error, log out
+      if (error.response?.status === 401) {
+        console.warn('Token invalid or expired');
+        logout();
+      }
     }
   };
 
@@ -77,8 +83,26 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    fetchUser();
-  }, [token]);
+    const initUser = async () => {
+      if (!token) return;
+      try {
+        const response = await axios.get(`${API_URL}/api/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 5000 // 5 second timeout
+        });
+        setUser(response.data.user);
+      } catch (error) {
+        console.error('Failed to fetch user:', error.message);
+        // Don't fail silently - if there's an auth error, log out
+        if (error.response?.status === 401) {
+          console.warn('Token invalid or expired');
+          logout();
+        }
+      }
+    };
+
+    initUser();
+  }, [token, API_URL]);
 
   useEffect(() => {
     if (token) {

@@ -32,8 +32,9 @@ const gracefulShutdown = async () => {
   process.exit(0);
 };
 
-process.on('SIGINT', gracefulShutdown);
-process.on('SIGTERM', gracefulShutdown);
+// Disable auto-shutdown on signals - let the server handle it
+// process.on('SIGINT', gracefulShutdown);
+// process.on('SIGTERM', gracefulShutdown);
 
 // Limit concurrent Prisma queries with a simple queue
 class PrismaQueryQueue {

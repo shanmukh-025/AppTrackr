@@ -78,11 +78,28 @@ app.use('/api/preferences', preferencesRoutes);
 
 const PORT = process.env.PORT || 5000;
 
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('⚠️ Uncaught Exception:', error);
+  // Don't crash - just log and continue
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('⚠️ Unhandled Rejection at:', promise, 'reason:', reason);
+  // Don't crash - just log and continue
+});
+
 app.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
   
-  // Initialize static companies in database on startup
-  await initializeStaticCompanies();
+  // Initialize static companies in database on startup (non-blocking)
+  try {
+    await initializeStaticCompanies();
+  } catch (error) {
+    console.warn('⚠️ Database initialization skipped (database may be temporarily unavailable)');
+    console.warn('Server will continue running - database-dependent features may be limited');
+  }
   
   // Email service disabled
   // emailService.initializeTransporter();
