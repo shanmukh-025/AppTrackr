@@ -137,28 +137,43 @@ router.get('/:id', authenticateToken, async (req, res) => {
  */
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
+    const resumeId = req.params.id;
+    console.log(`🗑️  Deleting resume: ${resumeId} for user: ${req.userId}`);
+
     const resume = await prisma.resume.findUnique({
-      where: { id: req.params.id }
+      where: { id: resumeId }
     });
 
-    if (!resume || resume.userId !== req.userId) {
+    if (!resume) {
+      console.log(`Resume not found: ${resumeId}`);
       return res.status(404).json({ error: 'Resume not found' });
+    }
+
+    if (resume.userId !== req.userId) {
+      console.log(`User mismatch: ${resume.userId} !== ${req.userId}`);
+      return res.status(403).json({ error: 'Unauthorized to delete this resume' });
     }
 
     // Delete file from disk if it exists
     if (resume.filePath) {
-      resumeUploadService.deleteResumeFile(resume.filePath);
+      try {
+        resumeUploadService.deleteResumeFile(resume.filePath);
+        console.log(`📁 File deleted: ${resume.filePath}`);
+      } catch (fileError) {
+        console.warn(`File deletion warning:`, fileError.message);
+      }
     }
 
     // Delete from database
     await prisma.resume.delete({
-      where: { id: req.params.id }
+      where: { id: resumeId }
     });
 
+    console.log(`✅ Resume deleted: ${resumeId}`);
     res.json({ success: true, message: 'Resume deleted' });
   } catch (error) {
-    console.error('Delete resume error:', error);
-    res.status(500).json({ error: error.message });
+    console.error('❌ Delete resume error:', error);
+    res.status(500).json({ error: error.message || 'Failed to delete resume' });
   }
 });
 
@@ -169,14 +184,20 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 router.post('/:id/analyze', authenticateToken, async (req, res) => {
   try {
     const { jobDescription } = req.body;
+    const resumeId = req.params.id;
+    
+    console.log(`🔍 Analyzing resume: ${resumeId} for user: ${req.userId}`);
 
     if (!jobDescription) {
       return res.status(400).json({ error: 'Job description is required' });
     }
 
     const resume = await prisma.resume.findUnique({
-      where: { id: req.params.id }
+      where: { id: resumeId }
     });
+
+    console.log(`Resume found:`, resume ? `Yes (ID: ${resume.id})` : 'No');
+    console.log(`Resume userId: ${resume?.userId}, Request userId: ${req.userId}`);
 
     if (!resume || resume.userId !== req.userId) {
       return res.status(404).json({ error: 'Resume not found' });

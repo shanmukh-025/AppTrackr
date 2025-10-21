@@ -16,22 +16,75 @@ class AIService {
 
   async analyzeResume(resumeText, jobDescription = null) {
     try {
-      const prompt = jobDescription
-        ? `You are an expert resume reviewer. Analyze this resume against the job description.\n\nRESUME:\n${resumeText}\n\nJOB DESCRIPTION:\n${jobDescription}\n\nReturn JSON with: overallScore, matchScore, skillsMatched, skillsGaps, strengths, weaknesses, suggestions`
-        : `You are an expert resume reviewer. Analyze this resume.\n\nRESUME:\n${resumeText}\n\nReturn JSON with: overallScore, strengths, weaknesses, suggestions`;
+      if (!resumeText || resumeText.trim().length === 0) {
+        throw new Error('Resume text is empty');
+      }
 
+      const prompt = jobDescription
+        ? `You are an expert resume reviewer. Analyze this resume against the job description.\n\nRESUME:\n${resumeText}\n\nJOB DESCRIPTION:\n${jobDescription}\n\nReturn ONLY valid JSON (no markdown, no extra text) with these fields:\n{\n"overallScore": 0-100,\n"matchScore": 0-100,\n"skillsMatched": ["skill1", "skill2"],\n"skillsGaps": ["skill1", "skill2"],\n"strengths": ["strength1", "strength2"],\n"weaknesses": ["weakness1", "weakness2"],\n"suggestions": ["suggestion1", "suggestion2"]\n}`
+        : `You are an expert resume reviewer. Analyze this resume.\n\nRESUME:\n${resumeText}\n\nReturn ONLY valid JSON (no markdown, no extra text) with these fields:\n{\n"overallScore": 0-100,\n"strengths": ["strength1", "strength2"],\n"weaknesses": ["weakness1", "weakness2"],\n"suggestions": ["suggestion1", "suggestion2"]\n}`;
+
+      console.log('🤖 Sending to Gemini API...');
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
-      const text = response.text();
-
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
+      
+      if (!response) {
+        throw new Error('No response from Gemini API');
       }
-      throw new Error('Could not parse AI response');
+
+      let text = response.text();
+      console.log('✅ Gemini response received (first 300 chars):', text.substring(0, 300));
+
+      // Remove markdown code blocks if present
+      text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+      
+      // Find JSON object
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        console.warn('❌ No JSON found in response. Raw text:', text);
+        throw new Error('Could not find JSON in AI response');
+      }
+      
+      const jsonStr = jsonMatch[0];
+      console.log('📋 Extracted JSON (first 300 chars):', jsonStr.substring(0, 300));
+      
+      // Try to parse and clean up if needed
+      let parsed;
+      try {
+        parsed = JSON.parse(jsonStr);
+      } catch (parseError) {
+        console.warn('⚠️  JSON parse error, attempting to fix...');
+        // Try to fix common JSON issues
+        let fixedJson = jsonStr
+          .replace(/,\s*}/g, '}')  // Remove trailing commas before }
+          .replace(/,\s*]/g, ']')  // Remove trailing commas before ]
+          .replace(/'/g, '"');      // Replace single quotes with double quotes
+        
+        parsed = JSON.parse(fixedJson);
+      }
+      
+      // Ensure all expected fields exist
+      parsed = {
+        overallScore: parsed.overallScore || 0,
+        matchScore: parsed.matchScore || 0,
+        skillsMatched: Array.isArray(parsed.skillsMatched) ? parsed.skillsMatched : [],
+        skillsGaps: Array.isArray(parsed.skillsGaps) ? parsed.skillsGaps : [],
+        strengths: Array.isArray(parsed.strengths) ? parsed.strengths : [],
+        weaknesses: Array.isArray(parsed.weaknesses) ? parsed.weaknesses : [],
+        suggestions: Array.isArray(parsed.suggestions) ? parsed.suggestions : []
+      };
+      
+      console.log('✅ Analysis complete:', { 
+        overallScore: parsed.overallScore, 
+        matchScore: parsed.matchScore,
+        skillsMatched: parsed.skillsMatched.length,
+        skillsGaps: parsed.skillsGaps.length
+      });
+      
+      return parsed;
     } catch (error) {
-      console.error('Resume analysis error:', error);
-      throw new Error('Failed to analyze resume: ' + error.message);
+      console.error('❌ Resume analysis error:', error.message || error);
+      throw new Error('Failed to analyze resume: ' + (error.message || 'Unknown error'));
     }
   }
 

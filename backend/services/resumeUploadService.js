@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
 const Tesseract = require('tesseract.js');
+const pdf = require('pdf-parse');
 
 class ResumeUploadService {
   constructor() {
@@ -22,10 +22,13 @@ class ResumeUploadService {
   async extractTextFromPDF(filePath) {
     try {
       const dataBuffer = fs.readFileSync(filePath);
-      const data = await pdfParse(dataBuffer);
-      return data.text;
+      const data = await pdf(dataBuffer);
+      const fullText = data.text || '';
+      
+      console.log(`✅ PDF extracted: ${fullText.length} characters`);
+      return fullText.trim();
     } catch (error) {
-      console.error('PDF extraction error:', error);
+      console.error('PDF extraction error:', error.message);
       throw new Error('Failed to extract text from PDF: ' + error.message);
     }
   }
@@ -246,6 +249,8 @@ class ResumeUploadService {
       const fileExt = path.extname(file.filename).toLowerCase();
       let resumeText = '';
 
+      console.log(`📝 Processing resume: ${file.filename} (${fileExt})`);
+
       if (fileExt === '.pdf') {
         resumeText = await this.extractTextFromPDF(file.path);
       } else if (fileExt === '.docx' || fileExt === '.doc') {
@@ -256,8 +261,18 @@ class ResumeUploadService {
         throw new Error('Unsupported file format. Use PDF, DOCX, or JPG.');
       }
 
+      console.log(`📄 Extracted text length: ${resumeText.length} characters`);
+      console.log(`📄 First 300 chars: ${resumeText.substring(0, 300)}`);
+
       // Parse extracted text
       const parsedData = this.parseResumeData(resumeText);
+
+      console.log(`✅ Parsed data:`, {
+        fullName: parsedData.fullName,
+        email: parsedData.email,
+        skills: parsedData.skills.slice(0, 5),
+        experience: parsedData.experience.length + ' entries'
+      });
 
       // Save file info
       parsedData.fileName = file.filename;
@@ -268,6 +283,7 @@ class ResumeUploadService {
 
       return parsedData;
     } catch (error) {
+      console.error('❌ Resume processing error:', error.message);
       // Clean up file on error
       if (file.path && fs.existsSync(file.path)) {
         fs.unlinkSync(file.path);
