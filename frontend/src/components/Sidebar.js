@@ -13,6 +13,7 @@ function Sidebar() {
     { path: '/jobs', icon: '💼', label: 'Jobs' },
     { path: '/ai-features', icon: '🤖', label: 'AI Assistant' },
     { path: '/resumes', icon: '📄', label: 'Resumes' },
+    { path: '/skills', icon: '🎯', label: 'Skill Gap' },
     { path: '/companies', icon: '🏢', label: 'Companies' },
     { path: '/analytics', icon: '📊', label: 'Analytics' },
     { path: '/profile', icon: '👤', label: 'Profile' },

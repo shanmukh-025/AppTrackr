@@ -6,6 +6,7 @@ const aiRoutes = require('./routes/ai');
 const notificationRoutes = require('./routes/notifications');
 const analyticsRoutes = require('./routes/analytics');
 const resumeRoutes = require('./routes/resumes');
+const skillGapRoutes = require('./routes/skillGap');
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -55,6 +56,9 @@ app.use('/api/analytics', analyticsRoutes);
 
 // Resume upload routes
 app.use('/api/resumes', resumeRoutes);
+
+// Skill gap analysis routes
+app.use('/api/skill-gap', skillGapRoutes);
 
 const PORT = process.env.PORT || 5000;
 
