@@ -12,6 +12,7 @@ import Profile from './pages/Profile';
 import Resources from './pages/Resources';
 import Jobs from './pages/Jobs';
 import AIFeatures from './pages/AIFeatures';
+import Resumes from './pages/Resumes';
 import './App.css';
 
 function App() {
@@ -53,6 +54,7 @@ function App() {
             <Route path="/applications" element={<Applications />} />
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/ai-features" element={<AIFeatures />} />
+            <Route path="/resumes" element={<Resumes />} />
             <Route path="/companies" element={<Companies />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/profile" element={<Profile />} />

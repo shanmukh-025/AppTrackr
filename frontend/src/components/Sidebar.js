@@ -12,6 +12,7 @@ function Sidebar() {
     { path: '/applications', icon: '📋', label: 'Applications' },
     { path: '/jobs', icon: '💼', label: 'Jobs' },
     { path: '/ai-features', icon: '🤖', label: 'AI Assistant' },
+    { path: '/resumes', icon: '📄', label: 'Resumes' },
     { path: '/companies', icon: '🏢', label: 'Companies' },
     { path: '/analytics', icon: '📊', label: 'Analytics' },
     { path: '/profile', icon: '👤', label: 'Profile' },

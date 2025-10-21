@@ -5,6 +5,7 @@ const jobRoutes = require('./routes/jobs');
 const aiRoutes = require('./routes/ai');
 const notificationRoutes = require('./routes/notifications');
 const analyticsRoutes = require('./routes/analytics');
+const resumeRoutes = require('./routes/resumes');
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -51,6 +52,9 @@ app.use('/api/notifications', notificationRoutes);
 
 // Analytics routes (Dashboard stats, insights, trends)
 app.use('/api/analytics', analyticsRoutes);
+
+// Resume upload routes
+app.use('/api/resumes', resumeRoutes);
 
 const PORT = process.env.PORT || 5000;
 

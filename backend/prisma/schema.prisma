@@ -388,6 +388,13 @@ model Resume {
   pdfUrl          String?  @db.Text
   docxUrl         String?  @db.Text
   
+  // File Upload Fields
+  fileName        String?
+  filePath        String?
+  fileSize        Int?
+  uploadedFrom    String?  // "upload" or "manual"
+  rawText         String?  @db.Text  // Raw extracted text from uploaded file
+  
   version         Int      @default(1)
   isActive        Boolean  @default(true)
   
