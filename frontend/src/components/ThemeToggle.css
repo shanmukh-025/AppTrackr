@@ -1,0 +1,101 @@
+.theme-toggle {
+  background: none;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+}
+
+.theme-toggle:hover:not(:disabled) {
+  border-color: #fbbf24;
+  background: #fffbeb;
+  transform: scale(1.05);
+}
+
+.theme-toggle:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.theme-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Dark Mode Styles */
+:root.dark-mode {
+  --bg-primary: #1f2937;
+  --bg-secondary: #111827;
+  --text-primary: #f3f4f6;
+  --text-secondary: #d1d5db;
+  --border-color: #374151;
+  --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+
+:root.dark-mode body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+:root.dark-mode .navbar,
+:root.dark-mode .sidebar,
+:root.dark-mode .card,
+:root.dark-mode .modal-content,
+:root.dark-mode .export-menu,
+:root.dark-mode .note-item {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+:root.dark-mode input,
+:root.dark-mode textarea,
+:root.dark-mode select {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+:root.dark-mode input::placeholder,
+:root.dark-mode textarea::placeholder {
+  color: var(--text-secondary);
+}
+
+:root.dark-mode .btn,
+:root.dark-mode button {
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+:root.dark-mode .export-menu {
+  background: var(--bg-secondary);
+  border-color: #10b981;
+}
+
+:root.dark-mode .note-input {
+  background: var(--bg-primary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+:root.dark-mode .note-input:focus {
+  border-color: #3b82f6;
+}
+
+/* Light Mode Styles (Default) */
+:root.light-mode {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}

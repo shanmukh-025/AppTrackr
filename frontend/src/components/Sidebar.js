@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import ThemeToggle from './ThemeToggle';
 import './Sidebar.css';
 
 function Sidebar() {
@@ -99,6 +100,7 @@ function Sidebar() {
 
         {/* Logout Button */}
         <div className="sidebar-footer">
+          <ThemeToggle />
           <button className="logout-btn" onClick={logout}>
             <span className="nav-icon">🚪</span>
             <span className="nav-label">Logout</span>

@@ -7,6 +7,10 @@ const notificationRoutes = require('./routes/notifications');
 const analyticsRoutes = require('./routes/analytics');
 const resumeRoutes = require('./routes/resumes');
 const skillGapRoutes = require('./routes/skillGap');
+const bookmarkRoutes = require('./routes/bookmarks');
+const notesRoutes = require('./routes/notes');
+const exportRoutes = require('./routes/export');
+const preferencesRoutes = require('./routes/preferences');
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -59,6 +63,18 @@ app.use('/api/resumes', resumeRoutes);
 
 // Skill gap analysis routes
 app.use('/api/skill-gap', skillGapRoutes);
+
+// Bookmark routes
+app.use('/api/bookmarks', bookmarkRoutes);
+
+// Notes routes
+app.use('/api/notes', notesRoutes);
+
+// Export routes
+app.use('/api/export', exportRoutes);
+
+// Preferences routes
+app.use('/api/preferences', preferencesRoutes);
 
 const PORT = process.env.PORT || 5000;
 

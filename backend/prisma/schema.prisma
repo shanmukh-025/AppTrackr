@@ -64,6 +64,9 @@ model User {
   forumPosts          ForumPost[]
   forumComments       ForumComment[]
   resumes             Resume[]
+  bookmarkedJobs      JobBookmark[]    @relation("BookmarkedJobs")
+  notes               Note[]           @relation("UserNotes")
+  preferences         UserPreference?  @relation("UserPreferences")
 }
 
 model Application {
@@ -446,4 +449,62 @@ model PremiumJob {
   
   @@index([company])
   @@index([postedDate])
+}
+
+// ============================================
+// QUICK WINS FEATURES
+// ============================================
+
+model JobBookmark {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation("BookmarkedJobs", fields: [userId], references: [id], onDelete: Cascade)
+  
+  company         String
+  position        String
+  jobUrl          String   @db.Text
+  logoUrl         String?
+  salaryRange     String?
+  location        String?
+  jobDescription  String?  @db.Text
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([userId, jobUrl])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Note {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation("UserNotes", fields: [userId], references: [id], onDelete: Cascade)
+  
+  type            String   // "application" or "job"
+  targetId        String?  // Application ID or Job ID
+  targetCompany   String
+  targetPosition  String
+  
+  content         String   @db.Text
+  isPinned        Boolean  @default(false)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([type])
+  @@index([targetId])
+}
+
+model UserPreference {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation("UserPreferences", fields: [userId], references: [id], onDelete: Cascade)
+  
+  theme           String   @default("light") // "light", "dark", "auto"
+  language        String   @default("en")
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
