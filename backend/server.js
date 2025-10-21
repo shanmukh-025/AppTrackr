@@ -17,8 +17,44 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
 const { initializeStaticCompanies } = require('./utils/companyCareerPages');
-// const emailService = require('./services/emailService'); // Email service disabled
 const app = express();
+
+// Request queue middleware - limit concurrent requests to prevent connection pool exhaustion
+const requestQueue = [];
+let activeRequests = 0;
+const MAX_CONCURRENT_REQUESTS = 5;
+
+app.use((req, res, next) => {
+  if (req.path.includes('/api/resumes') || req.path.includes('/api/jobs/suggestions')) {
+    // Prioritize resume and critical operations
+    if (activeRequests < MAX_CONCURRENT_REQUESTS) {
+      activeRequests++;
+      res.on('finish', () => {
+        activeRequests--;
+        if (requestQueue.length > 0) {
+          const callback = requestQueue.shift();
+          callback();
+        }
+      });
+      next();
+    } else {
+      // Queue the request
+      requestQueue.push(() => {
+        activeRequests++;
+        res.on('finish', () => {
+          activeRequests--;
+          if (requestQueue.length > 0) {
+            const cb = requestQueue.shift();
+            cb();
+          }
+        });
+        next();
+      });
+    }
+  } else {
+    next();
+  }
+});
 
 // Middleware
 app.use(cors());
@@ -94,12 +130,13 @@ app.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
   
   // Initialize static companies in database on startup (non-blocking)
-  try {
-    await initializeStaticCompanies();
-  } catch (error) {
-    console.warn('⚠️ Database initialization skipped (database may be temporarily unavailable)');
-    console.warn('Server will continue running - database-dependent features may be limited');
-  }
+  // DISABLED: Skip initialization to preserve database connections for user requests
+  // try {
+  //   await initializeStaticCompanies();
+  // } catch (error) {
+  //   console.warn('⚠️ Database initialization skipped (database may be temporarily unavailable)');
+  //   console.warn('Server will continue running - database-dependent features may be limited');
+  // }
   
   // Email service disabled
   // emailService.initializeTransporter();

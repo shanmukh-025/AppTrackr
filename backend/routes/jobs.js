@@ -15,6 +15,17 @@ const prisma = require('../prisma/client');
  * Get personalized job suggestions based on user skills
  */
 router.get('/suggestions', auth, async (req, res) => {
+  // Set a timeout of 15 seconds for this request to prevent connection pool exhaustion
+  const timeoutHandle = setTimeout(() => {
+    if (!res.headersSent) {
+      res.status(503).json({
+        success: false,
+        error: 'Job suggestions service temporarily unavailable. Please try again later.',
+        data: { jobs: [], count: 0 }
+      });
+    }
+  }, 15000);
+
   try {
     const { userId } = req;
     const { location, limit, remote, complex } = req.query;
@@ -23,6 +34,8 @@ router.get('/suggestions', auth, async (req, res) => {
     const user = await prisma.user.findUnique({
       where: { id: userId }
     });
+
+    clearTimeout(timeoutHandle);
 
     if (!user) {
       return res.status(404).json({
