@@ -4,14 +4,6 @@ const aiService = require('../services/aiService');
 const auth = require('../middleware/auth');
 const prisma = require('../prisma/client');
 
-// ============================================
-// RESUME ANALYSIS
-// ============================================
-
-/**
- * POST /api/ai/analyze-resume
- * Analyze resume against job description
- */
 router.post('/analyze-resume', auth, async (req, res) => {
   try {
     console.log('📄 Resume Analysis Started');
@@ -29,10 +21,8 @@ router.post('/analyze-resume', auth, async (req, res) => {
       return res.status(400).json({ error: 'Resume text is required' });
     }
 
-    // Call AI service
     const analysis = await aiService.analyzeResume(resumeText, jobDescription);
 
-    // Return response immediately, save to database in background (non-blocking)
     const responseData = {
       success: true,
       analysis: {
@@ -48,7 +38,6 @@ router.post('/analyze-resume', auth, async (req, res) => {
       }
     };
 
-    // Fire-and-forget: Save to database without blocking response
     setImmediate(() => {
       prisma.resumeAnalysis.create({
         data: {
