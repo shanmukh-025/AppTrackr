@@ -112,6 +112,55 @@ router.get('/resume-analyses', auth, async (req, res) => {
 });
 
 // ============================================
+// RESUME GENERATION
+// ============================================
+
+/**
+ * POST /api/ai/generate-resume
+ * Generate AI-powered resume
+ */
+router.post('/generate-resume', auth, async (req, res) => {
+  try {
+    console.log('📄 Resume Generation Started');
+    const { fullName, email, phone, targetRole, experience, skills } = req.body;
+    const userId = req.userId;
+
+    if (!fullName || !targetRole || !skills) {
+      return res.status(400).json({ error: 'Name, target role, and skills are required' });
+    }
+
+    if (!userId) {
+      return res.status(401).json({ error: 'User ID not found in token' });
+    }
+
+    // Generate resume using AI
+    const resumeContent = await aiService.generateResume({
+      fullName,
+      email,
+      phone,
+      targetRole,
+      experience,
+      skills
+    });
+
+    const responseData = {
+      success: true,
+      resume: {
+        id: 'generated',
+        content: resumeContent,
+        createdAt: new Date()
+      }
+    };
+
+    res.json(responseData);
+    console.log('✅ Resume generated successfully');
+  } catch (error) {
+    console.error('❌ Resume generation error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================
 // COVER LETTER GENERATION
 // ============================================
 

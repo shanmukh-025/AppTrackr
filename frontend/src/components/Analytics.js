@@ -46,6 +46,7 @@ function Analytics({ applications }) {
 
   // Calculate response rate
   const calculateResponseRate = () => {
+    // eslint-disable-next-line no-unused-vars
     const applied = applications.filter(app => app.status === 'applied' || 
                                               app.status === 'wishlist').length;
     const responded = applications.filter(app => 

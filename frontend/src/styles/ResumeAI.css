@@ -1,0 +1,473 @@
+/* Resume AI Styles */
+.resume-ai {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.resume-ai h2 {
+  color: #667eea;
+  margin-bottom: 10px;
+  font-size: 2em;
+}
+
+.resume-ai .subtitle {
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 1.05em;
+}
+
+.resume-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  margin-bottom: 40px;
+}
+
+.input-panel, .preview-panel {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.input-panel h3, .preview-panel h3 {
+  color: #333;
+  margin: 0 0 25px 0;
+  font-size: 1.3em;
+}
+
+/* Form Sections */
+.form-section {
+  margin-bottom: 25px;
+}
+
+.form-section h4 {
+  color: #555;
+  margin: 0 0 12px 0;
+  font-size: 0.95em;
+  font-weight: 600;
+}
+
+.input-field, .textarea-field {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 0.95em;
+  font-family: inherit;
+  transition: border-color 0.3s ease;
+  margin-bottom: 10px;
+}
+
+.input-field:focus, .textarea-field:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+/* Skills */
+.skill-input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.skill-input-group .input-field {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.add-btn {
+  padding: 12px 20px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+.add-btn:hover {
+  background: #5568d3;
+}
+
+.skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.skill-tag {
+  background: #667eea;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9em;
+}
+
+.skill-tag button {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Template Options */
+.template-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+}
+
+.template-btn {
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.template-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.template-btn.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+/* Generate Button */
+.generate-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.05em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  margin-top: 10px;
+}
+
+.generate-btn:hover:not(:disabled) {
+  transform: scale(1.02);
+}
+
+.generate-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Resume Preview */
+.resume-preview {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  max-height: 500px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.resume-content {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  white-space: pre-wrap;
+  color: #333;
+  line-height: 1.6;
+  font-size: 0.9em;
+}
+
+/* Preview Actions */
+.preview-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9em;
+  transition: all 0.3s ease;
+}
+
+.action-btn.primary {
+  background: #667eea;
+  color: white;
+}
+
+.action-btn.primary:hover {
+  background: #5568d3;
+}
+
+.action-btn.secondary {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+}
+
+.action-btn.secondary:hover {
+  background: #f0f2ff;
+}
+
+/* Empty State */
+.empty-preview, .empty-letter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: #999;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 3em;
+  margin-bottom: 15px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .resume-container {
+    grid-template-columns: 1fr;
+  }
+
+  .input-panel, .preview-panel {
+    padding: 20px;
+  }
+}
+
+/* Cover Letter Specific Styles */
+.cover-letter {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.cover-letter h2 {
+  color: #667eea;
+  margin-bottom: 10px;
+  font-size: 2em;
+}
+
+.cover-letter .subtitle {
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 1.05em;
+}
+
+.letter-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  margin-bottom: 40px;
+}
+
+.letter-input, .letter-preview {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.letter-input h3, .letter-preview h3 {
+  color: #333;
+  margin: 0 0 25px 0;
+  font-size: 1.3em;
+}
+
+/* Form Groups */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  color: #555;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.95em;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 0.95em;
+  font-family: inherit;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+/* Tone Options */
+.tone-options {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.tone-btn {
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.tone-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.tone-btn.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+/* Letter Content */
+.letter-content {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  max-height: 500px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.letter-content pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 0.9em;
+  color: #333;
+  line-height: 1.6;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Letter Actions */
+.letter-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Tips Section */
+.tips-section {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.tips-section h3 {
+  color: #333;
+  margin: 0 0 25px 0;
+  font-size: 1.3em;
+}
+
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.tip-card {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.tip-card h4 {
+  color: #667eea;
+  margin: 0 0 10px 0;
+  font-size: 1.05em;
+}
+
+.tip-card p {
+  margin: 0;
+  color: #666;
+  font-size: 0.95em;
+  line-height: 1.5;
+}
+
+/* Scrollbar */
+.resume-preview::-webkit-scrollbar,
+.letter-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.resume-preview::-webkit-scrollbar-track,
+.letter-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.resume-preview::-webkit-scrollbar-thumb,
+.letter-content::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .letter-container {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .tone-options {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tips-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .letter-input, .letter-preview, .input-panel, .preview-panel {
+    padding: 20px;
+  }
+
+  .tone-options {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tips-grid {
+    grid-template-columns: 1fr;
+  }
+}

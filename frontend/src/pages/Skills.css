@@ -1,4 +1,65 @@
 .skills-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, var(--slate-50) 0%, var(--slate-100) 100%);
+  padding: var(--space-8);
+  margin-left: 280px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dual floating decorative elements */
+.skills-page::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: -150px;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(99, 102, 241, 0.08) 0%,
+    rgba(139, 92, 246, 0.05) 50%,
+    transparent 75%
+  );
+  pointer-events: none;
+  animation: floatDiagonal 32s ease-in-out infinite;
+  filter: blur(55px);
+}
+
+.skills-page::after {
+  content: '';
+  position: absolute;
+  bottom: 10%;
+  right: -150px;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(
+    circle at center,
+    rgba(139, 92, 246, 0.09) 0%,
+    rgba(99, 102, 241, 0.04) 60%,
+    transparent 80%
+  );
+  pointer-events: none;
+  animation: floatDiagonal 28s ease-in-out infinite reverse;
+  filter: blur(50px);
+}
+
+@keyframes floatDiagonal {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(40px, -30px) rotate(120deg);
+  }
+  66% {
+    transform: translate(-30px, 40px) rotate(240deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .skills-page {
+    margin-left: 0;
+    padding: var(--space-4);
+    padding-top: 80px;
+  }
 }

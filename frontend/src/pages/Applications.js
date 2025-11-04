@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useCallback } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import AddApplication from '../components/AddApplication';
@@ -7,7 +7,7 @@ import ApplicationsList from '../components/ApplicationsList';
 import Pipeline from '../components/Pipeline';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import Toast from '../components/Toast';
-import './Pages.css';
+import './Applications.css';
 
 function Applications() {
   const { token } = useContext(AuthContext);
@@ -23,11 +23,7 @@ function Applications() {
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-  useEffect(() => {
-    fetchApplications();
-  }, []);
-
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get(`${API_URL}/api/applications`, {
@@ -39,7 +35,11 @@ function Applications() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, API_URL]);
+
+  useEffect(() => {
+    fetchApplications();
+  }, [fetchApplications]);
 
   const handleApplicationAdded = (newApp) => {
     setApplications([newApp, ...applications]);
@@ -76,15 +76,18 @@ function Applications() {
 
   return (
     <div className="page-container">
-      <div className="page-header">
-        <h1>📋 Applications</h1>
-        <button className="primary-btn" onClick={() => setShowAddModal(true)}>
+      <div className="page-header card">
+        <div>
+          <h1>📋 Applications</h1>
+          <p>Track and manage all your job applications</p>
+        </div>
+        <button className="btn btn-primary primary-btn" onClick={() => setShowAddModal(true)}>
           + Add Application
         </button>
       </div>
 
       {/* Search & Filter */}
-      <div className="search-filter-bar">
+      <div className="card search-filter-bar">
         <div className="search-box">
           <span className="search-icon">🔍</span>
           <input
@@ -92,17 +95,17 @@ function Applications() {
             placeholder="Search by company or position..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="search-input"
+            className="form-input search-input"
           />
           {searchQuery && (
-            <button className="clear-search" onClick={() => setSearchQuery('')}>
+            <button className="btn btn-ghost clear-search" onClick={() => setSearchQuery('')}>
               ✕
             </button>
           )}
         </div>
 
         <select 
-          className="status-filter"
+          className="form-select status-filter"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
@@ -119,15 +122,15 @@ function Applications() {
       </div>
 
       {/* View Tabs */}
-      <div className="view-tabs">
+      <div className="tabs view-tabs">
         <button 
-          className={`view-tab ${activeView === 'list' ? 'active' : ''}`}
+          className={`tab ${activeView === 'list' ? 'tab-active' : ''}`}
           onClick={() => setActiveView('list')}
         >
           📋 List View
         </button>
         <button 
-          className={`view-tab ${activeView === 'pipeline' ? 'active' : ''}`}
+          className={`tab ${activeView === 'pipeline' ? 'tab-active' : ''}`}
           onClick={() => setActiveView('pipeline')}
         >
           🎯 Pipeline

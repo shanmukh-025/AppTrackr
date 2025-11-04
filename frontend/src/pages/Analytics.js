@@ -13,7 +13,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
-import './AnalyticsNew.css';
+import './Analytics.css';
 
 // Register Chart.js components
 ChartJS.register(

@@ -88,6 +88,40 @@ class AIService {
     }
   }
 
+  async generateResume(userData) {
+    try {
+      const { fullName, email, phone, targetRole, experience, skills } = userData;
+      
+      const prompt = `You are an expert resume writer. Generate a professional, ATS-friendly resume.
+
+USER INFORMATION:
+- Full Name: ${fullName}
+- Email: ${email || 'N/A'}
+- Phone: ${phone || 'N/A'}
+- Target Role: ${targetRole}
+- Experience: ${experience || 'Entry level or career change'}
+- Skills: ${skills}
+
+Create a well-structured resume with the following sections:
+1. Professional Summary (2-3 sentences tailored to ${targetRole})
+2. Core Skills (formatted as bullet points)
+3. Professional Experience (if experience provided, create 2-3 relevant positions with achievements)
+4. Education (create appropriate education background)
+5. Additional relevant sections if applicable
+
+Format it cleanly with clear section headers, bullet points, and professional language.
+Make it ATS-friendly and impactful.
+Return ONLY the resume text, no explanations.`;
+
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      return response.text();
+    } catch (error) {
+      console.error('Resume generation error:', error);
+      throw new Error('Failed to generate resume: ' + error.message);
+    }
+  }
+
   async generateCoverLetter(userProfile, jobDescription, company, position, tone = 'professional') {
     try {
       const toneGuide = {

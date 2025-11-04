@@ -102,6 +102,30 @@ router.post('/text', authenticateToken, async (req, res) => {
 });
 
 /**
+ * POST /api/skill-gap/parse-job
+ * Parse job description from URL
+ */
+router.post('/parse-job', authenticateToken, async (req, res) => {
+  try {
+    const { url } = req.body;
+
+    if (!url) {
+      return res.status(400).json({ error: 'URL is required' });
+    }
+
+    // For now, return a helpful message that URL parsing is not available
+    // The frontend will fall back to manual text input
+    res.status(501).json({ 
+      error: 'URL parsing not implemented. Please copy and paste the job description instead.',
+      message: 'Please switch to text input mode and paste the job description directly.'
+    });
+  } catch (error) {
+    console.error('Parse job error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
  * GET /api/skill-gap/learning-resources/:skill
  * Get learning resources for a specific skill
  */

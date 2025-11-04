@@ -1,0 +1,906 @@
+.salary-coach {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.salary-header {
+  text-align: center;
+  color: white;
+  margin-bottom: 30px;
+  animation: slideDown 0.5s ease-out;
+}
+
+.salary-header h2 {
+  font-size: 32px;
+  margin: 0 0 10px 0;
+  font-weight: 700;
+}
+
+.salary-header p {
+  font-size: 16px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.salary-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: slideDown 0.6s ease-out 0.1s both;
+}
+
+.salary-tabs .tab {
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+}
+
+.salary-tabs .tab:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.salary-tabs .tab.active {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+  border-color: #ff6b6b;
+  box-shadow: 0 8px 32px rgba(255, 107, 107, 0.4);
+}
+
+.salary-content {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 60px rgba(102, 126, 234, 0.2);
+  animation: slideUp 0.5s ease-out;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Market Data Tab */
+.market-data-panel {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.controls-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+  border-radius: 15px;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input-group input,
+.input-group select {
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  background-color: rgba(102, 126, 234, 0.02);
+}
+
+.fetch-btn {
+  grid-column: 1 / -1;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.fetch-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.fetch-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.market-insights {
+  margin-top: 30px;
+}
+
+.market-insights h3 {
+  color: #333;
+  margin-bottom: 25px;
+  font-size: 22px;
+}
+
+.salary-range {
+  margin-bottom: 30px;
+}
+
+.range-bar {
+  margin-bottom: 20px;
+}
+
+.range-label {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.range-track {
+  height: 60px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  border-radius: 10px;
+  position: relative;
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.range-track::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.3), transparent);
+  width: 100%;
+}
+
+.range-min, .range-avg, .range-max {
+  position: absolute;
+  font-size: 12px;
+  font-weight: 700;
+  color: #667eea;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  background: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.range-avg {
+  color: #764ba2;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.salary-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.metric {
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+  border-radius: 12px;
+  border: 2px solid rgba(102, 126, 234, 0.1);
+  text-align: center;
+}
+
+.metric.highlight {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+  border-color: #667eea;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.metric-label {
+  font-size: 12px;
+  color: #999;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.insights-box {
+  background: linear-gradient(135deg, #fff5f7, #f5f7ff);
+  padding: 25px;
+  border-radius: 12px;
+  border-left: 4px solid #667eea;
+}
+
+.insights-box h4 {
+  color: #333;
+  margin: 0 0 15px 0;
+  font-size: 16px;
+}
+
+.insights-box ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.insights-box li {
+  color: #555;
+  margin-bottom: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+  padding-left: 25px;
+  position: relative;
+}
+
+.insights-box li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #667eea;
+  font-weight: bold;
+}
+
+/* Strategy Tab */
+.strategy-panel {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.offer-section {
+  margin-bottom: 30px;
+  padding: 25px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+  border-radius: 15px;
+  border: 2px solid rgba(102, 126, 234, 0.1);
+}
+
+.offer-section h3 {
+  color: #333;
+  margin: 0 0 20px 0;
+  font-size: 18px;
+}
+
+.offer-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.total-comp {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: white;
+  border-radius: 10px;
+  font-weight: 600;
+  color: #666;
+  border: 2px solid #e0e0e0;
+}
+
+.total {
+  font-size: 20px;
+  color: #667eea;
+  font-weight: 700;
+}
+
+.analyze-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 20px 0;
+  transition: all 0.3s ease;
+}
+
+.analyze-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.strategy-results {
+  margin-top: 30px;
+  animation: slideUp 0.5s ease-out;
+}
+
+.gap-analysis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.gap-card {
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  border: 2px solid;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+}
+
+.gap-card.positive {
+  border-color: #4caf50;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+}
+
+.gap-card.negative {
+  border-color: #ff9800;
+  box-shadow: 0 4px 15px rgba(255, 152, 0, 0.2);
+}
+
+.gap-card.feasible {
+  border-color: #667eea;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.gap-card.aggressive {
+  border-color: #ff6b6b;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);
+}
+
+.gap-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.gap-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.gap-percent {
+  font-size: 13px;
+  color: #666;
+}
+
+.recommendations {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.recommendations h4 {
+  color: #333;
+  margin: 0 0 15px 0;
+  font-size: 16px;
+}
+
+.recommendation {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  padding: 15px;
+  background: white;
+  border-radius: 10px;
+  border-left: 4px solid;
+  transition: all 0.3s ease;
+}
+
+.recommendation:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.recommendation.high {
+  border-color: #ff6b6b;
+}
+
+.recommendation.medium {
+  border-color: #ff9800;
+}
+
+.recommendation.good {
+  border-color: #4caf50;
+}
+
+.recommendation .icon {
+  font-size: 20px;
+  min-width: 30px;
+}
+
+.rec-content {
+  flex: 1;
+}
+
+.rec-content .priority {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 5px;
+}
+
+.rec-content p {
+  margin: 0;
+  color: #555;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Comparison Tab */
+.comparison-panel {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.comparison-panel h3 {
+  color: #333;
+  margin-bottom: 25px;
+  font-size: 22px;
+}
+
+.offers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.offer-card {
+  padding: 25px;
+  border: 2px solid #e0e0e0;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #fafafa, #ffffff);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.offer-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.15);
+  transform: translateY(-5px);
+}
+
+.offer-company {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+}
+
+.offer-details {
+  margin-bottom: 20px;
+  flex: 1;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+}
+
+.detail-row .label {
+  color: #999;
+  font-weight: 500;
+}
+
+.detail-row .value {
+  color: #333;
+  font-weight: 600;
+}
+
+.offer-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.offer-total .value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.offer-benefits {
+  margin-bottom: 15px;
+}
+
+.offer-benefits h5 {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.benefits-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.benefit-tag {
+  display: inline-block;
+  padding: 6px 12px;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.compare-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.compare-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+
+.comparison-table {
+  margin-top: 30px;
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 2px solid #e0e0e0;
+}
+
+.comparison-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.comparison-table th {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.comparison-table td {
+  padding: 15px;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 14px;
+  color: #555;
+}
+
+.comparison-table tr:last-child td {
+  border-bottom: none;
+}
+
+.comparison-table tbody tr:hover {
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.comparison-table .total-cell {
+  font-weight: 700;
+  color: #667eea;
+  font-size: 15px;
+}
+
+/* Tactics Tab */
+.tactics-panel {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.tactics-panel h3 {
+  color: #333;
+  margin-bottom: 25px;
+  font-size: 22px;
+}
+
+.tactics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.tactic-card {
+  padding: 25px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  border-radius: 15px;
+  transition: all 0.3s ease;
+}
+
+.tactic-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.15);
+  transform: translateY(-5px);
+}
+
+.tactic-card h4 {
+  color: #333;
+  margin: 0 0 10px 0;
+  font-size: 16px;
+}
+
+.tactic-description {
+  color: #666;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.tactic-card .steps {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 2px solid rgba(102, 126, 234, 0.1);
+}
+
+.tactic-card .steps h5 {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.tactic-card ol {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.tactic-card li {
+  color: #555;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.pro-tips {
+  margin-top: 40px;
+}
+
+.pro-tips h3 {
+  color: #333;
+  margin-bottom: 25px;
+  font-size: 22px;
+}
+
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.tip-card {
+  padding: 25px;
+  background: linear-gradient(135deg, #fff5f7, #f5f7ff);
+  border: 2px solid rgba(255, 107, 107, 0.2);
+  border-radius: 15px;
+  transition: all 0.3s ease;
+}
+
+.tip-card:hover {
+  border-color: #ff6b6b;
+  box-shadow: 0 8px 25px rgba(255, 107, 107, 0.15);
+  transform: translateY(-3px);
+}
+
+.tip-card h4 {
+  color: #333;
+  margin: 0 0 15px 0;
+  font-size: 16px;
+}
+
+.tip-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tip-card li {
+  color: #555;
+  font-size: 13px;
+  line-height: 1.8;
+  margin-bottom: 10px;
+  padding-left: 20px;
+  position: relative;
+}
+
+.tip-card li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: #667eea;
+  font-weight: bold;
+}
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .salary-content {
+    padding: 20px;
+  }
+
+  .salary-header h2 {
+    font-size: 24px;
+  }
+
+  .salary-tabs {
+    gap: 8px;
+  }
+
+  .salary-tabs .tab {
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+
+  .controls-section {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .offers-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .salary-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tactics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .comparison-table {
+    border: none;
+  }
+
+  .comparison-table table {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .salary-coach {
+    padding: 12px;
+  }
+
+  .salary-content {
+    padding: 15px;
+    border-radius: 15px;
+  }
+
+  .salary-header h2 {
+    font-size: 20px;
+  }
+
+  .salary-header p {
+    font-size: 13px;
+  }
+
+  .salary-tabs {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .salary-tabs .tab {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .offer-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .salary-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .gap-analysis {
+    grid-template-columns: 1fr;
+  }
+
+  .range-min, .range-avg, .range-max {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+
+  .offer-card {
+    padding: 15px;
+  }
+
+  .tip-card {
+    padding: 15px;
+  }
+
+  .tip-card li {
+    font-size: 12px;
+  }
+}

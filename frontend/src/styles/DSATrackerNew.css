@@ -1,0 +1,1268 @@
+/* ===================================
+   DSA TRACKER - GAMIFIED STYLES
+   =================================== */
+
+.dsa-tracker-new {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+/* ===================================
+   HEADER SECTION
+   =================================== */
+
+.tracker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+}
+
+.header-content h1 {
+  margin: 0 0 10px 0;
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.header-content p {
+  margin: 0;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.overall-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.stat-card {
+  text-align: center;
+  padding: 15px 30px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ===================================
+   PROGRESS BAR
+   =================================== */
+
+.progress-container {
+  background: white;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+}
+
+.progress-bar-new {
+  width: 100%;
+  height: 40px;
+  background: #e0e0e0;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.progress-fill-new {
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50, #8BC34A);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 15px;
+  transition: width 0.5s ease;
+  position: relative;
+}
+
+.progress-fill-new::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.progress-text-new {
+  font-weight: 700;
+  color: white;
+  font-size: 1rem;
+  z-index: 1;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* ===================================
+   SHEET SELECTION
+   =================================== */
+
+.sheet-selection {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+}
+
+.sheet-selection h2 {
+  margin: 0 0 25px 0;
+  font-size: 1.8rem;
+  color: #333;
+}
+
+.sheets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.sheet-card {
+  padding: 25px;
+  border: 3px solid #e0e0e0;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.sheet-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sheet-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.sheet-card:hover::before {
+  opacity: 1;
+}
+
+.sheet-card.active {
+  border-color: currentColor;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  transform: translateY(-3px);
+}
+
+.sheet-card.active::before {
+  opacity: 1;
+}
+
+.sheet-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin-bottom: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.sheet-card h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.3rem;
+  color: #333;
+}
+
+.sheet-card p {
+  margin: 0 0 15px 0;
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.sheet-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.problem-count {
+  font-weight: 600;
+  color: #667eea;
+  font-size: 0.95rem;
+}
+
+/* ===================================
+   TOPIC STATISTICS
+   =================================== */
+
+.topic-stats-section {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+}
+
+.topic-stats-section h2 {
+  margin: 0 0 25px 0;
+  font-size: 1.8rem;
+  color: #333;
+}
+
+.topic-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.topic-stat-card {
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease;
+}
+
+.topic-stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+
+.topic-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.topic-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topic-progress-bar {
+  flex: 1;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.topic-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 5px;
+  transition: width 0.5s ease;
+}
+
+.topic-numbers {
+  font-weight: 600;
+  color: #667eea;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+/* ===================================
+   FILTERS SECTION
+   =================================== */
+
+.filters-section {
+  background: white;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+}
+
+.search-box {
+  margin-bottom: 20px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 15px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.topic-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-btn {
+  padding: 10px 20px;
+  border: 2px solid #e0e0e0;
+  background: white;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  color: #666;
+}
+
+.filter-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+  transform: translateY(-2px);
+}
+
+.filter-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* ===================================
+   PROBLEMS SECTION
+   =================================== */
+
+.problems-section {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+}
+
+.problems-header h2 {
+  margin: 0 0 25px 0;
+  font-size: 1.8rem;
+  color: #333;
+}
+
+.problems-table {
+  overflow-x: auto;
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 80px 1fr 120px 150px 120px 120px;
+  gap: 15px;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  color: white;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.table-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 120px 150px 120px 120px;
+  gap: 15px;
+  padding: 18px 20px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  align-items: center;
+  border: 2px solid transparent;
+}
+
+.table-row:hover {
+  background: #f0f0f0;
+  transform: translateX(5px);
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.table-row.solved {
+  background: #e8f5e9;
+  border-color: #4CAF50;
+}
+
+.col-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.problem-checkbox {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  accent-color: #4CAF50;
+  transform: scale(1.2);
+}
+
+.col-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  color: #333;
+}
+
+.check-icon {
+  font-size: 1.2rem;
+}
+
+.solved-text {
+  text-decoration: line-through;
+  color: #4CAF50;
+}
+
+.col-difficulty {
+  display: flex;
+  justify-content: center;
+}
+
+.difficulty-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.difficulty-badge.easy {
+  background: #c8e6c9;
+  color: #2e7d32;
+}
+
+.difficulty-badge.medium {
+  background: #fff9c4;
+  color: #f57f17;
+}
+
+.difficulty-badge.hard {
+  background: #ffcdd2;
+  color: #c62828;
+}
+
+.col-topic {
+  display: flex;
+  justify-content: center;
+}
+
+.topic-badge {
+  padding: 6px 14px;
+  background: #e3f2fd;
+  color: #1976d2;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.col-platform {
+  display: flex;
+  justify-content: center;
+}
+
+.platform-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.platform-badge.leetcode {
+  background: #ffa116;
+  color: white;
+}
+
+.platform-badge.gfg {
+  background: #2f8d46;
+  color: white;
+}
+
+.platform-badge.spoj {
+  background: #4285f4;
+  color: white;
+}
+
+.col-action {
+  display: flex;
+  justify-content: center;
+}
+
+.solve-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+}
+
+.solve-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+@media (max-width: 1024px) {
+  .tracker-header {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .sheets-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+
+  .table-header,
+  .table-row {
+    grid-template-columns: 60px 1fr 100px 120px 100px 100px;
+    gap: 10px;
+    padding: 12px 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dsa-tracker-new {
+    padding: 15px;
+  }
+
+  .header-content h1 {
+    font-size: 1.8rem;
+  }
+
+  .overall-stats {
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .stat-card {
+    padding: 10px 20px;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .sheets-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .topic-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-header {
+    display: none;
+  }
+
+  .table-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .table-row > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .table-row > div::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #666;
+  }
+
+  .col-status::before { content: 'Status: '; }
+  .col-title::before { content: 'Problem: '; }
+  .col-difficulty::before { content: 'Difficulty: '; }
+  .col-topic::before { content: 'Topic: '; }
+  .col-platform::before { content: 'Platform: '; }
+  .col-action::before { content: 'Action: '; }
+}
+
+@media (max-width: 480px) {
+  .header-content h1 {
+    font-size: 1.5rem;
+  }
+
+  .sheet-card {
+    padding: 20px;
+  }
+
+  .filter-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+}
+
+/* ===================================
+   ANIMATIONS
+   =================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.table-row {
+  animation: fadeIn 0.3s ease;
+}
+
+.sheet-card {
+  animation: fadeIn 0.5s ease;
+}
+
+/* ===================================
+   CONFETTI ANIMATION (for milestones)
+   =================================== */
+
+@keyframes confetti {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+.confetti-piece {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  background: #FF6B6B;
+  top: -10px;
+  animation: confetti 3s linear forwards;
+  z-index: 9999;
+}
+
+/* ===================================
+   DSA SHEETS OVERVIEW PAGE
+   =================================== */
+
+.dsa-tracker-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 30px;
+  min-height: 100vh;
+}
+
+.dsa-tracker-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.tracker-title {
+  font-size: 3rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0 0 15px 0;
+}
+
+.title-icon {
+  font-size: 3.5rem;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.tracker-subtitle {
+  font-size: 1.2rem;
+  color: #666;
+  margin: 0;
+}
+
+.overall-progress-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 30px;
+  border-radius: 20px;
+  color: white;
+  margin-bottom: 40px;
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+}
+
+.overall-progress-card h3 {
+  margin: 0 0 20px 0;
+  font-size: 1.5rem;
+}
+
+.progress-stats {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-bottom: 5px;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.progress-bar-container {
+  background: rgba(255,255,255,0.2);
+  height: 12px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: white;
+  transition: width 0.5s ease;
+  border-radius: 10px;
+}
+
+.sheets-section {
+  margin-bottom: 40px;
+}
+
+.section-title {
+  font-size: 2rem;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.sheets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+  margin-bottom: 40px;
+}
+
+.sheet-card {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  border: 3px solid #e0e0e0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.sheet-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+  border-color: currentColor;
+}
+
+.sheet-card-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.sheet-icon {
+  font-size: 3rem;
+}
+
+.sheet-name {
+  font-size: 1.4rem;
+  margin: 0;
+  color: #333;
+}
+
+.sheet-description {
+  color: #666;
+  margin: 0 0 20px 0;
+  line-height: 1.6;
+}
+
+.sheet-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat .stat-label {
+  font-size: 0.85rem;
+  color: #666;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.stat .stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.sheet-progress {
+  background: #e0e0e0;
+  height: 8px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+.sheet-progress-bar {
+  height: 100%;
+  transition: width 0.5s ease;
+  border-radius: 5px;
+}
+
+.view-sheet-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.view-sheet-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.stat-box {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.stat-icon {
+  font-size: 3rem;
+}
+
+.stat-content h4 {
+  margin: 0 0 5px 0;
+  font-size: 2rem;
+  color: #333;
+}
+
+.stat-content p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* ===================================
+   DSA SHEET DETAIL PAGE
+   =================================== */
+
+.dsa-sheet-detail-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 30px;
+  min-height: 100vh;
+}
+
+.sheet-detail-header {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.back-button {
+  align-self: flex-start;
+  padding: 10px 20px;
+  background: #f8f9fa;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background: #e0e0e0;
+  transform: translateX(-5px);
+}
+
+.sheet-title-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.sheet-icon-large {
+  font-size: 4rem;
+}
+
+.sheet-name-large {
+  font-size: 3rem;
+  margin: 0;
+  font-weight: 700;
+  color: #333;
+}
+
+.progress-section {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.progress-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 30px;
+  border-radius: 20px;
+  color: white;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+}
+
+.progress-card h3 {
+  margin: 0 0 20px 0;
+  font-size: 1.3rem;
+}
+
+.progress-circle {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 20px auto;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.percentage {
+  font-size: 2.5rem;
+  font-weight: 700;
+  display: block;
+}
+
+.solved-count {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.progress-bar-large {
+  background: rgba(255,255,255,0.2);
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: white;
+  transition: width 0.5s ease;
+  border-radius: 5px;
+}
+
+.topic-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.topic-stat-card {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.topic-stat-card h4 {
+  margin: 0 0 10px 0;
+  font-size: 0.9rem;
+  color: #666;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.topic-stat-card p {
+  margin: 0 0 10px 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.mini-progress {
+  background: #e0e0e0;
+  height: 5px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.mini-progress-fill {
+  height: 100%;
+  transition: width 0.5s ease;
+  border-radius: 3px;
+}
+
+.filters-section {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.search-box {
+  flex: 1;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 12px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.topic-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topic-filter label {
+  font-weight: 600;
+  color: #333;
+}
+
+.topic-filter select {
+  padding: 12px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  min-width: 200px;
+  transition: all 0.3s ease;
+}
+
+.topic-filter select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.problems-section h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.problems-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.problem-card {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.problem-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+
+.problem-checkbox input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  accent-color: #667eea;
+}
+
+.problem-content {
+  flex: 1;
+}
+
+.problem-title {
+  margin: 0 0 10px 0;
+  font-size: 1.2rem;
+  color: #333;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.problem-title:hover {
+  color: #667eea;
+  text-decoration: underline;
+}
+
+.problem-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.difficulty-badge,
+.topic-badge,
+.platform-badge {
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.difficulty-badge.easy {
+  background: #d4edda;
+  color: #155724;
+}
+
+.difficulty-badge.medium {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.difficulty-badge.hard {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.topic-badge {
+  background: #e7f3ff;
+  color: #004085;
+}
+
+.platform-badge {
+  background: #f8f9fa;
+  color: #666;
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+@media (max-width: 768px) {
+  .dsa-tracker-header {
+    padding: 20px;
+  }
+
+  .tracker-title {
+    font-size: 2rem;
+  }
+
+  .sheets-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .progress-section {
+    grid-template-columns: 1fr;
+  }
+
+  .filters-section {
+    flex-direction: column;
+  }
+
+  .topic-filter select {
+    width: 100%;
+  }
+
+  .sheet-name-large {
+    font-size: 2rem;
+  }
+
+  .quick-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+}

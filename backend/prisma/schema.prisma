@@ -67,6 +67,8 @@ model User {
   bookmarkedJobs      JobBookmark[]    @relation("BookmarkedJobs")
   notes               Note[]           @relation("UserNotes")
   preferences         UserPreference?  @relation("UserPreferences")
+  interviewSessions   InterviewSession[]
+  learningPaths       SavedLearningPath[]
 }
 
 model Application {
@@ -507,4 +509,84 @@ model UserPreference {
   
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+// ============================================
+// INTERVIEW COACHING FEATURES
+// ============================================
+
+model InterviewSession {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  interviewType   String   // "behavioral", "technical", "situational", "mock"
+  company         String
+  position        String
+  
+  feedback        Json?    // Stores structured feedback: scores, strengths, improvements, tips
+  notes           String?  @db.Text
+  tags            String?  // Comma-separated tags
+  
+  responses       InterviewResponse[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([company])
+  @@index([createdAt])
+}
+
+model InterviewResponse {
+  id              String   @id @default(uuid())
+  sessionId       String
+  session         InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  question        String   @db.Text
+  answer          String?  @db.Text
+  videoURL        String?  @db.Text
+  duration        Int?     // Duration in seconds
+  
+  createdAt       DateTime @default(now())
+  
+    
+  @@index([sessionId])
+}
+
+// ============================================
+// LEARNING PATH FEATURES
+// ============================================
+
+model SavedLearningPath {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name            String   // User-friendly name like "Backend Developer Path"
+  targetRole      String
+  experienceLevel String
+  currentSkills   String?  // JSON array
+  
+  pathData        String   @db.Text // JSON of complete learning path
+  savedResources  String?  @db.Text // JSON of fetched resources for each topic
+  
+  // Progress Tracking
+  completedTopics String?  @db.Text // JSON array of completed topic keys ["0-0", "0-1", "1-0"]
+  progressPercent Int      @default(0) // 0-100
+  
+  // Metadata
+  totalPhases     Int      @default(0)
+  totalHours      Int      @default(0)
+  estimatedWeeks  String?
+  
+  isActive        Boolean  @default(true)
+  lastAccessedAt  DateTime @default(now())
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([isActive])
+  @@index([lastAccessedAt])
 }

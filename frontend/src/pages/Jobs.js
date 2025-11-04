@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import JobFilters from '../components/JobFilters';
 import './Jobs.css';
@@ -10,7 +10,6 @@ const Jobs = () => {
     location: '',
     remote: false
   });
-  const [filters, setFilters] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -20,11 +19,7 @@ const Jobs = () => {
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-  useEffect(() => {
-    fetchSavedSearches();
-  }, []);
-
-  const fetchSavedSearches = async () => {
+  const fetchSavedSearches = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(`${API_URL}/api/jobs/saved-searches`, {
@@ -34,10 +29,13 @@ const Jobs = () => {
     } catch (err) {
       console.error('Error fetching saved searches:', err);
     }
-  };
+  }, [API_URL]);
+
+  useEffect(() => {
+    fetchSavedSearches();
+  }, [fetchSavedSearches]);
 
   const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
     // Auto-search when filters change (with debounce would be better)
     if (newFilters.search || newFilters.location || newFilters.techStack.length > 0) {
       handleSearchWithFilters(newFilters);
@@ -134,7 +132,7 @@ const Jobs = () => {
       setSearched(true);
       
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/jobs/search', {
+      const response = await axios.get(`${API_URL}/api/jobs/search`, {
         headers: { Authorization: `Bearer ${token}` },
         params: {
           keywords: searchParams.keywords,
@@ -146,10 +144,15 @@ const Jobs = () => {
 
       if (response.data.success) {
         setJobs(response.data.data.jobs);
+        if (response.data.data.jobs.length === 0) {
+          setError('No jobs found. Try different keywords or location.');
+        }
+      } else {
+        setError(response.data.message || 'Failed to fetch jobs');
       }
     } catch (err) {
       console.error('Error searching jobs:', err);
-      setError(err.response?.data?.error || 'Failed to search jobs');
+      setError(err.response?.data?.error || err.response?.data?.message || 'Failed to search jobs. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -158,16 +161,26 @@ const Jobs = () => {
   const handleJobClick = async (job) => {
     try {
       const token = localStorage.getItem('token');
+      
+      // Track the click
       await axios.post(
-        'http://localhost:5000/api/jobs/track-click',
+        `${API_URL}/api/jobs/track-click`,
         { jobId: job.id, source: job.source },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      window.open(job.url, '_blank');
+      // Open the job URL in a new tab
+      const jobUrl = job.companyCareerPage || job.url;
+      if (jobUrl) {
+        window.open(jobUrl, '_blank', 'noopener,noreferrer');
+      }
     } catch (err) {
       console.error('Error tracking click:', err);
-      window.open(job.url, '_blank');
+      // Still open the URL even if tracking fails
+      const jobUrl = job.companyCareerPage || job.url;
+      if (jobUrl) {
+        window.open(jobUrl, '_blank', 'noopener,noreferrer');
+      }
     }
   };
 
@@ -215,11 +228,13 @@ const Jobs = () => {
 
   return (
     <div className="jobs-page">
-      <div className="page-header">
-        <h1>🔍 Search Jobs</h1>
-        <p>Find your next opportunity from thousands of job listings</p>
+      <div className="page-header card">
+        <div>
+          <h1>🔍 Search Jobs</h1>
+          <p>Find your next opportunity from thousands of job listings</p>
+        </div>
         <button 
-          className="toggle-filters-btn"
+          className="btn btn-primary toggle-filters-btn"
           onClick={() => setShowFilters(!showFilters)}
         >
           {showFilters ? '❌ Hide Filters' : '⚙️ Show Filters'}
@@ -243,8 +258,11 @@ const Jobs = () => {
         {/* Main Content */}
         <div className={`jobs-main ${showFilters ? '' : 'full-width'}`}>
           {/* Search Form */}
-          <div className="search-container">
-            <form onSubmit={handleSearch} className="search-form">
+          <div className="card search-container">
+            <div className="card-header">
+              <h3>Search Jobs</h3>
+            </div>
+            <form onSubmit={handleSearch} className="card-body search-form">
               <div className="form-row">
                 <div className="form-group flex-2">
                   <label htmlFor="keywords">Keywords *</label>
@@ -252,6 +270,7 @@ const Jobs = () => {
                     type="text"
                     id="keywords"
                     name="keywords"
+                    className="form-input"
                     value={searchParams.keywords}
                     onChange={handleInputChange}
                     placeholder="e.g. React Developer, Python Engineer"
@@ -265,6 +284,7 @@ const Jobs = () => {
                     type="text"
                     id="location"
                     name="location"
+                    className="form-input"
                     value={searchParams.location}
                     onChange={handleInputChange}
                     placeholder="e.g. New York, Remote"
@@ -285,7 +305,7 @@ const Jobs = () => {
                   </label>
                 </div>
 
-                <button type="submit" className="search-btn" disabled={loading}>
+                <button type="submit" className="btn btn-primary search-btn" disabled={loading}>
                   {loading ? '🔄 Searching...' : '🔍 Search Jobs'}
                 </button>
               </div>
@@ -294,7 +314,7 @@ const Jobs = () => {
 
           {/* Error Message */}
           {error && (
-            <div className="error-banner">
+            <div className="alert alert-danger">
               <p>⚠️ {error}</p>
             </div>
           )}
@@ -329,7 +349,7 @@ const Jobs = () => {
               ) : (
                 <div className="jobs-list">
                   {jobs.map((job) => (
-                    <div key={job.id} className="job-card-large">
+                    <div key={job.id} className="card job-card-large">
                       <div className="job-card-header">
                         <div className="job-title-section">
                           <h3 className="job-title">{job.title}</h3>
@@ -372,46 +392,19 @@ const Jobs = () => {
 
                       <div className="job-footer">
                         <div className="job-meta">
-                          {job.type && <span className="job-badge">{job.type}</span>}
-                          {job.salary && <span className="job-badge">💰 {job.salary}</span>}
-                          {job.snippet && <span className="job-badge">📝 Details available</span>}
+                          {job.type && <span className="badge badge-info">{job.type}</span>}
+                          {job.salary && <span className="badge badge-success">💰 {job.salary}</span>}
+                          {job.snippet && <span className="badge badge-info">📝 Details available</span>}
                         </div>
                         
-                        {/* PRIORITIZE CAREER PAGE! */}
-                        {job.companyCareerPage ? (
-                          <a
-                            href={job.companyCareerPage}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="apply-btn direct-apply-btn"
-                            onClick={(e) => e.stopPropagation()}
-                            title="Apply directly at company website!"
-                          >
-                            ✅ Apply at {job.company} →
-                          </a>
-                        ) : (
-                          <button 
-                            className="apply-btn"
-                            onClick={() => handleJobClick(job)}
-                            title="View job listing"
-                          >
-                            View Job Details →
-                          </button>
-                        )}
+                        <button 
+                          className="apply-btn"
+                          onClick={() => handleJobClick(job)}
+                          title="Opens job application page in new tab"
+                        >
+                          🔗 View Job & Apply →
+                        </button>
                       </div>
-                      
-                      {/* SECONDARY: Show job listing link */}
-                      {job.companyCareerPage && (
-                        <div className="company-career-link">
-                          <span className="career-link-label">ℹ️ Or view full job listing:</span>
-                          <button 
-                            className="career-link-btn secondary"
-                            onClick={() => handleJobClick(job)}
-                          >
-                            📋 View on {job.source.charAt(0).toUpperCase() + job.source.slice(1)} →
-                          </button>
-                        </div>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -421,11 +414,11 @@ const Jobs = () => {
 
           {/* Initial State */}
           {!loading && !searched && (
-            <div className="initial-state">
+            <div className="card initial-state">
               <div className="search-illustration">🎯</div>
               <h3>Start Your Job Search</h3>
               <p>Enter keywords above to find jobs from multiple sources</p>
-              <div className="search-tips">
+              <div className="alert alert-info search-tips">
                 <h4>💡 Search Tips:</h4>
                 <ul>
                   <li>Use specific job titles like "React Developer" or "Data Scientist"</li>

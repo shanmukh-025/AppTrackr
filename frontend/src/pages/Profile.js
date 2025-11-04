@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useCallback } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import Toast from '../components/Toast';
@@ -32,42 +32,68 @@ const { token, user: authUser, refreshUser } = useContext(AuthContext);  const [
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
   try {
     setLoading(true);
     const response = await axios.get(`${API_URL}/api/profile`, {
       headers: { Authorization: `Bearer ${token}` }
     });
+    
+    const userData = response.data.user || {};
+    
     setFormData({
-      name: response.data.user.name || '',
-      email: response.data.user.email || '',
-      phone: response.data.user.phone || '',
-      location: response.data.user.location || '',
-      bio: response.data.user.bio || '',
-      currentRole: response.data.user.currentRole || '',
-      experience: response.data.user.experience || '',
-      targetRole: response.data.user.targetRole || '',
-      targetSalary: response.data.user.targetSalary || '',
-      skills: response.data.user.skills || '',
-      education: response.data.user.education || '',
-      university: response.data.user.university || '',
-      graduationYear: response.data.user.graduationYear || '',
-      jobType: response.data.user.jobType || '',
-      workMode: response.data.user.workMode || '',
-      availability: response.data.user.availability || '',
-      profilePicture: response.data.user.profilePicture || '' // Ensure this is included
+      name: userData.name || '',
+      email: userData.email || '',
+      phone: userData.phone || '',
+      location: userData.location || '',
+      bio: userData.bio || '',
+      currentRole: userData.currentRole || '',
+      experience: userData.experience || '',
+      targetRole: userData.targetRole || '',
+      targetSalary: userData.targetSalary || '',
+      skills: userData.skills || '',
+      education: userData.education || '',
+      university: userData.university || '',
+      graduationYear: userData.graduationYear || '',
+      jobType: userData.jobType || '',
+      workMode: userData.workMode || '',
+      availability: userData.availability || '',
+      profilePicture: userData.profilePicture || ''
     });
   } catch (error) {
     console.error('Failed to fetch profile:', error);
-    setToast({ message: 'Failed to load profile', type: 'error' });
+    setToast({ message: 'Failed to load profile: ' + (error.response?.data?.message || error.message), type: 'error' });
+    
+    // Set default values if fetch fails
+    setFormData({
+      name: authUser?.name || '',
+      email: authUser?.email || '',
+      phone: '',
+      location: '',
+      bio: '',
+      currentRole: '',
+      experience: '',
+      targetRole: '',
+      targetSalary: '',
+      skills: '',
+      education: '',
+      university: '',
+      graduationYear: '',
+      jobType: '',
+      workMode: '',
+      availability: '',
+      profilePicture: authUser?.profilePicture || ''
+    });
   } finally {
     setLoading(false);
   }
-};
+}, [token, API_URL, authUser]);
+
+  useEffect(() => {
+    if (token) {
+      fetchProfile();
+    }
+  }, [token, fetchProfile]);
 
   const handleChange = (e) => {
     setFormData({
@@ -147,20 +173,24 @@ const handleSubmit = async (e) => {
   setSaving(true);
 
   try {
-    await axios.put(`${API_URL}/api/profile`, formData, {
+    const response = await axios.put(`${API_URL}/api/profile`, formData, {
       headers: { 
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
       }
     });
-    setToast({ message: 'Profile updated successfully!', type: 'success' });
-    setIsEditing(false);
-
-    // Refresh the global user state to update the navbar and other components
-    if (refreshUser) refreshUser();
+    
+    if (response.data.user) {
+      setToast({ message: 'Profile updated successfully!', type: 'success' });
+      setIsEditing(false);
+      
+      // Refresh the global user state to update the navbar and other components
+      if (refreshUser) refreshUser();
+    }
   } catch (error) {
     console.error('Failed to update profile:', error);
-    setToast({ message: 'Failed to update profile', type: 'error' });
+    const errorMsg = error.response?.data?.message || error.message || 'Failed to update profile';
+    setToast({ message: 'Error: ' + errorMsg, type: 'error' });
   } finally {
     setSaving(false);
   }
@@ -179,21 +209,24 @@ const handleSubmit = async (e) => {
 
   return (
     <div className="page-container">
-      <div className="page-header">
-        <h1>👤 Profile</h1>
+      <div className="page-header card">
+        <div>
+          <h1>👤 Profile</h1>
+          <p>Manage your personal information and preferences</p>
+        </div>
         {!isEditing ? (
-          <button className="primary-btn" onClick={() => setIsEditing(true)}>
+          <button className="btn btn-primary primary-btn" onClick={() => setIsEditing(true)}>
             ✏️ Edit Profile
           </button>
         ) : (
           <div className="header-actions">
-            <button className="secondary-btn" onClick={() => {
+            <button className="btn btn-secondary secondary-btn" onClick={() => {
               setIsEditing(false);
               fetchProfile();
             }}>
               Cancel
             </button>
-            <button className="primary-btn" onClick={handleSubmit} disabled={saving}>
+            <button className="btn btn-primary primary-btn" onClick={handleSubmit} disabled={saving}>
               {saving ? 'Saving...' : '💾 Save Changes'}
             </button>
           </div>
@@ -202,7 +235,7 @@ const handleSubmit = async (e) => {
 
       <form onSubmit={handleSubmit}>
         {/* Personal Information */}
-        <div className="profile-section">
+        <div className="card profile-section">
           <h2>📋 Personal Information</h2>
           {/* Profile Picture */}
           <div className="profile-picture-section">
@@ -249,6 +282,7 @@ const handleSubmit = async (e) => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
+                  className="form-input"
                   placeholder="Your full name"
                 />
               ) : (
@@ -268,6 +302,7 @@ const handleSubmit = async (e) => {
                   type="tel"
                   name="phone"
                   value={formData.phone}
+                  className="form-input"
                   onChange={handleChange}
                   placeholder="+1 (555) 123-4567"
                 />

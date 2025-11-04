@@ -11,6 +11,10 @@ const bookmarkRoutes = require('./routes/bookmarks');
 const notesRoutes = require('./routes/notes');
 const exportRoutes = require('./routes/export');
 const preferencesRoutes = require('./routes/preferences');
+const resourceRoutes = require('./routes/resources');
+const dsaRoutes = require('./routes/dsa');
+const interviewRoutes = require('./routes/interviews');
+const learningRoutes = require('./routes/learning');
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -111,6 +115,18 @@ app.use('/api/export', exportRoutes);
 
 // Preferences routes
 app.use('/api/preferences', preferencesRoutes);
+
+// Resources hub routes (Resume templates, Cover letter, Interview prep, etc)
+app.use('/api/resources', resourceRoutes);
+
+// DSA questions routes (Striver's SDE + AI + Google Drive integration)
+app.use('/api/dsa', dsaRoutes);
+
+// Interview sessions routes (Mock interviews, feedback, history)
+app.use('/api/interviews', interviewRoutes);
+
+// Learning resources routes (Skill-specific learning paths)
+app.use('/api/learning', learningRoutes);
 
 const PORT = process.env.PORT || 5000;
 

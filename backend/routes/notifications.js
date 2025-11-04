@@ -8,6 +8,95 @@ const emailService = require('../services/emailService');
 // EMAIL NOTIFICATION SETTINGS
 // ============================================
 
+// ============================================
+// NOTIFICATION LIST
+// ============================================
+
+/**
+ * GET /api/notifications
+ * Get user's notifications
+ */
+router.get('/', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const limit = parseInt(req.query.limit) || 50;
+    const skip = parseInt(req.query.skip) || 0;
+
+    const notifications = await prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      skip: skip
+    });
+
+    res.json({ data: notifications });
+  } catch (error) {
+    console.error('Get notifications error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * PATCH /api/notifications/:id/read
+ * Mark notification as read
+ */
+router.patch('/:id/read', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    await prisma.notification.update({
+      where: { id },
+      data: { read: true }
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Mark as read error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/notifications/mark-all-read
+ * Mark all notifications as read
+ */
+router.post('/mark-all-read', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    await prisma.notification.updateMany({
+      where: { userId, read: false },
+      data: { read: true }
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Mark all as read error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * DELETE /api/notifications/:id
+ * Delete a notification
+ */
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    await prisma.notification.delete({
+      where: { id }
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete notification error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 /**
  * GET /api/notifications/settings
  * Get user's notification preferences

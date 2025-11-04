@@ -1,0 +1,797 @@
+.company-intelligence {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-6);
+}
+
+.ci-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.ci-header h1 {
+  font-size: 2.5rem;
+  margin: 0 0 var(--space-2) 0;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ci-header p {
+  color: var(--neutral-600);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* Search Section */
+.search-section {
+  margin-bottom: var(--space-8);
+  position: relative;
+}
+
+.search-container {
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: var(--space-4) var(--space-5);
+  font-size: 1.05rem;
+  border: 2px solid var(--neutral-300);
+  border-radius: var(--radius-lg);
+  transition: var(--transition-normal);
+  background: white;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.search-loading {
+  position: absolute;
+  right: var(--space-4);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* Search Results */
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid var(--neutral-300);
+  border-top: none;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.company-result {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--neutral-100);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  transition: var(--transition-normal);
+}
+
+.company-result:hover {
+  background: var(--neutral-50);
+}
+
+.company-result:last-child {
+  border-bottom: none;
+}
+
+.company-result-logo {
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+  background: var(--neutral-100);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.company-result-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.company-result-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.company-result-info h3 {
+  margin: 0 0 var(--space-1) 0;
+  font-size: 0.95rem;
+  color: var(--neutral-900);
+}
+
+.company-result-info p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--neutral-600);
+}
+
+.company-result-rating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.rating-display {
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 1rem;
+}
+
+.stars {
+  font-size: 0.85rem;
+}
+
+/* Details Modal */
+.details-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  padding: var(--space-4);
+}
+
+.details-modal {
+  background: white;
+  border-radius: var(--radius-lg);
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  background: white;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--neutral-600);
+  z-index: 10;
+  transition: var(--transition-normal);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  background: var(--neutral-100);
+  transform: rotate(90deg);
+}
+
+/* Company Header */
+.company-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: white;
+  padding: var(--space-6);
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.company-header img {
+  width: 100px;
+  height: 100px;
+  border-radius: var(--radius-lg);
+  border: 3px solid white;
+  object-fit: cover;
+}
+
+.company-header-info h1 {
+  margin: 0 0 var(--space-1) 0;
+  font-size: 1.8rem;
+}
+
+.company-industry {
+  margin: 0 0 var(--space-2) 0;
+  opacity: 0.95;
+}
+
+.company-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* Details Tabs */
+.details-tabs {
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 2px solid var(--neutral-200);
+  overflow-x: auto;
+  background: white;
+}
+
+.tab {
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--neutral-600);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--primary);
+}
+
+.tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+/* Details Content */
+.details-content {
+  padding: var(--space-6);
+  min-height: 400px;
+}
+
+.detail-section {
+  margin-bottom: var(--space-6);
+}
+
+.detail-section h2 {
+  margin: 0 0 var(--space-3) 0;
+  color: var(--neutral-900);
+  font-size: 1.1rem;
+}
+
+.detail-section p {
+  color: var(--neutral-700);
+  line-height: 1.7;
+}
+
+/* Rating Badges */
+.ratings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.rating-badge {
+  background: var(--neutral-50);
+  border: 2px solid var(--neutral-200);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  text-align: center;
+  transition: var(--transition-normal);
+}
+
+.rating-badge:hover {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+}
+
+.rating-stars {
+  font-size: 1.2rem;
+  margin-bottom: var(--space-2);
+  letter-spacing: 2px;
+}
+
+.rating-value {
+  font-weight: 700;
+  font-size: 1.3rem;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: var(--space-1);
+}
+
+.rating-label {
+  color: var(--neutral-600);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Info Grid */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+}
+
+.info-item {
+  padding: var(--space-3);
+  background: var(--neutral-50);
+  border-radius: var(--radius-md);
+  color: var(--neutral-700);
+}
+
+.info-item strong {
+  color: var(--neutral-900);
+  display: block;
+  margin-bottom: var(--space-1);
+}
+
+/* Tech Stack */
+.tech-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tech-item {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: white;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Financial Stability */
+.stability-card {
+  background: var(--neutral-50);
+  border-left: 4px solid var(--primary);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.stability-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-3);
+  background: white;
+  border-radius: var(--radius-md);
+  min-width: 100px;
+}
+
+.score-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.score-label {
+  font-size: 0.75rem;
+  color: var(--neutral-600);
+  font-weight: 600;
+}
+
+.stability-insight {
+  margin: 0;
+  color: var(--neutral-700);
+}
+
+/* Reviews */
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.review-card {
+  background: var(--neutral-50);
+  border: 1px solid var(--neutral-200);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  transition: var(--transition-normal);
+}
+
+.review-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.review-rating {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.review-rating .stars {
+  font-size: 1rem;
+  letter-spacing: 1px;
+}
+
+.review-rating .rating-value {
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.review-role {
+  display: inline-block;
+  background: var(--primary);
+  color: white;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.review-date {
+  color: var(--neutral-500);
+  font-size: 0.85rem;
+}
+
+.review-title {
+  font-weight: 600;
+  color: var(--neutral-900);
+  margin: var(--space-2) 0;
+}
+
+.review-text {
+  color: var(--neutral-700);
+  line-height: 1.6;
+  margin: var(--space-2) 0;
+}
+
+.review-section-item {
+  margin-top: var(--space-2);
+  padding: var(--space-2);
+  background: white;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  color: var(--neutral-700);
+}
+
+.review-section-item strong {
+  color: var(--neutral-900);
+}
+
+/* Salary Section */
+.salary-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-4);
+}
+
+.salary-card {
+  background: white;
+  border: 1px solid var(--neutral-300);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  transition: var(--transition-normal);
+  position: relative;
+}
+
+.salary-card:hover {
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.15);
+  transform: translateY(-4px);
+}
+
+.salary-card h3 {
+  margin: 0 0 var(--space-3) 0;
+  color: var(--neutral-900);
+}
+
+.salary-range {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.salary-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.salary-item .label {
+  font-size: 0.8rem;
+  color: var(--neutral-600);
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+
+.salary-item .value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.level-badge {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: white;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Interview Section */
+.difficulty-card {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  color: white;
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  margin-bottom: var(--space-4);
+}
+
+.difficulty-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.difficulty-score .score-value {
+  font-size: 3rem;
+  font-weight: 700;
+  color: white;
+  -webkit-text-fill-color: white;
+}
+
+.difficulty-score .score-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.rounds-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.round-card {
+  background: var(--neutral-50);
+  border: 1px solid var(--neutral-200);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.round-card h3 {
+  margin: 0 0 var(--space-2) 0;
+  color: var(--neutral-900);
+}
+
+.round-type,
+.round-duration,
+.round-desc {
+  margin: var(--space-1) 0;
+  color: var(--neutral-700);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.round-type,
+.round-duration {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.tips-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-3);
+}
+
+.tips-list li {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  padding: var(--space-3);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius-sm);
+  color: var(--neutral-700);
+}
+
+/* Topics Grid */
+.topics-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.topic-tag {
+  display: inline-block;
+  background: #e7f5ff;
+  color: var(--primary);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* No Data */
+.no-data {
+  text-align: center;
+  padding: var(--space-8);
+  color: var(--neutral-500);
+  font-size: 1rem;
+}
+
+/* Empty State */
+.empty-state-container {
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-state {
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: var(--space-4);
+}
+
+.empty-state h2 {
+  font-size: 1.5rem;
+  color: var(--neutral-900);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.empty-state p {
+  color: var(--neutral-600);
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .company-intelligence {
+    padding: var(--space-4);
+  }
+
+  .ci-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .company-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .company-header img {
+    width: 80px;
+    height: 80px;
+  }
+
+  .company-meta {
+    justify-content: center;
+  }
+
+  .ratings-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .salary-list {
+    grid-template-columns: 1fr;
+  }
+
+  .rounds-list {
+    grid-template-columns: 1fr;
+  }
+
+  .details-tabs {
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .tab {
+    padding: var(--space-2) var(--space-2);
+    font-size: 0.9rem;
+  }
+
+  .details-modal {
+    max-width: 95%;
+  }
+}
+
+@media (max-width: 480px) {
+  .company-intelligence {
+    padding: var(--space-3);
+  }
+
+  .ci-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .search-input {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .company-header {
+    padding: var(--space-4);
+  }
+
+  .ratings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .salary-range {
+    grid-template-columns: 1fr;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tech-list {
+    gap: var(--space-1);
+  }
+
+  .tech-item {
+    padding: var(--space-1) var(--space-2);
+    font-size: 0.8rem;
+  }
+
+  .details-tabs {
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+
+  .details-content {
+    padding: var(--space-3);
+  }
+}

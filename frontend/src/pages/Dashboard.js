@@ -1,9 +1,32 @@
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useCallback } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
+import {
+  Box,
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Paper,
+  Avatar,
+  Chip,
+  CircularProgress,
+  Alert,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Assessment as AssessmentIcon,
+  Send as SendIcon,
+  Computer as ComputerIcon,
+  CheckCircle as CheckCircleIcon,
+  Business as BusinessIcon,
+  CalendarToday as CalendarIcon,
+} from '@mui/icons-material';
 import AddApplication from '../components/AddApplication';
 import JobSuggestions from '../components/JobSuggestions';
-import './Pages.css';
+import './Dashboard.css';
 
 function Dashboard() {
   const { token } = useContext(AuthContext);
@@ -13,11 +36,7 @@ function Dashboard() {
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-  useEffect(() => {
-    fetchApplications();
-  }, []);
-
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get(`${API_URL}/api/applications`, {
@@ -29,7 +48,11 @@ function Dashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, API_URL]);
+
+  useEffect(() => {
+    fetchApplications();
+  }, [fetchApplications]);
 
   const handleApplicationAdded = (newApp) => {
     setApplications([newApp, ...applications]);
@@ -39,105 +62,239 @@ function Dashboard() {
   // Get recent applications (last 5)
   const recentApplications = applications.slice(0, 5);
 
+  // Status badge colors
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'offer': return 'success';
+      case 'rejected': return 'error';
+      case 'applied': return 'info';
+      case 'phone_screen':
+      case 'technical':
+      case 'onsite': return 'warning';
+      default: return 'default';
+    }
+  };
+
   return (
-    <div className="page-container">
-      <div className="page-header">
-        <h1>🏠 Dashboard</h1>
-        <button className="primary-btn" onClick={() => setShowAddModal(true)}>
-          + Add Application
-        </button>
-      </div>
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      {/* Header */}
+      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
+            🏠 Dashboard
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Welcome back! Here's your application overview
+          </Typography>
+        </Box>
+        <Button 
+          variant="contained" 
+          startIcon={<AddIcon />}
+          onClick={() => setShowAddModal(true)}
+          size="large"
+          sx={{ borderRadius: 2, px: 3 }}
+        >
+          Add Application
+        </Button>
+      </Box>
 
       {/* Quick Stats */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon">📊</div>
-          <div className="stat-content">
-            <div className="stat-value">{applications.length}</div>
-            <div className="stat-label">Total Applications</div>
-          </div>
-        </div>
-        
-        <div className="stat-card">
-          <div className="stat-icon">📤</div>
-          <div className="stat-content">
-            <div className="stat-value">
-              {applications.filter(app => app.status === 'applied').length}
-            </div>
-            <div className="stat-label">Applied</div>
-          </div>
-        </div>
-        
-        <div className="stat-card">
-          <div className="stat-icon">💻</div>
-          <div className="stat-content">
-            <div className="stat-value">
-              {applications.filter(app => 
-                ['phone_screen', 'technical', 'onsite'].includes(app.status)
-              ).length}
-            </div>
-            <div className="stat-label">In Interview</div>
-          </div>
-        </div>
-        
-        <div className="stat-card">
-          <div className="stat-icon">✅</div>
-          <div className="stat-content">
-            <div className="stat-value">
-              {applications.filter(app => app.status === 'offer').length}
-            </div>
-            <div className="stat-label">Offers</div>
-          </div>
-        </div>
-      </div>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card 
+            sx={{ 
+              height: '100%',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              transition: 'transform 0.2s',
+              '&:hover': { transform: 'translateY(-4px)' }
+            }}
+          >
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
+                  <AssessmentIcon fontSize="large" />
+                </Avatar>
+                <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                  {applications.length}
+                </Typography>
+              </Box>
+              <Typography variant="h6" sx={{ opacity: 0.9 }}>
+                Total Applications
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
+          <Card 
+            sx={{ 
+              height: '100%',
+              background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+              color: 'white',
+              transition: 'transform 0.2s',
+              '&:hover': { transform: 'translateY(-4px)' }
+            }}
+          >
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
+                  <SendIcon fontSize="large" />
+                </Avatar>
+                <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                  {applications.filter(app => app.status === 'applied').length}
+                </Typography>
+              </Box>
+              <Typography variant="h6" sx={{ opacity: 0.9 }}>
+                Applied
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
+          <Card 
+            sx={{ 
+              height: '100%',
+              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+              color: 'white',
+              transition: 'transform 0.2s',
+              '&:hover': { transform: 'translateY(-4px)' }
+            }}
+          >
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
+                  <ComputerIcon fontSize="large" />
+                </Avatar>
+                <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                  {applications.filter(app => 
+                    ['phone_screen', 'technical', 'onsite'].includes(app.status)
+                  ).length}
+                </Typography>
+              </Box>
+              <Typography variant="h6" sx={{ opacity: 0.9 }}>
+                In Interview
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
+          <Card 
+            sx={{ 
+              height: '100%',
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              color: 'white',
+              transition: 'transform 0.2s',
+              '&:hover': { transform: 'translateY(-4px)' }
+            }}
+          >
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
+                  <CheckCircleIcon fontSize="large" />
+                </Avatar>
+                <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                  {applications.filter(app => app.status === 'offer').length}
+                </Typography>
+              </Box>
+              <Typography variant="h6" sx={{ opacity: 0.9 }}>
+                Offers
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
       {/* Job Suggestions */}
-      <JobSuggestions />
+      <Box sx={{ mb: 4 }}>
+        <JobSuggestions />
+      </Box>
 
       {/* Recent Applications */}
-      <div className="dashboard-section">
-        <h2>Recent Applications</h2>
+      <Paper sx={{ p: 3, borderRadius: 3 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+          Recent Applications
+        </Typography>
+        
         {loading ? (
-          <p>Loading...</p>
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress />
+          </Box>
         ) : recentApplications.length === 0 ? (
-          <div className="empty-state">
-            <p>No applications yet. Add your first one!</p>
-          </div>
+          <Alert severity="info" sx={{ borderRadius: 2 }}>
+            No applications yet. Add your first one!
+          </Alert>
         ) : (
-          <div className="recent-applications">
+          <Grid container spacing={2}>
             {recentApplications.map((app) => (
-              <div key={app.id} className="recent-app-card">
-                {app.logoUrl && (
-                  <img 
-                    src={app.logoUrl} 
-                    alt={app.company}
-                    className="app-logo"
-                    onError={(e) => e.target.style.display = 'none'}
-                  />
-                )}
-                <div className="app-info">
-                  <h3>{app.company}</h3>
-                  <p>{app.position}</p>
-                </div>
-                <div className="app-meta">
-                  <span className="app-status">{app.status}</span>
-                  <span className="app-date">
-                    {new Date(app.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
+              <Grid item xs={12} key={app.id}>
+                <Card 
+                  sx={{ 
+                    transition: 'all 0.2s',
+                    '&:hover': { 
+                      boxShadow: 4,
+                      transform: 'translateX(4px)'
+                    }
+                  }}
+                >
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        {app.logoUrl ? (
+                          <Avatar 
+                            src={app.logoUrl} 
+                            alt={app.company}
+                            sx={{ width: 48, height: 48 }}
+                            onError={(e) => e.target.style.display = 'none'}
+                          />
+                        ) : (
+                          <Avatar sx={{ width: 48, height: 48, bgcolor: 'primary.main' }}>
+                            <BusinessIcon />
+                          </Avatar>
+                        )}
+                        <Box>
+                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                            {app.company}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {app.position}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Chip 
+                          label={app.status}
+                          color={getStatusColor(app.status)}
+                          size="small"
+                        />
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
+                          <CalendarIcon fontSize="small" />
+                          <Typography variant="body2">
+                            {new Date(app.createdAt).toLocaleDateString()}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
             ))}
-          </div>
+          </Grid>
         )}
-      </div>
+      </Paper>
 
-      {/* Follow-ups Section - Coming Soon */}
-      <div className="dashboard-section">
-        <h2>Follow-Ups</h2>
-        <div className="coming-soon">
-          <p>🚧 Coming soon! Track companies you need to follow up with.</p>
-        </div>
-      </div>
+      {/* Follow-ups Section */}
+      <Paper sx={{ p: 3, borderRadius: 3, mt: 3 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
+          Follow-Ups
+        </Typography>
+        <Alert severity="info" sx={{ borderRadius: 2 }}>
+          🚧 Coming soon! Track companies you need to follow up with.
+        </Alert>
+      </Paper>
 
       {showAddModal && (
         <AddApplication 
@@ -145,7 +302,7 @@ function Dashboard() {
           onClose={() => setShowAddModal(false)}
         />
       )}
-    </div>
+    </Container>
   );
 }
 

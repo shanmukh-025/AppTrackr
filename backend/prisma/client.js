@@ -1,9 +1,9 @@
 const { PrismaClient } = require('@prisma/client');
 
+// Create Prisma client with connection pooling optimized
 const prisma = new PrismaClient({
-  log: ['error', 'warn'],
-  errorFormat: 'pretty',
-  // Increase connection pool size
+  log: ['error'],
+  errorFormat: 'minimal',
   datasources: {
     db: {
       url: process.env.DATABASE_URL,
@@ -11,53 +11,80 @@ const prisma = new PrismaClient({
   },
 });
 
-// Modify the schema connection_limit via environment or directly configure
-// For Supabase, we need to handle connections better
-let connectionAttempts = 0;
-
-// Handle connection errors
-prisma.$on('error', (e) => {
-  console.error('Prisma error:', e);
-});
-
-// Graceful shutdown with proper cleanup
-const gracefulShutdown = async () => {
-  console.log('Shutting down gracefully...');
-  try {
-    await prisma.$disconnect();
-    console.log('Database connection closed');
-  } catch (err) {
-    console.error('Error during shutdown:', err);
-  }
-  process.exit(0);
-};
-
-// Disable auto-shutdown on signals - let the server handle it
-// process.on('SIGINT', gracefulShutdown);
-// process.on('SIGTERM', gracefulShutdown);
-
-// Limit concurrent Prisma queries with a simple queue
-class PrismaQueryQueue {
-  constructor(maxConcurrent = 10) {
+// Connection pool middleware for limiting concurrent requests
+class ConnectionPoolManager {
+  constructor(maxConcurrent = 5) {
     this.maxConcurrent = maxConcurrent;
-    this.running = 0;
+    this.active = 0;
     this.queue = [];
   }
 
-  async run(fn) {
-    while (this.running >= this.maxConcurrent) {
+  async execute(fn) {
+    // Wait if at capacity
+    while (this.active >= this.maxConcurrent) {
       await new Promise(resolve => this.queue.push(resolve));
     }
     
-    this.running++;
+    this.active++;
     try {
-      return await fn();
+      return await Promise.race([
+        fn(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Query timeout (30s)')), 30000)
+        )
+      ]);
     } finally {
-      this.running--;
-      const resolve = this.queue.shift();
-      if (resolve) resolve();
+      this.active--;
+      const next = this.queue.shift();
+      if (next) next();
     }
   }
 }
 
-module.exports = prisma;
+const poolManager = new ConnectionPoolManager(5);
+
+// Wrap Prisma to use connection pool
+const wrappedPrisma = new Proxy(prisma, {
+  get(target, prop) {
+    // For database operations, wrap in pool manager - include ALL models
+    const dbModels = [
+      'application', 'user', 'interviewSession', 'interviewResponse', 'resume',
+      'resumeAnalysis', 'coverLetter', 'interviewPrep', 'savedSearch', 
+      'applicationActivity', 'jobShare', 'referral', 'companyReview',
+      'forumPost', 'forumComment', 'autofillData', 'premiumJob',
+      'jobBookmark', 'note', 'userPreference', 'companyCareerPage',
+      'savedLearningPath'  // Added missing model
+    ];
+    
+    if (dbModels.includes(prop)) {
+      return new Proxy(target[prop], {
+        get(t, method) {
+          if (typeof t[method] === 'function') {
+            return function(...args) {
+              return poolManager.execute(() => t[method](...args));
+            };
+          }
+          return t[method];
+        }
+      });
+    }
+    return target[prop];
+  }
+});
+
+// Handle connection errors gracefully
+prisma.$on('error', (e) => {
+  console.error('Database error:', e.message);
+});
+
+// Graceful shutdown
+const gracefulShutdown = async () => {
+  try {
+    await prisma.$disconnect();
+  } catch (err) {
+    console.error('Shutdown error:', err);
+  }
+  process.exit(0);
+};
+
+module.exports = wrappedPrisma;

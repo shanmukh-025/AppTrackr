@@ -48,6 +48,38 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET user skills only
+router.get('/skills', async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: {
+        skills: true
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Parse skills from JSON string or return as array
+    let skills = [];
+    if (user.skills) {
+      try {
+        skills = typeof user.skills === 'string' ? JSON.parse(user.skills) : user.skills;
+      } catch (e) {
+        // If skills is already a comma-separated string, split it
+        skills = user.skills.split(',').map(s => s.trim()).filter(Boolean);
+      }
+    }
+
+    res.json({ skills });
+  } catch (error) {
+    console.error('Get skills error:', error);
+    res.status(500).json({ message: 'Server error', skills: [] });
+  }
+});
+
 // PUT update user profile
 router.put('/', async (req, res) => {
   try {

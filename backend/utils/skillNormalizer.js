@@ -181,10 +181,10 @@ function extractSkillsFromProfile(user) {
     });
   }
   
-  // If still no skills found, return some default popular tech skills
+  // If still no skills found, return empty array (don't use defaults)
   if (skills.length === 0) {
-    console.warn('⚠️  No skills found in user profile, using defaults');
-    return ['javascript', 'python', 'react'];
+    console.warn('⚠️  No skills found in user profile');
+    return [];
   }
   
   return normalizeSkills(skills);

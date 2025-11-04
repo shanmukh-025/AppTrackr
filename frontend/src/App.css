@@ -1,149 +1,235 @@
-/* App with Sidebar Layout */
+/* ============================================================================
+   APPLICATION LAYOUT - PROFESSIONAL DESIGN SYSTEM
+   ============================================================================ */
+
+/* ========== MAIN LAYOUT ========== */
+
 .app-with-sidebar {
   display: flex;
   min-height: 100vh;
-  background: #f7fafc;
+  background: var(--background);
+  transition: background-color 0.3s ease;
 }
 
 .main-content {
   flex: 1;
-  margin-left: 260px;
   min-height: 100vh;
-  transition: margin-left 0.3s ease;
+  background: var(--background);
+  transition: margin-left var(--duration-300) var(--easing-ease-in-out), background-color 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Mobile Responsive */
-@media (max-width: 768px) {
+/* Desktop: add margin for permanent sidebar */
+@media (min-width: 900px) {
   .main-content {
-    margin-left: 0;
-    padding-top: 60px;
+    margin-left: 280px;
   }
 }
 
-/* Keep all your existing App.css styles below */
-
-
-
+/* Mobile: no margin, sidebar is temporary drawer */
+@media (max-width: 899px) {
+  .main-content {
+    margin-left: 0;
+    padding-top: 60px; /* Space for hamburger menu */
+  }
+}
 
 .App {
   min-height: 100vh;
-  background: #f7fafc;
+  background: var(--background);
+  transition: background-color 0.3s ease;
 }
 
-.loading-screen {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  color: #4a5568;
-}
+/* ========== DASHBOARD LAYOUT ========== */
 
 .dashboard {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .dashboard-header {
-  background: white;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 24px 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-color);
+  padding: var(--space-6) 0;
   position: sticky;
   top: 0;
-  z-index: 100;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  z-index: 40;
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(10px);
+  background-color: var(--surface);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dashboard-header-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--space-8);
+  width: 100%;
 }
 
 .header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--space-8);
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
 .header-left h1 {
-  margin: 0 0 4px 0;
-  color: #1a202c;
-  font-size: 28px;
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-800);
+  letter-spacing: -0.02em;
+  transition: color 0.3s ease;
 }
 
 .header-left p {
   margin: 0;
-  color: #718096;
-  font-size: 14px;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-500);
+  transition: color 0.3s ease;
 }
 
 .header-right {
   display: flex;
-  gap: 12px;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+/* ========== BUTTONS - PROFESSIONAL ========== */
+
+.add-button,
+.logout-button,
+.action-button {
+  padding: var(--space-3) var(--space-6);
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-600);
+  cursor: pointer;
+  transition: all var(--duration-200) var(--easing-ease-out);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  white-space: nowrap;
 }
 
 .add-button {
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+  color: var(--bg-white);
+  box-shadow: var(--shadow-md);
 }
 
 .add-button:hover {
+  background: linear-gradient(135deg, var(--primary-700) 0%, var(--primary-800) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: var(--shadow-lg);
+}
+
+.add-button:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-md);
 }
 
 .logout-button {
-  padding: 12px 24px;
-  background: white;
-  color: #4a5568;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+  background: var(--bg-white);
+  color: var(--slate-700);
+  border: 1.5px solid var(--slate-200);
 }
 
 .logout-button:hover {
-  background: #f7fafc;
-  border-color: #cbd5e0;
+  background: var(--slate-50);
+  border-color: var(--slate-300);
 }
 
-.dashboard-main {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 24px;
+.action-button {
+  background: var(--slate-100);
+  color: var(--slate-700);
 }
+
+.action-button:hover {
+  background: var(--slate-200);
+  color: var(--slate-900);
+}
+
+/* ========== DASHBOARD MAIN ========== */
+
+.dashboard-main {
+  flex: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--space-8);
+  width: 100%;
+}
+
+/* ========== STATS BAR ========== */
 
 .stats-bar {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
 }
 
 .stat-card {
-  background: white;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
+  background: var(--bg-white);
+  padding: var(--space-8);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--slate-200);
+  transition: all var(--duration-200) var(--easing-ease-out);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  position: relative;
+}
+
+.stat-card:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--slate-300);
+  transform: translateY(-2px);
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-600), var(--secondary-600));
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  opacity: 0;
+  transition: opacity var(--duration-200);
+}
+
+.stat-card:hover::before {
+  opacity: 1;
 }
 
 .stat-number {
-  font-size: 36px;
-  font-weight: 700;
-  color: #667eea;
-  margin-bottom: 8px;
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-800);
+  color: var(--primary-600);
+  line-height: var(--line-height-tight);
 }
 
 .stat-label {
-  font-size: 14px;
-  color: #718096;
-  font-weight: 500;
+  font-size: var(--font-size-sm);
+  color: var(--slate-600);
+  font-weight: var(--font-weight-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .loading-applications {
