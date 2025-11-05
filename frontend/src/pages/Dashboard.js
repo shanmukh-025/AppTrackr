@@ -23,6 +23,10 @@ import {
   CheckCircle as CheckCircleIcon,
   Business as BusinessIcon,
   CalendarToday as CalendarIcon,
+  TrendingUp as TrendingUpIcon,
+  Update as UpdateIcon,
+  Favorite as FavoriteIcon,
+  Error as ErrorIcon,
 } from '@mui/icons-material';
 import AddApplication from '../components/AddApplication';
 import JobSuggestions from '../components/JobSuggestions';
@@ -76,225 +80,364 @@ function Dashboard() {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* Header */}
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
-            🏠 Dashboard
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Welcome back! Here's your application overview
-          </Typography>
-        </Box>
-        <Button 
-          variant="contained" 
-          startIcon={<AddIcon />}
-          onClick={() => setShowAddModal(true)}
-          size="large"
-          sx={{ borderRadius: 2, px: 3 }}
-        >
-          Add Application
-        </Button>
-      </Box>
+    <Box sx={{ backgroundColor: '#f8f9fa', minHeight: '100vh', pl: 2, pr: 2, py: 3 }}>
 
-      {/* Quick Stats */}
+      {/* Quick Stats - Top Row (4 Cards) */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
+        {/* Total Applications Card */}
         <Grid item xs={12} sm={6} md={3}>
           <Card 
+            elevation={0}
             sx={{ 
               height: '100%',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              transition: 'transform 0.2s',
-              '&:hover': { transform: 'translateY(-4px)' }
+              minHeight: 180,
+              background: '#fff',
+              border: '1px solid #e0e0e0',
+              borderRadius: 2,
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': { 
+                transform: 'translateY(-4px)',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.12)'
+              }
             }}
           >
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
-                  <AssessmentIcon fontSize="large" />
+            <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Avatar 
+                  sx={{ 
+                    bgcolor: '#fff3e0', 
+                    width: 56, 
+                    height: 56,
+                    mr: 2
+                  }}
+                >
+                  <AssessmentIcon sx={{ color: '#ff9800', fontSize: 32 }} />
                 </Avatar>
-                <Typography variant="h3" sx={{ fontWeight: 700 }}>
-                  {applications.length}
-                </Typography>
+                <Box sx={{ flex: 1, textAlign: 'right' }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                    Total Applications
+                  </Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#424242' }}>
+                    {applications.length}
+                  </Typography>
+                </Box>
               </Box>
-              <Typography variant="h6" sx={{ opacity: 0.9 }}>
-                Total Applications
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', color: '#9e9e9e', fontSize: '0.875rem' }}>
+                <UpdateIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                Update Now
+              </Box>
             </CardContent>
           </Card>
         </Grid>
 
+        {/* Applied Card */}
         <Grid item xs={12} sm={6} md={3}>
           <Card 
+            elevation={0}
             sx={{ 
               height: '100%',
-              background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-              color: 'white',
-              transition: 'transform 0.2s',
-              '&:hover': { transform: 'translateY(-4px)' }
+              minHeight: 180,
+              background: '#fff',
+              border: '1px solid #e0e0e0',
+              borderRadius: 2,
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': { 
+                transform: 'translateY(-4px)',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.12)'
+              }
             }}
           >
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
-                  <SendIcon fontSize="large" />
+            <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Avatar 
+                  sx={{ 
+                    bgcolor: '#e8f5e9', 
+                    width: 56, 
+                    height: 56,
+                    mr: 2
+                  }}
+                >
+                  <SendIcon sx={{ color: '#66bb6a', fontSize: 32 }} />
                 </Avatar>
-                <Typography variant="h3" sx={{ fontWeight: 700 }}>
-                  {applications.filter(app => app.status === 'applied').length}
-                </Typography>
+                <Box sx={{ flex: 1, textAlign: 'right' }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                    Applied
+                  </Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#424242' }}>
+                    {applications.filter(app => app.status === 'applied').length}
+                  </Typography>
+                </Box>
               </Box>
-              <Typography variant="h6" sx={{ opacity: 0.9 }}>
-                Applied
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', color: '#9e9e9e', fontSize: '0.875rem' }}>
+                <CalendarIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                Last day
+              </Box>
             </CardContent>
           </Card>
         </Grid>
 
+        {/* In Interview Card */}
         <Grid item xs={12} sm={6} md={3}>
           <Card 
+            elevation={0}
             sx={{ 
               height: '100%',
-              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-              color: 'white',
-              transition: 'transform 0.2s',
-              '&:hover': { transform: 'translateY(-4px)' }
+              minHeight: 180,
+              background: '#fff',
+              border: '1px solid #e0e0e0',
+              borderRadius: 2,
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': { 
+                transform: 'translateY(-4px)',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.12)'
+              }
             }}
           >
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
-                  <ComputerIcon fontSize="large" />
+            <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Avatar 
+                  sx={{ 
+                    bgcolor: '#fff3e0', 
+                    width: 56, 
+                    height: 56,
+                    mr: 2
+                  }}
+                >
+                  <ComputerIcon sx={{ color: '#ff9800', fontSize: 32 }} />
                 </Avatar>
-                <Typography variant="h3" sx={{ fontWeight: 700 }}>
-                  {applications.filter(app => 
-                    ['phone_screen', 'technical', 'onsite'].includes(app.status)
-                  ).length}
-                </Typography>
+                <Box sx={{ flex: 1, textAlign: 'right' }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                    Interviews
+                  </Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#424242' }}>
+                    {applications.filter(app => 
+                      ['phone_screen', 'technical', 'onsite'].includes(app.status)
+                    ).length}
+                  </Typography>
+                </Box>
               </Box>
-              <Typography variant="h6" sx={{ opacity: 0.9 }}>
-                In Interview
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', color: '#9e9e9e', fontSize: '0.875rem' }}>
+                <UpdateIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                In Progress
+              </Box>
             </CardContent>
           </Card>
         </Grid>
 
+        {/* Offers Card */}
         <Grid item xs={12} sm={6} md={3}>
           <Card 
+            elevation={0}
             sx={{ 
               height: '100%',
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-              color: 'white',
-              transition: 'transform 0.2s',
-              '&:hover': { transform: 'translateY(-4px)' }
+              minHeight: 180,
+              background: '#fff',
+              border: '1px solid #e0e0e0',
+              borderRadius: 2,
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': { 
+                transform: 'translateY(-4px)',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.12)'
+              }
             }}
           >
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
-                  <CheckCircleIcon fontSize="large" />
+            <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Avatar 
+                  sx={{ 
+                    bgcolor: '#e3f2fd', 
+                    width: 56, 
+                    height: 56,
+                    mr: 2
+                  }}
+                >
+                  <CheckCircleIcon sx={{ color: '#42a5f5', fontSize: 32 }} />
                 </Avatar>
-                <Typography variant="h3" sx={{ fontWeight: 700 }}>
-                  {applications.filter(app => app.status === 'offer').length}
-                </Typography>
+                <Box sx={{ flex: 1, textAlign: 'right' }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                    Offers
+                  </Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#424242' }}>
+                    {applications.filter(app => app.status === 'offer').length}
+                  </Typography>
+                </Box>
               </Box>
-              <Typography variant="h6" sx={{ opacity: 0.9 }}>
-                Offers
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', color: '#9e9e9e', fontSize: '0.875rem' }}>
+                <UpdateIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                Received
+              </Box>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
-      {/* Job Suggestions */}
-      <Box sx={{ mb: 4 }}>
-        <JobSuggestions />
-      </Box>
+      {/* Main Content - Two Columns: Job Suggestions (Left) + Recent Applications (Right) */}
+      <Grid container spacing={3}>
+        {/* Left Column - Job Suggestions (67% width) */}
+        <Grid item xs={12} md={8}>
+          <Paper 
+            elevation={0}
+            sx={{ 
+              p: 3, 
+              borderRadius: 2,
+              border: '1px solid #e0e0e0',
+              background: '#fff',
+              minHeight: 500
+            }}
+          >
+            <JobSuggestions />
+          </Paper>
+        </Grid>
 
-      {/* Recent Applications */}
-      <Paper sx={{ p: 3, borderRadius: 3 }}>
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
-          Recent Applications
-        </Typography>
-        
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-            <CircularProgress />
-          </Box>
-        ) : recentApplications.length === 0 ? (
-          <Alert severity="info" sx={{ borderRadius: 2 }}>
-            No applications yet. Add your first one!
-          </Alert>
-        ) : (
-          <Grid container spacing={2}>
-            {recentApplications.map((app) => (
-              <Grid item xs={12} key={app.id}>
-                <Card 
-                  sx={{ 
-                    transition: 'all 0.2s',
-                    '&:hover': { 
-                      boxShadow: 4,
-                      transform: 'translateX(4px)'
-                    }
-                  }}
+        {/* Right Column - Recent Applications (33% width) */}
+        <Grid item xs={12} md={4}>
+          <Paper 
+            elevation={0}
+            sx={{ 
+              p: 3, 
+              borderRadius: 2,
+              border: '1px solid #e0e0e0',
+              background: '#fff',
+              minHeight: 500
+            }}
+          >
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, color: '#424242' }}>
+                Recent Applications
+              </Typography>
+              <Button 
+                variant="contained" 
+                startIcon={<AddIcon />}
+                onClick={() => setShowAddModal(true)}
+                size="small"
+                sx={{ 
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+                  }
+                }}
+              >
+                Add
+              </Button>
+            </Box>
+            
+            {loading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+                <CircularProgress />
+              </Box>
+            ) : recentApplications.length === 0 ? (
+              <Box sx={{ 
+                textAlign: 'center', 
+                py: 8,
+                color: 'text.secondary' 
+              }}>
+                <BusinessIcon sx={{ fontSize: 64, color: '#e0e0e0', mb: 2 }} />
+                <Typography variant="body1">
+                  No applications yet
+                </Typography>
+                <Button 
+                  variant="outlined"
+                  startIcon={<AddIcon />}
+                  onClick={() => setShowAddModal(true)}
+                  sx={{ mt: 2, borderRadius: 2, textTransform: 'none' }}
                 >
-                  <CardContent>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  Add your first application
+                </Button>
+              </Box>
+            ) : (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {recentApplications.map((app) => (
+                  <Card 
+                    key={app.id}
+                    elevation={0}
+                    sx={{ 
+                      border: '1px solid #f0f0f0',
+                      borderRadius: 2,
+                      transition: 'all 0.2s',
+                      '&:hover': { 
+                        borderColor: '#667eea',
+                        boxShadow: '0 4px 12px rgba(102, 126, 234, 0.15)'
+                      }
+                    }}
+                  >
+                    <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         {app.logoUrl ? (
                           <Avatar 
                             src={app.logoUrl} 
                             alt={app.company}
-                            sx={{ width: 48, height: 48 }}
+                            sx={{ width: 40, height: 40 }}
                             onError={(e) => e.target.style.display = 'none'}
                           />
                         ) : (
-                          <Avatar sx={{ width: 48, height: 48, bgcolor: 'primary.main' }}>
-                            <BusinessIcon />
+                          <Avatar 
+                            sx={{ 
+                              width: 40, 
+                              height: 40, 
+                              bgcolor: '#f5f5f5',
+                              color: '#667eea'
+                            }}
+                          >
+                            <BusinessIcon fontSize="small" />
                           </Avatar>
                         )}
-                        <Box>
-                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography 
+                            variant="subtitle2" 
+                            sx={{ 
+                              fontWeight: 600,
+                              color: '#424242',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis'
+                            }}
+                          >
                             {app.company}
                           </Typography>
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography 
+                            variant="caption" 
+                            color="text.secondary"
+                            sx={{ 
+                              display: 'block',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis'
+                            }}
+                          >
                             {app.position}
                           </Typography>
                         </Box>
                       </Box>
                       
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1.5 }}>
                         <Chip 
                           label={app.status}
                           color={getStatusColor(app.status)}
                           size="small"
+                          sx={{ 
+                            borderRadius: 1.5,
+                            height: 24,
+                            fontSize: '0.75rem',
+                            fontWeight: 500
+                          }}
                         />
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
-                          <CalendarIcon fontSize="small" />
-                          <Typography variant="body2">
-                            {new Date(app.createdAt).toLocaleDateString()}
-                          </Typography>
-                        </Box>
+                        <Typography variant="caption" color="text.secondary">
+                          {new Date(app.createdAt).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric' 
+                          })}
+                        </Typography>
                       </Box>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        )}
-      </Paper>
-
-      {/* Follow-ups Section */}
-      <Paper sx={{ p: 3, borderRadius: 3, mt: 3 }}>
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
-          Follow-Ups
-        </Typography>
-        <Alert severity="info" sx={{ borderRadius: 2 }}>
-          🚧 Coming soon! Track companies you need to follow up with.
-        </Alert>
-      </Paper>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Box>
+            )}
+          </Paper>
+        </Grid>
+      </Grid>
 
       {showAddModal && (
         <AddApplication 
@@ -302,7 +445,7 @@ function Dashboard() {
           onClose={() => setShowAddModal(false)}
         />
       )}
-    </Container>
+    </Box>
   );
 }
 

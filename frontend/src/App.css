@@ -23,7 +23,7 @@
 /* Desktop: add margin for permanent sidebar */
 @media (min-width: 900px) {
   .main-content {
-    margin-left: 280px;
+    margin-left:auto;
   }
 }
 

@@ -183,18 +183,6 @@ const JobSuggestions = () => {
           <h2>💼 Job Suggestions For You</h2>
           <p>Based on your skills and profile</p>
         </div>
-        {stats && stats.rateLimits && stats.rateLimits.jooble && stats.rateLimits.apijobs && (
-          <div className="api-stats">
-            <div className="stat-item">
-              <span className="stat-label">Jooble:</span>
-              <span className="stat-value">{stats.rateLimits.jooble.remaining}/{stats.rateLimits.jooble.limit}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">APIJobs:</span>
-              <span className="stat-value">{stats.rateLimits.apijobs.remaining}/{stats.rateLimits.apijobs.limit}</span>
-            </div>
-          </div>
-        )}
       </div>
 
       {jobs.length === 0 ? (
