@@ -220,6 +220,45 @@ router.get('/search', auth, async (req, res) => {
 });
 
 /**
+ * GET /api/jobs/health
+ * Health check for job service and API keys
+ */
+router.get('/health', async (req, res) => {
+  try {
+    const health = {
+      status: 'operational',
+      apis: {
+        jooble: !!process.env.JOOBLE_API_KEY,
+        apijobs: !!process.env.APIJOBS_API_KEY,
+        joobleUrl: !!process.env.JOOBLE_API_URL,
+        apijobsUrl: !!process.env.APIJOBS_API_URL,
+        arbeitnowUrl: !!process.env.ARBEITNOW_API_URL,
+        remoteok: true, // Always available (no key)
+        remotive: true  // Always available (no key)
+      },
+      timestamp: new Date().toISOString()
+    };
+
+    const allConfigured = health.apis.jooble && health.apis.apijobs && 
+                          health.apis.joobleUrl && health.apis.apijobsUrl;
+
+    res.json({
+      success: true,
+      data: health,
+      warning: !allConfigured ? 'Some paid APIs are not configured. Using free APIs only.' : null
+    });
+
+  } catch (error) {
+    console.error('Error checking health:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Health check failed',
+      error: error.message
+    });
+  }
+});
+
+/**
  * GET /api/jobs/stats
  * Get API usage statistics
  */
