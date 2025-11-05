@@ -15,6 +15,33 @@ services:
         sync: false
       - key: GEMINI_API_KEY
         sync: false
+      # Optional: Job Search APIs
+      - key: JOOBLE_API_KEY
+        sync: false
+      - key: JOOBLE_API_URL
+        value: https://jooble.org/api
+      - key: APIJOBS_API_KEY
+        sync: false
+      - key: APIJOBS_API_URL
+        value: https://api.apijobs.dev/v1
+      - key: ARBEITNOW_API_URL
+        value: https://www.arbeitnow.com/api/job-board-api
+      # Optional: AI Services
+      - key: CLAUDE_API_KEY
+        sync: false
+      # Optional: Email Service
+      - key: RESEND_API_KEY
+        sync: false
+      # Rate Limits
+      - key: JOOBLE_DAILY_LIMIT
+        value: 500
+      - key: APIJOBS_MONTHLY_LIMIT
+        value: 50
+      # Cache Configuration
+      - key: CACHE_TTL
+        value: 1800
+      - key: MAX_CACHE_SIZE
+        value: 100
     healthCheckPath: /
 
   - type: web

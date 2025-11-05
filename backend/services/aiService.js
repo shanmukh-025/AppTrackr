@@ -1,9 +1,8 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-// Initialize Gemini API - MUST use environment variable ONLY
 if (!process.env.GEMINI_API_KEY) {
-  console.error('❌ GEMINI_API_KEY is not set in .env file!');
-  console.error('Add GEMINI_API_KEY to your .env file');
+  console.error('❌ GEMINI_API_KEY environment variable is not set!');
+  console.error('Please set GEMINI_API_KEY in your environment variables or .env file');
   process.exit(1);
 }
 

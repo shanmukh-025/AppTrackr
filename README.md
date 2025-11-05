@@ -12,13 +12,27 @@ A comprehensive job application tracking system with AI-powered features.
 - **Skills Gap Analysis**: Identify and track skill gaps
 - **Profile Management**: Manage your professional profile
 
-## 📋 Prerequisites
+## � API Keys Required
 
-- Node.js (v14 or higher)
-- PostgreSQL database
-- Google Gemini API key
+### Required APIs
+- **PostgreSQL Database**: Supabase or any PostgreSQL provider
+- **Google Gemini AI**: For resume generation and cover letter writing
+  - Get your key: https://makersuite.google.com/app/apikey
 
-## 🛠️ Local Development Setup
+### Optional APIs (for enhanced features)
+
+#### Job Search APIs
+- **Jooble** (Primary, 500 calls/day): https://jooble.org/api/about
+- **APIJobs.dev** (Complex searches, 50 calls/month): https://apijobs.dev
+- **Arbeitnow** (Fallback, unlimited): https://arbeitnow.com/api
+
+#### AI Services
+- **Claude AI** (Advanced question analysis): https://console.anthropic.com/
+
+#### Email Service
+- **Resend** (Email notifications): https://resend.com/api-keys
+
+## 📝 Environment Variables
 
 ### Backend Setup
 
