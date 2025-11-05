@@ -166,6 +166,12 @@ class JobService {
    * @returns {Promise<Array>} - Job listings with DIRECT company URLs
    */
   async fetchFromRemoteOK(keywords, options = {}) {
+    // RemoteOK is blocking automated requests with 403 errors
+    // Disabling this API temporarily
+    console.log('⚠️  RemoteOK: Skipped (API blocking automated requests)');
+    return [];
+    
+    /* DISABLED DUE TO 403 ERRORS
     const cacheKey = cacheService.generateKey('remoteok', { keywords, ...options });
     
     // Check cache first
@@ -205,6 +211,7 @@ class JobService {
       console.error('❌ RemoteOK API Error:', error.message);
       return [];
     }
+    */
   }
 
   /**
@@ -261,7 +268,7 @@ class JobService {
     const normalized = normalizeSkills(skills);
     const queries = generateSearchQueries(normalized, 3);
     
-    console.log(`\n🔍 Searching for jobs with DIRECT company URLs: ${queries.join(', ')}`);
+    console.log(`\n🔍 Searching for jobs: ${queries.join(', ')}`);
     console.log(`📊 Rate limits: Jooble ${rateLimiter.getRemainingCalls('jooble')}/500, APIJobs ${rateLimiter.getRemainingCalls('apijobs')}/50\n`);
 
     let allJobs = [];
@@ -271,30 +278,26 @@ class JobService {
       try {
         let jobs = [];
 
-        // PRIORITY 1: RemoteOK (FREE + DIRECT COMPANY URLS!)
-        const remoteokResults = await this.fetchFromRemoteOK(query, options);
-        jobs = [...remoteokResults];
+        // PRIORITY 1: Jooble (PRIMARY - with API key)
+        if (this.joobleKey && rateLimiter.getRemainingCalls('jooble') > 50) {
+          const joobleResults = await this.fetchFromJooble(query, options);
+          jobs = [...joobleResults];
+        }
 
         // PRIORITY 2: Remotive.io (FREE + DIRECT COMPANY URLS!)
         const remotiveResults = await this.fetchFromRemotive(query, options);
         jobs = [...jobs, ...remotiveResults];
 
         // FALLBACK 3: Arbeitnow (free but redirects)
-        if (jobs.length < 10) {
+        if (jobs.length < 15) {
           const arbeitnowResults = await this.fetchFromArbeitnow(query, options);
           jobs = [...jobs, ...arbeitnowResults];
         }
 
-        // FALLBACK 4: APIJobs for complex queries (redirects)
-        if (jobs.length < 15 && isComplexQuery && rateLimiter.getRemainingCalls('apijobs') > 10) {
+        // FALLBACK 4: APIJobs for complex queries (with API key)
+        if (jobs.length < 20 && isComplexQuery && this.apijobsKey && rateLimiter.getRemainingCalls('apijobs') > 10) {
           const apiJobsResults = await this.fetchFromAPIJobs(query, options);
           jobs = [...jobs, ...apiJobsResults];
-        }
-
-        // FALLBACK 5: Jooble only if still need more (redirects)
-        if (jobs.length < 20 && rateLimiter.getRemainingCalls('jooble') > 50) {
-          const joobleResults = await this.fetchFromJooble(query, options);
-          jobs = [...jobs, ...joobleResults];
         }
 
         allJobs = [...allJobs, ...jobs];
