@@ -4,9 +4,12 @@ import './JobSuggestions.css';
 
 const JobSuggestions = () => {
   const [jobs, setJobs] = useState([]);
+  const [allJobs, setAllJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [stats, setStats] = useState(null);
+  const [showAllJobs, setShowAllJobs] = useState(false);
+  const [displayLimit, setDisplayLimit] = useState(6);
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -23,13 +26,16 @@ const JobSuggestions = () => {
       const token = localStorage.getItem('token');
       const response = await axios.get(`${API_URL}/api/jobs/suggestions`, {
         headers: { Authorization: `Bearer ${token}` },
-        params: { limit: 6 } // Show 6 jobs on dashboard
+        params: { limit: 50 } // Fetch more jobs from backend
       });
 
       if (response.data.success) {
-        setJobs(response.data.data.jobs);
+        const fetchedJobs = response.data.data.jobs;
+        setAllJobs(fetchedJobs); // Store all jobs
+        setJobs(fetchedJobs.slice(0, displayLimit)); // Show limited jobs initially
+        
         // Check if there's a message about missing skills
-        if (response.data.data.message && response.data.data.jobs.length === 0) {
+        if (response.data.data.message && fetchedJobs.length === 0) {
           setError(response.data.data.message);
         }
       }
@@ -156,6 +162,20 @@ const JobSuggestions = () => {
     );
   }
 
+  const handleViewAllJobs = () => {
+    if (showAllJobs) {
+      // Going back to limited view
+      setJobs(allJobs.slice(0, displayLimit));
+      setShowAllJobs(false);
+    } else {
+      // Show all jobs
+      setJobs(allJobs);
+      setShowAllJobs(true);
+      // Scroll to job suggestions section
+      document.querySelector('.job-suggestions')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="job-suggestions">
       <div className="suggestions-header">
@@ -273,14 +293,19 @@ const JobSuggestions = () => {
             ))}
           </div>
           
-          <div className="view-all-container">
-            <button 
-              className="view-all-btn"
-              onClick={() => window.location.href = '/jobs'}
-            >
-              View All Jobs
-            </button>
-          </div>
+          {allJobs.length > displayLimit && (
+            <div className="view-all-container">
+              <button 
+                className="view-all-btn"
+                onClick={handleViewAllJobs}
+              >
+                {showAllJobs 
+                  ? `Show Less (${displayLimit} jobs)` 
+                  : `View All ${allJobs.length} Jobs`
+                }
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>
