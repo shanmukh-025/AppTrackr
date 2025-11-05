@@ -80,7 +80,7 @@ function Dashboard() {
   };
 
   return (
-    <Box sx={{ backgroundColor: '#f8f9fa', minHeight: '100vh', pl: 2, pr: 2, py: 3 }}>
+    <Container maxWidth="xl" sx={{ py: 4, backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
 
       {/* Quick Stats - Top Row (4 Cards) */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -90,7 +90,6 @@ function Dashboard() {
             elevation={0}
             sx={{ 
               height: '100%',
-              minHeight: 180,
               background: '#fff',
               border: '1px solid #e0e0e0',
               borderRadius: 2,
@@ -101,7 +100,7 @@ function Dashboard() {
               }
             }}
           >
-            <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <Avatar 
                   sx={{ 
@@ -136,7 +135,6 @@ function Dashboard() {
             elevation={0}
             sx={{ 
               height: '100%',
-              minHeight: 180,
               background: '#fff',
               border: '1px solid #e0e0e0',
               borderRadius: 2,
@@ -147,7 +145,7 @@ function Dashboard() {
               }
             }}
           >
-            <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <Avatar 
                   sx={{ 
@@ -182,7 +180,6 @@ function Dashboard() {
             elevation={0}
             sx={{ 
               height: '100%',
-              minHeight: 180,
               background: '#fff',
               border: '1px solid #e0e0e0',
               borderRadius: 2,
@@ -193,7 +190,7 @@ function Dashboard() {
               }
             }}
           >
-            <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <Avatar 
                   sx={{ 
@@ -230,7 +227,6 @@ function Dashboard() {
             elevation={0}
             sx={{ 
               height: '100%',
-              minHeight: 180,
               background: '#fff',
               border: '1px solid #e0e0e0',
               borderRadius: 2,
@@ -241,7 +237,7 @@ function Dashboard() {
               }
             }}
           >
-            <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <Avatar 
                   sx={{ 
@@ -271,10 +267,10 @@ function Dashboard() {
         </Grid>
       </Grid>
 
-      {/* Main Content - Two Columns: Job Suggestions (Left) + Recent Applications (Right) */}
+      {/* Main Content - Two Columns */}
       <Grid container spacing={3}>
-        {/* Left Column - Job Suggestions (67% width) */}
-        <Grid item xs={12} md={8}>
+        {/* Left Column - Job Suggestions (8 columns) */}
+        <Grid item xs={12} lg={8}>
           <Paper 
             elevation={0}
             sx={{ 
@@ -289,8 +285,8 @@ function Dashboard() {
           </Paper>
         </Grid>
 
-        {/* Right Column - Recent Applications (33% width) */}
-        <Grid item xs={12} md={4}>
+        {/* Right Column - Recent Applications (4 columns) */}
+        <Grid item xs={12} lg={4}>
           <Paper 
             elevation={0}
             sx={{ 
@@ -445,7 +441,7 @@ function Dashboard() {
           onClose={() => setShowAddModal(false)}
         />
       )}
-    </Box>
+    </Container>
   );
 }
 
