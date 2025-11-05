@@ -1,3 +1,4 @@
+
 require('dotenv').config();
 
 const express = require('express');
@@ -19,6 +20,7 @@ const dsaRoutes = require('./routes/dsa');
 const interviewRoutes = require('./routes/interviews');
 const learningRoutes = require('./routes/learning');
 const authRoutes = require('./routes/auth');
+const healthRoutes = require('./routes/health');
 const { initializeStaticCompanies } = require('./utils/companyCareerPages');
 const app = express();
 
@@ -72,9 +74,8 @@ app.get('/', (req, res) => {
   });
 });
 
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'healthy', service: 'AppTrackr API' });
-});
+// Health check routes
+app.use('/api/health', healthRoutes);
 
 // Auth routes
 app.use('/api/auth', authRoutes);

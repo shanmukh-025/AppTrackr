@@ -20,14 +20,6 @@ class JobService {
     // NEW: APIs with DIRECT company URLs (no redirects!)
     this.remoteokUrl = 'https://remoteok.com/api';
     this.remotiveUrl = 'https://remotive.com/api/remote-jobs';
-
-    // Log API configuration status at startup
-    console.log('\n🔑 Job Service API Configuration:');
-    console.log(`  Jooble: ${this.joobleKey ? '✅ Configured' : '❌ Missing'}`);
-    console.log(`  APIJobs: ${this.apijobsKey ? '✅ Configured' : '❌ Missing'}`);
-    console.log(`  RemoteOK: ✅ No key needed (FREE)`);
-    console.log(`  Remotive: ✅ No key needed (FREE)`);
-    console.log(`  Arbeitnow: ✅ No key needed (FREE)\n`);
   }
 
   /**

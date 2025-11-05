@@ -1,8 +1,9 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
+// Initialize Gemini API - MUST use environment variable ONLY
 if (!process.env.GEMINI_API_KEY) {
-  console.error('❌ GEMINI_API_KEY environment variable is not set!');
-  console.error('Please set GEMINI_API_KEY in your environment variables or .env file');
+  console.error('❌ GEMINI_API_KEY is not set in .env file!');
+  console.error('Add GEMINI_API_KEY to your .env file');
   process.exit(1);
 }
 
@@ -10,11 +11,23 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 class AIService {
   constructor() {
-    this.model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    if (genAI) {
+      this.model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    } else {
+      this.model = null;
+    }
+  }
+
+  _checkAPIKey() {
+    if (!genAI || !this.model) {
+      throw new Error('Gemini API is not configured. Please set GEMINI_API_KEY environment variable.');
+    }
   }
 
   async analyzeResume(resumeText, jobDescription = null) {
     try {
+      this._checkAPIKey();
+      
       if (!resumeText || resumeText.trim().length === 0) {
         throw new Error('Resume text is empty');
       }
@@ -89,6 +102,8 @@ class AIService {
 
   async generateResume(userData) {
     try {
+      this._checkAPIKey();
+      
       const { fullName, email, phone, targetRole, experience, skills } = userData;
       
       const prompt = `You are an expert resume writer. Generate a professional, ATS-friendly resume.
@@ -123,6 +138,8 @@ Return ONLY the resume text, no explanations.`;
 
   async generateCoverLetter(userProfile, jobDescription, company, position, tone = 'professional') {
     try {
+      this._checkAPIKey();
+      
       const toneGuide = {
         professional: 'formal, polished, and corporate',
         casual: 'friendly, approachable, yet professional',
@@ -142,6 +159,8 @@ Return ONLY the resume text, no explanations.`;
 
   async generateInterviewPrep(company, position, jobDescription) {
     try {
+      this._checkAPIKey();
+      
       const prompt = `You are an interview coach. Generate 10 interview questions with answers.\n\nCOMPANY: ${company}\nPOSITION: ${position}\nJOB: ${jobDescription}\n\nReturn JSON with questions array and tips array. Each question should have: id, question, answer, category (behavioral/technical/situational), difficulty (easy/medium/hard)`;
 
       const result = await this.model.generateContent(prompt);
@@ -161,6 +180,8 @@ Return ONLY the resume text, no explanations.`;
 
   async extractSkills(resumeText) {
     try {
+      this._checkAPIKey();
+      
       const prompt = `Extract all technical and professional skills from this resume. Return ONLY a JSON array of skills.\n\nRESUME:\n${resumeText}`;
 
       const result = await this.model.generateContent(prompt);

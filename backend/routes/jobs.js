@@ -44,8 +44,19 @@ router.get('/suggestions', auth, async (req, res) => {
       });
     }
 
+    // DEBUG: Log user profile data
+    console.log('🔍 User profile data for job search:');
+    console.log('  User ID:', user.id);
+    console.log('  Email:', user.email);
+    console.log('  Skills field:', user.skills);
+    console.log('  Current Role:', user.currentRole);
+    console.log('  Target Role:', user.targetRole);
+    console.log('  Bio:', user.bio?.substring(0, 100));
+
     // Extract skills from user profile
     let skills = extractSkillsFromProfile(user);
+    
+    console.log('  Extracted skills:', skills);
 
     // Allow manual skill override via query
     if (req.query.skills) {
@@ -53,18 +64,10 @@ router.get('/suggestions', auth, async (req, res) => {
       skills = [...new Set([...skills, ...manualSkills])]; // Remove duplicates
     }
 
-    // If still no skills, provide helpful message
+    // If no skills found, use default tech skills for testing
     if (skills.length === 0) {
-      return res.json({
-        success: true,
-        data: {
-          jobs: [],
-          count: 0,
-          skills: [],
-          message: 'No skills found in your profile. Please add skills to get personalized job suggestions.',
-          filters: { location: location || '', limit: parseInt(limit) || 50, remote: remote === 'true' }
-        }
-      });
+      console.log('⚠️  No skills in profile, using default skills for job search');
+      skills = ['JavaScript', 'React', 'Node.js', 'Python', 'Full Stack Developer'];
     }
 
     // Search options
@@ -214,45 +217,6 @@ router.get('/search', auth, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to search jobs',
-      error: error.message
-    });
-  }
-});
-
-/**
- * GET /api/jobs/health
- * Health check for job service and API keys
- */
-router.get('/health', async (req, res) => {
-  try {
-    const health = {
-      status: 'operational',
-      apis: {
-        jooble: !!process.env.JOOBLE_API_KEY,
-        apijobs: !!process.env.APIJOBS_API_KEY,
-        joobleUrl: !!process.env.JOOBLE_API_URL,
-        apijobsUrl: !!process.env.APIJOBS_API_URL,
-        arbeitnowUrl: !!process.env.ARBEITNOW_API_URL,
-        remoteok: true, // Always available (no key)
-        remotive: true  // Always available (no key)
-      },
-      timestamp: new Date().toISOString()
-    };
-
-    const allConfigured = health.apis.jooble && health.apis.apijobs && 
-                          health.apis.joobleUrl && health.apis.apijobsUrl;
-
-    res.json({
-      success: true,
-      data: health,
-      warning: !allConfigured ? 'Some paid APIs are not configured. Using free APIs only.' : null
-    });
-
-  } catch (error) {
-    console.error('Error checking health:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Health check failed',
       error: error.message
     });
   }

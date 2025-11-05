@@ -8,6 +8,8 @@ const JobSuggestions = () => {
   const [error, setError] = useState(null);
   const [stats, setStats] = useState(null);
 
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
   useEffect(() => {
     fetchJobSuggestions();
     fetchStats();
@@ -19,7 +21,7 @@ const JobSuggestions = () => {
       setError(null);
       
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/jobs/suggestions', {
+      const response = await axios.get(`${API_URL}/api/jobs/suggestions`, {
         headers: { Authorization: `Bearer ${token}` },
         params: { limit: 6 } // Show 6 jobs on dashboard
       });
@@ -42,7 +44,7 @@ const JobSuggestions = () => {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/jobs/stats', {
+      const response = await axios.get(`${API_URL}/api/jobs/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -58,7 +60,7 @@ const JobSuggestions = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        'http://localhost:5000/api/jobs/track-click',
+        `${API_URL}/api/jobs/track-click`,
         { jobId: job.id, source: job.source },
         { headers: { Authorization: `Bearer ${token}` } }
       );

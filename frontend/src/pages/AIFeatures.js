@@ -6,6 +6,8 @@ const AIFeatures = () => {
   const [activeTab, setActiveTab] = useState('resume');
   const [loading, setLoading] = useState(false);
 
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
   // Resume Generator State
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -33,7 +35,7 @@ const AIFeatures = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        'http://localhost:5000/api/ai/generate-resume',
+        `${API_URL}/api/ai/generate-resume`,
         { 
           fullName,
           email,
@@ -69,7 +71,7 @@ const AIFeatures = () => {
       console.log('Payload:', { clCompany, clPosition, clJobDesc, clTone });
 
       const response = await axios.post(
-        'http://localhost:5000/api/ai/generate-cover-letter',
+        `${API_URL}/api/ai/generate-cover-letter`,
         {
           company: clCompany,
           position: clPosition,
