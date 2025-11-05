@@ -1,4 +1,7 @@
+require('dotenv').config();
 
+const express = require('express');
+const cors = require('cors');
 const applicationRoutes = require('./routes/applications');
 const profileRoutes = require('./routes/profile');
 const jobRoutes = require('./routes/jobs');
@@ -15,10 +18,6 @@ const resourceRoutes = require('./routes/resources');
 const dsaRoutes = require('./routes/dsa');
 const interviewRoutes = require('./routes/interviews');
 const learningRoutes = require('./routes/learning');
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
-
 const authRoutes = require('./routes/auth');
 const { initializeStaticCompanies } = require('./utils/companyCareerPages');
 const app = express();
