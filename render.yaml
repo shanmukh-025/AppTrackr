@@ -1,0 +1,53 @@
+# Render Deployment Configuration for AppTracker
+# Monorepo with Backend (Node.js) and Frontend (React Static Site)
+
+services:
+  # Backend API Service
+  - type: web
+    name: apptrackr-api
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd backend && npm install && npx prisma generate
+    startCommand: cd backend && npm start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: JOOBLE_API_KEY
+        sync: false
+      - key: APIJOBS_API_KEY
+        sync: false
+      - key: JOOBLE_API_URL
+        value: https://jooble.org/api
+      - key: APIJOBS_API_URL
+        value: https://api.apijobs.dev/v1
+      - key: ARBEITNOW_API_URL
+        value: https://www.arbeitnow.com/api/job-board-api
+      - key: GOOGLE_DRIVE_FOLDER_ID
+        sync: false
+      - key: CACHE_TTL
+        value: 1800
+      - key: MAX_CACHE_SIZE
+        value: 100
+      - key: JOOBLE_DAILY_LIMIT
+        value: 500
+      - key: APIJOBS_MONTHLY_LIMIT
+        value: 50
+      - key: NODE_ENV
+        value: production
+
+  # Frontend Static Site
+  - type: web
+    name: apptrackr-frontend
+    env: static
+    region: oregon
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://apptrackr-api.onrender.com
