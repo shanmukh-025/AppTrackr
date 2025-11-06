@@ -297,7 +297,7 @@ function Dashboard() {
       {/* Main Content - Two Columns */}
       <Grid container spacing={3}>
         {/* Left Column - Job Suggestions */}
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12} sm={7} md={8}>
           <Paper 
             elevation={0}
             sx={{ 
@@ -306,7 +306,7 @@ function Dashboard() {
               border: '1px solid #e0e0e0',
               background: '#fff',
               minHeight: 500,
-              maxHeight: { xs: 'none', md: '600px' },
+              maxHeight: { xs: 'none', sm: '600px' },
               overflow: 'auto'
             }}
           >
@@ -315,7 +315,7 @@ function Dashboard() {
         </Grid>
 
         {/* Right Column - Recent Applications */}
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} sm={5} md={4}>
           <Paper 
             elevation={0}
             sx={{ 
@@ -324,10 +324,10 @@ function Dashboard() {
               border: '1px solid #e0e0e0',
               background: '#fff',
               minHeight: 500,
-              maxHeight: { xs: 'none', md: '600px' },
+              maxHeight: { xs: 'none', sm: '600px' },
               overflow: 'auto',
-              position: { xs: 'relative', md: 'sticky' },
-              top: { xs: 0, md: 20 }
+              position: { xs: 'relative', sm: 'sticky' },
+              top: { xs: 0, sm: 20 }
             }}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
