@@ -12,7 +12,8 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Bar, Line, Doughnut } from 'react-chartjs-2';
+import { Bar, Line } from 'react-chartjs-2';
+import { Container, Box, Card, Typography, Grid, Button } from '@mui/material';
 import './Analytics.css';
 
 // Register Chart.js components
@@ -33,12 +34,9 @@ function Analytics() {
   const [error, setError] = useState(null);
   const [overview, setOverview] = useState(null);
   const [timeline, setTimeline] = useState(null);
-  const [statusDistribution, setStatusDistribution] = useState(null);
   const [topCompanies, setTopCompanies] = useState([]);
-  const [trendingSkills, setTrendingSkills] = useState([]);
-  const [salaryInsights, setSalaryInsights] = useState(null);
-  const [responseTime, setResponseTime] = useState(null);
   const [weeklyActivity, setWeeklyActivity] = useState(null);
+  const [recentApplications, setRecentApplications] = useState([]);
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -54,44 +52,27 @@ function Analytics() {
       const headers = { Authorization: `Bearer ${token}` };
 
       console.log('🔍 Fetching analytics from:', API_URL);
-      console.log('🔑 Token exists:', !!token);
-      console.log('🔑 Token preview:', token ? token.substring(0, 20) + '...' : 'No token');
-
       const [
         overviewRes,
         timelineRes,
-        statusRes,
         companiesRes,
-        skillsRes,
-        salaryRes,
-        responseRes,
-        weeklyRes
+        weeklyRes,
+        applicationsRes
       ] = await Promise.all([
         axios.get(`${API_URL}/api/analytics/overview`, { headers }),
         axios.get(`${API_URL}/api/analytics/timeline`, { headers }),
-        axios.get(`${API_URL}/api/analytics/status-distribution`, { headers }),
         axios.get(`${API_URL}/api/analytics/top-companies?limit=5`, { headers }),
-        axios.get(`${API_URL}/api/analytics/trending-skills`, { headers }),
-        axios.get(`${API_URL}/api/analytics/salary-insights`, { headers }),
-        axios.get(`${API_URL}/api/analytics/response-times`, { headers }),
-        axios.get(`${API_URL}/api/analytics/weekly-activity`, { headers })
+        axios.get(`${API_URL}/api/analytics/weekly-activity`, { headers }),
+        axios.get(`${API_URL}/api/applications?sort=-createdAt&limit=10`, { headers }).catch(() => ({ data: [] }))
       ]);
-
-      console.log('✅ Overview data:', overviewRes.data);
-      console.log('✅ Timeline data:', timelineRes.data);
-      console.log('✅ Status distribution:', statusRes.data);
 
       setOverview(overviewRes.data);
       setTimeline(timelineRes.data);
-      setStatusDistribution(statusRes.data);
       setTopCompanies(companiesRes.data);
-      setTrendingSkills(skillsRes.data);
-      setSalaryInsights(salaryRes.data);
-      setResponseTime(responseRes.data);
       setWeeklyActivity(weeklyRes.data);
+      setRecentApplications(Array.isArray(applicationsRes.data) ? applicationsRes.data : applicationsRes.data.applications || []);
     } catch (err) {
       console.error('❌ Failed to fetch analytics:', err);
-      console.error('Error details:', err.response?.data || err.message);
       setError(err.response?.data?.error || err.message || 'Failed to load analytics');
     } finally {
       setLoading(false);
@@ -100,106 +81,22 @@ function Analytics() {
 
   if (loading) {
     return (
-      <div className="analytics-container">
-        <div className="analytics-header">
-          <h1>📊 Analytics Dashboard</h1>
-        </div>
-        <div className="loading-state">Loading your insights...</div>
-      </div>
+      <Container maxWidth="xl" sx={{ py: 4, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <Typography>Loading your insights...</Typography>
+      </Container>
     );
   }
 
-  // Show error state if something went wrong
   if (error) {
     return (
-      <div className="analytics-container">
-        <div className="analytics-header">
-          <h1>📊 Analytics Dashboard</h1>
-        </div>
-        <div className="empty-state">
-          <div className="empty-icon">⚠️</div>
-          <h2>Failed to Load Analytics</h2>
-          <p>{error}</p>
-          <div className="empty-actions">
-            <button onClick={fetchAllAnalytics} className="primary-button">
-              🔄 Retry
-            </button>
-          </div>
-          <p style={{ marginTop: '2rem', color: '#999', fontSize: '0.9rem' }}>
-            Check the browser console (F12) for more details
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Check if user has no applications
-  const hasNoData = !overview || overview.total === 0;
-
-  // Show empty state if no data
-  if (hasNoData) {
-    return (
-      <div className="analytics-container">
-        <div className="analytics-header">
-          <h1>📊 Analytics Dashboard</h1>
-          <p>Track your job search progress and insights</p>
-        </div>
-
-        <div className="empty-state">
-          <div className="empty-icon">📊</div>
-          <h2>No Analytics Data Yet</h2>
-          <p>Start tracking your job applications to see insightful analytics!</p>
-          <div className="empty-actions">
-            <a href="/applications" className="primary-button">
-              ➕ Add Your First Application
-            </a>
-            <a href="/jobs" className="secondary-button">
-              🔍 Search Jobs
-            </a>
-          </div>
-          <div className="empty-features">
-            <div className="feature-item">
-              <span className="feature-icon">📈</span>
-              <span>Track Success Rates</span>
-            </div>
-            <div className="feature-item">
-              <span className="feature-icon">💰</span>
-              <span>Salary Insights</span>
-            </div>
-            <div className="feature-item">
-              <span className="feature-icon">🔥</span>
-              <span>Trending Skills</span>
-            </div>
-            <div className="feature-item">
-              <span className="feature-icon">⏱️</span>
-              <span>Response Times</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Typography color="error">Error: {error}</Typography>
+        <Button onClick={fetchAllAnalytics} sx={{ mt: 2 }}>Retry</Button>
+      </Container>
     );
   }
 
   // Chart configurations
-  const statusColors = {
-    applied: '#2196F3',
-    screening: '#FF9800',
-    interview: '#9C27B0',
-    offer: '#4CAF50',
-    accepted: '#8BC34A',
-    rejected: '#F44336'
-  };
-
-  const statusChartData = statusDistribution ? {
-    labels: statusDistribution.labels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
-    datasets: [{
-      data: statusDistribution.data,
-      backgroundColor: statusDistribution.labels.map(label => statusColors[label]),
-      borderWidth: 2,
-      borderColor: '#fff'
-    }]
-  } : null;
-
   const timelineChartData = timeline ? {
     labels: timeline.labels,
     datasets: [{
@@ -208,206 +105,206 @@ function Analytics() {
       borderColor: '#667eea',
       backgroundColor: 'rgba(102, 126, 234, 0.1)',
       tension: 0.4,
-      fill: true
+      fill: true,
+      borderWidth: 2
     }]
   } : null;
 
   const weeklyChartData = weeklyActivity ? {
     labels: weeklyActivity.labels,
     datasets: [{
-      label: 'Applications per Week',
+      label: 'Applications',
       data: weeklyActivity.data,
-      backgroundColor: '#764ba2',
-      borderColor: '#667eea',
-      borderWidth: 2
+      backgroundColor: '#667eea',
+      borderRadius: 6,
+      borderSkipped: false
     }]
   } : null;
 
   return (
-    <div className="analytics-container">
-      <div className="analytics-header">
-        <h1>📊 Analytics Dashboard</h1>
-        <p>Track your job search progress and insights</p>
-      </div>
+    <Container maxWidth="xl" sx={{ py: 4, backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+      {/* Header */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>Analytics Dashboard</Typography>
+        <Typography variant="body2" color="text.secondary">Track your job search progress</Typography>
+      </Box>
 
-      {/* Overview Cards */}
+      {/* Key Stats Cards */}
       {overview && (
-        <div className="stats-grid">
-          <div className="stat-card purple">
-            <div className="stat-icon">📋</div>
-            <div className="stat-content">
-              <div className="stat-value">{overview.total}</div>
-              <div className="stat-label">Total Applications</div>
-            </div>
-          </div>
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#666', fontSize: '0.9rem' }}>Total Applications</Typography>
+                  <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '2rem', color: '#333' }}>{overview.total}</Typography>
+                </Box>
+                <Box sx={{ color: '#667eea', fontSize: '1.5rem' }}>📋</Box>
+              </Box>
+            </Card>
+          </Grid>
 
-          <div className="stat-card blue">
-            <div className="stat-icon">🔄</div>
-            <div className="stat-content">
-              <div className="stat-value">{overview.active}</div>
-              <div className="stat-label">Active Applications</div>
-            </div>
-          </div>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#666', fontSize: '0.9rem' }}>Total Applied</Typography>
+                  <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '2rem', color: '#333' }}>{overview.active || 0}</Typography>
+                </Box>
+                <Box sx={{ color: '#FF9800', fontSize: '1.5rem' }}>🔄</Box>
+              </Box>
+            </Card>
+          </Grid>
 
-          <div className="stat-card green">
-            <div className="stat-icon">🎯</div>
-            <div className="stat-content">
-              <div className="stat-value">{overview.successRate}%</div>
-              <div className="stat-label">Success Rate</div>
-            </div>
-          </div>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#666', fontSize: '0.9rem' }}>Total Interviews</Typography>
+                  <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '2rem', color: '#333' }}>{overview.interviews || 0}</Typography>
+                </Box>
+                <Box sx={{ color: '#9C27B0', fontSize: '1.5rem' }}>🎯</Box>
+              </Box>
+            </Card>
+          </Grid>
 
-          <div className="stat-card orange">
-            <div className="stat-icon">💼</div>
-            <div className="stat-content">
-              <div className="stat-value">{overview.interviewRate}%</div>
-              <div className="stat-label">Interview Rate</div>
-            </div>
-          </div>
-        </div>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#666', fontSize: '0.9rem' }}>Total Offers</Typography>
+                  <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '2rem', color: '#333' }}>{overview.offers || 0}</Typography>
+                </Box>
+                <Box sx={{ color: '#4CAF50', fontSize: '1.5rem' }}>💰</Box>
+              </Box>
+            </Card>
+          </Grid>
+        </Grid>
       )}
 
       {/* Charts Grid */}
-      <div className="charts-grid">
-        {/* Status Distribution */}
-        {statusChartData && (
-          <div className="chart-card">
-            <h3>Application Status Distribution</h3>
-            <div className="chart-wrapper doughnut">
-              <Doughnut 
-                data={statusChartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: { position: 'bottom' }
-                  }
-                }}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Timeline */}
-        <div className="chart-card">
-          <h3>Application Timeline (6 Months)</h3>
-          {timelineChartData && timelineChartData.labels && timelineChartData.labels.length > 0 ? (
-            <div className="chart-wrapper">
-              <Line
-                data={timelineChartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: { display: false }
-                  },
-                  scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
-                  }
-                }}
-              />
-            </div>
-          ) : (
-            <div className="empty-chart">
-              <p>📅 No application data in the last 6 months</p>
-              <p className="text-muted">Start applying to jobs to see your timeline!</p>
-            </div>
-          )}
-        </div>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {/* Application Timeline */}
+        <Grid item xs={12} md={8}>
+          <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, fontSize: '1.1rem' }}>Application Timeline</Typography>
+            {timelineChartData && timelineChartData.labels && timelineChartData.labels.length > 0 ? (
+              <Box sx={{ height: 300 }}>
+                <Line
+                  data={timelineChartData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { display: false }
+                    },
+                    scales: {
+                      y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
+                      x: { grid: { display: false } }
+                    }
+                  }}
+                />
+              </Box>
+            ) : (
+              <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
+                No application data available
+              </Typography>
+            )}
+          </Card>
+        </Grid>
 
         {/* Weekly Activity */}
-        {weeklyChartData && (
-          <div className="chart-card">
-            <h3>Weekly Activity (Last 12 Weeks)</h3>
-            <div className="chart-wrapper">
-              <Bar
-                data={weeklyChartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: { display: false }
-                  },
-                  scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
-                  }
-                }}
-              />
-            </div>
-          </div>
-        )}
+        <Grid item xs={12} md={4}>
+          <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, fontSize: '1.1rem' }}>Weekly Activity</Typography>
+            {weeklyChartData ? (
+              <Box sx={{ height: 300 }}>
+                <Bar
+                  data={weeklyChartData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { display: false }
+                    },
+                    scales: {
+                      y: { beginAtZero: true, grid: { color: '#f0f0f0' }, ticks: { stepSize: 1 } },
+                      x: { grid: { display: false } }
+                    }
+                  }}
+                />
+              </Box>
+            ) : (
+              <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
+                No activity data available
+              </Typography>
+            )}
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Bottom Grid */}
+      <Grid container spacing={3}>
+        {/* Recent Applications */}
+        <Grid item xs={12} md={8}>
+          <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, fontSize: '1.1rem' }}>Recent Applications</Typography>
+            <Box>
+              {recentApplications && recentApplications.length > 0 ? (
+                recentApplications.slice(0, 5).map((app, idx) => (
+                  <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 2, borderBottom: idx < 4 ? '1px solid #f0f0f0' : 'none', '&:hover': { backgroundColor: '#f8f9fa' }, px: 1, borderRadius: 1, cursor: 'pointer', transition: 'background-color 0.2s' }}>
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#333' }}>
+                        {app.company || 'Unknown Company'}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {app.position || 'Position'} • {new Date(app.appliedDate || app.createdAt).toLocaleDateString()}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="caption" sx={{ px: 1.5, py: 0.5, backgroundColor: '#667eea', color: '#fff', borderRadius: 1, fontWeight: 600, fontSize: '0.75rem' }}>
+                        {app.status || 'Applied'}
+                      </Typography>
+                    </Box>
+                  </Box>
+                ))
+              ) : (
+                <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
+                  No recent applications
+                </Typography>
+              )}
+            </Box>
+          </Card>
+        </Grid>
 
         {/* Top Companies */}
-        {topCompanies.length > 0 && (
-          <div className="chart-card">
-            <h3>Top Companies Applied</h3>
-            <div className="list-content">
-              {topCompanies.map((company, idx) => (
-                <div key={idx} className="list-item">
-                  <span className="rank">#{idx + 1}</span>
-                  <span className="company-name">{company.company}</span>
-                  <span className="count-badge">{company.count}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Insights Grid */}
-      <div className="insights-grid">
-        {/* Response Time */}
-        {responseTime && (
-          <div className="insight-card">
-            <h3>⏱️ Response Time</h3>
-            <div className="insight-value">{responseTime.averageResponseTime} days</div>
-            <p className="insight-description">
-              Average time to hear back from companies
-            </p>
-            <div className="insight-stats">
-              <span>✅ {responseTime.responsesReceived} responses</span>
-              <span>⏳ {responseTime.noResponse} pending</span>
-            </div>
-          </div>
-        )}
-
-        {/* Salary Insights */}
-        {salaryInsights && salaryInsights.count > 0 && (
-          <div className="insight-card">
-            <h3>💰 Salary Insights</h3>
-            <div className="insight-value">
-              ${(salaryInsights.average / 1000).toFixed(0)}K
-            </div>
-            <p className="insight-description">Average salary from listings</p>
-            <div className="insight-stats">
-              <span>📊 ${(salaryInsights.min / 1000).toFixed(0)}K - ${(salaryInsights.max / 1000).toFixed(0)}K range</span>
-              <span>📈 {salaryInsights.count} listings analyzed</span>
-            </div>
-          </div>
-        )}
-
-        {/* Trending Skills */}
-        {trendingSkills.length > 0 && (
-          <div className="insight-card wide">
-            <h3>🔥 Trending Skills in Your Applications</h3>
-            <div className="skills-cloud">
-              {trendingSkills.slice(0, 10).map((skill, idx) => (
-                <span
-                  key={idx}
-                  className="skill-tag"
-                  style={{
-                    fontSize: `${Math.max(0.9, 1.5 - idx * 0.1)}rem`,
-                    opacity: Math.max(0.6, 1 - idx * 0.05)
-                  }}
-                >
-                  {skill.skill} ({skill.count})
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+        <Grid item xs={12} md={4}>
+          <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, fontSize: '1.1rem' }}>Top Applied Companies</Typography>
+            <Box>
+              {topCompanies && topCompanies.length > 0 ? (
+                topCompanies.map((company, idx) => (
+                  <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 2, borderBottom: idx < topCompanies.length - 1 ? '1px solid #f0f0f0' : 'none', px: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500, color: '#333' }}>
+                      {idx + 1}. {company.company}
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="caption" sx={{ fontWeight: 700, color: '#667eea' }}>
+                        {company.count}
+                      </Typography>
+                    </Box>
+                  </Box>
+                ))
+              ) : (
+                <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
+                  No company data
+                </Typography>
+              )}
+            </Box>
+          </Card>
+        </Grid>
+      </Grid>
+    </Container>
   );
 }
 
