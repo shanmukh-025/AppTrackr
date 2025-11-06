@@ -2,6 +2,31 @@ import { useContext, useState, useEffect, useCallback } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import Toast from '../components/Toast';
+import {
+  Box,
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  TextField,
+  Avatar,
+  Chip,
+  Paper,
+  CircularProgress,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from '@mui/material';
+import {
+  Edit as EditIcon,
+  Save as SaveIcon,
+  Cancel as CancelIcon,
+  PhotoCamera as PhotoCameraIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
 import './Profile.css';
 
 function Profile() {
@@ -198,357 +223,417 @@ const handleSubmit = async (e) => {
 
   if (loading) {
     return (
-      <div className="page-container">
-        <div className="page-header">
-          <h1>👤 Profile</h1>
-        </div>
-        <p>Loading profile...</p>
-      </div>
+      <Container maxWidth="xl" sx={{ py: 4, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <CircularProgress />
+      </Container>
     );
   }
 
   return (
-    <div className="page-container">
-      <div className="page-header card">
-        <div>
-          <h1>👤 Profile</h1>
-          <p>Manage your personal information and preferences</p>
-        </div>
+    <Container maxWidth="xl" sx={{ py: 4, backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+      {/* Header Card */}
+      <Paper elevation={0} sx={{ p: 4, borderRadius: 3, border: '1px solid #e0e0e0', background: '#fff', mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, fontSize: '1.3rem' }}>My Profile</Typography>
+          <Typography variant="body2" color="text.secondary">Manage your personal and professional information</Typography>
+        </Box>
         {!isEditing ? (
-          <button className="btn btn-primary primary-btn" onClick={() => setIsEditing(true)}>
-            ✏️ Edit Profile
-          </button>
+          <Button 
+            variant="contained" 
+            startIcon={<EditIcon />}
+            onClick={() => setIsEditing(true)}
+            sx={{ borderRadius: 2, textTransform: 'none', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+          >
+            Edit Profile
+          </Button>
         ) : (
-          <div className="header-actions">
-            <button className="btn btn-secondary secondary-btn" onClick={() => {
-              setIsEditing(false);
-              fetchProfile();
-            }}>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button 
+              variant="outlined" 
+              startIcon={<CancelIcon />}
+              onClick={() => {
+                setIsEditing(false);
+                fetchProfile();
+              }}
+              sx={{ borderRadius: 2, textTransform: 'none' }}
+            >
               Cancel
-            </button>
-            <button className="btn btn-primary primary-btn" onClick={handleSubmit} disabled={saving}>
-              {saving ? 'Saving...' : '💾 Save Changes'}
-            </button>
-          </div>
+            </Button>
+            <Button 
+              variant="contained" 
+              startIcon={<SaveIcon />}
+              onClick={handleSubmit}
+              disabled={saving}
+              sx={{ borderRadius: 2, textTransform: 'none', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </Box>
         )}
-      </div>
+      </Paper>
 
       <form onSubmit={handleSubmit}>
-        {/* Personal Information */}
-        <div className="card profile-section">
-          <h2>📋 Personal Information</h2>
-          {/* Profile Picture */}
-          <div className="profile-picture-section">
-            <div className="profile-avatar-large">
-              {formData.profilePicture ? (
-                <img src={formData.profilePicture} alt="Profile" />
-              ) : (
-                <span className="avatar-placeholder">
-                  {(formData.name || formData.email).charAt(0).toUpperCase()}
-                </span>
-              )}
-            </div>
-            {isEditing && (
-              <div className="upload-section">
-                <input
-                  type="file"
-                  id="profilePicture"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  style={{ display: 'none' }}
-                />
-                <label htmlFor="profilePicture" className="upload-btn">
-                  📷 Upload Photo
-                </label>
-                {formData.profilePicture && (
-                  <button
-                    type="button"
-                    className="remove-photo-btn"
-                    onClick={() => setFormData({ ...formData, profilePicture: '' })}
-                  >
-                    ✕ Remove
-                  </button>
+        {/* Personal Information Section */}
+        <Paper elevation={0} sx={{ p: 6, borderRadius: 3, border: '1px solid #e0e0e0', background: '#fff', mb: 6 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 5, fontSize: '1.2rem' }}>Personal Information</Typography>
+          
+          {/* Profile Picture and Basic Info Container */}
+          <Box sx={{ display: 'flex', gap: 8, mb: 5, alignItems: 'flex-start', pb: 5, borderBottom: '1px solid #f0f0f0', flexDirection: { xs: 'column', md: 'row' } }}>
+            {/* Basic Info Section */}
+            <Grid container spacing={6} sx={{ flex: 1 }}>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body2" sx={{ fontWeight: 700, mb: 2, color: '#333', fontSize: '1.0rem' }}>Full Name</Typography>
+                {isEditing ? (
+                  <TextField
+                    fullWidth
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Your full name"
+                    size="small"
+                    variant="outlined"
+                  />
+                ) : (
+                  <Typography variant="body2" sx={{ fontSize: '0.95rem', color: '#555' }}>{formData.name || 'Not set'}</Typography>
                 )}
-                <p className="upload-hint">JPG, PNG or GIF. Max 2MB.</p>
-              </div>
-            )}
-          </div>
-          <div className="profile-grid">
-            <div className="form-group">
-              <label>Full Name</label>
-              {isEditing ? (
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="form-input"
-                  placeholder="Your full name"
-                />
-              ) : (
-                <div className="profile-value">{formData.name || 'Not set'}</div>
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body2" sx={{ fontWeight: 700, mb: 2, color: '#333', fontSize: '1.0rem' }}>Email</Typography>
+                <Typography variant="body2" sx={{ color: '#666', fontSize: '0.95rem' }}>{formData.email}</Typography>
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body2" sx={{ fontWeight: 700, mb: 2, color: '#333', fontSize: '1.0rem' }}>Phone</Typography>
+                {isEditing ? (
+                  <TextField
+                    fullWidth
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="+1 (555) 123-4567"
+                    size="small"
+                    variant="outlined"
+                  />
+                ) : (
+                  <Typography variant="body2" sx={{ fontSize: '0.95rem', color: '#555' }}>{formData.phone || 'Not set'}</Typography>
+                )}
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body2" sx={{ fontWeight: 700, mb: 2, color: '#333', fontSize: '1.0rem' }}>Location</Typography>
+                {isEditing ? (
+                  <TextField
+                    fullWidth
+                    name="location"
+                    value={formData.location}
+                    onChange={handleChange}
+                    placeholder="City, Country"
+                    size="small"
+                    variant="outlined"
+                  />
+                ) : (
+                  <Typography variant="body2" sx={{ fontSize: '0.95rem', color: '#555' }}>{formData.location || 'Not set'}</Typography>
+                )}
+              </Grid>
+            </Grid>
+
+            {/* Profile Picture Section */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center', flexShrink: 0 }}>
+              <Avatar 
+                sx={{ width: 110, height: 110, bgcolor: '#667eea' }}
+                src={formData.profilePicture}
+              >
+                {!formData.profilePicture && (formData.name || formData.email).charAt(0).toUpperCase()}
+              </Avatar>
+              
+              {isEditing && (
+                <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', width: '100%' }}>
+                  <input
+                    type="file"
+                    id="profilePicture"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    style={{ display: 'none' }}
+                  />
+                  <Button
+                    variant="contained"
+                    component="label"
+                    htmlFor="profilePicture"
+                    size="small"
+                    sx={{ borderRadius: 1, textTransform: 'none', background: '#667eea', fontSize: '0.85rem' }}
+                  >
+                    <PhotoCameraIcon sx={{ mr: 0.5, fontSize: 16 }} /> Upload
+                  </Button>
+                  {formData.profilePicture && (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => setFormData({ ...formData, profilePicture: '' })}
+                      sx={{ borderRadius: 1, textTransform: 'none', color: '#d32f2f', borderColor: '#d32f2f', fontSize: '0.85rem' }}
+                    >
+                      <DeleteIcon sx={{ mr: 0.5, fontSize: 16 }} /> Remove
+                    </Button>
+                  )}
+                  <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', fontSize: '0.75rem' }}>Max 2MB</Typography>
+                </Box>
               )}
-            </div>
+            </Box>
+          </Box>
 
-            <div className="form-group">
-              <label>Email</label>
-              <div className="profile-value disabled">{formData.email}</div>
-            </div>
-
-            <div className="form-group">
-              <label>Phone</label>
-              {isEditing ? (
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  className="form-input"
-                  onChange={handleChange}
-                  placeholder="+1 (555) 123-4567"
-                />
-              ) : (
-                <div className="profile-value">{formData.phone || 'Not set'}</div>
-              )}
-            </div>
-
-            <div className="form-group">
-              <label>Location</label>
-              {isEditing ? (
-                <input
-                  type="text"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleChange}
-                  placeholder="City, Country"
-                />
-              ) : (
-                <div className="profile-value">{formData.location || 'Not set'}</div>
-              )}
-            </div>
-          </div>
-
-          <div className="form-group full-width">
-            <label>Bio</label>
+          {/* Bio Section - Full Width */}
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 700, mb: 2, color: '#333', fontSize: '1.0rem' }}>Bio</Typography>
             {isEditing ? (
-              <textarea
+              <TextField
+                fullWidth
                 name="bio"
                 value={formData.bio}
                 onChange={handleChange}
                 placeholder="Tell us about yourself..."
-                rows="3"
+                size="small"
+                variant="outlined"
+                multiline
+                rows={3}
               />
             ) : (
-              <div className="profile-value">{formData.bio || 'Not set'}</div>
+              <Typography variant="body2" sx={{ fontSize: '0.95rem', color: '#555' }}>{formData.bio || 'Not set'}</Typography>
             )}
-          </div>
-        </div>
+          </Box>
+        </Paper>
 
-        {/* Professional Information */}
-        <div className="profile-section">
-          <h2>💼 Professional Information</h2>
-          <div className="profile-grid">
-            <div className="form-group">
-              <label>Current Role</label>
+        {/* Professional Information Section */}
+        <Paper elevation={0} sx={{ p: 6, borderRadius: 3, border: '1px solid #e0e0e0', background: '#fff', mb: 6 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 5, fontSize: '1.2rem' }}>Professional Information</Typography>
+          
+          <Grid container spacing={8}>
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2" sx={{ fontWeight: 700, mb: 2, color: '#333', fontSize: '1.0rem' }}>Current Role</Typography>
               {isEditing ? (
-                <input
-                  type="text"
+                <TextField
+                  fullWidth
                   name="currentRole"
                   value={formData.currentRole}
                   onChange={handleChange}
                   placeholder="e.g., Software Engineer"
+                  size="small"
+                  variant="outlined"
                 />
               ) : (
-                <div className="profile-value">{formData.currentRole || 'Not set'}</div>
+                <Typography variant="body2" sx={{ fontSize: '0.95rem', color: '#555' }}>{formData.currentRole || 'Not set'}</Typography>
               )}
-            </div>
+            </Grid>
 
-            <div className="form-group">
-              <label>Experience Level</label>
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2" sx={{ fontWeight: 700, mb: 2, color: '#333', fontSize: '1.0rem' }}>Experience Level</Typography>
               {isEditing ? (
-                <select
+                <Select
+                  fullWidth
                   name="experience"
                   value={formData.experience}
                   onChange={handleChange}
+                  size="small"
                 >
-                  <option value="">Select...</option>
-                  <option value="entry">Entry Level (0-2 years)</option>
-                  <option value="junior">Junior (2-4 years)</option>
-                  <option value="mid">Mid Level (4-7 years)</option>
-                  <option value="senior">Senior (7-10 years)</option>
-                  <option value="lead">Lead (10+ years)</option>
-                </select>
+                  <MenuItem value="">Select...</MenuItem>
+                  <MenuItem value="entry">Entry Level (0-2 years)</MenuItem>
+                  <MenuItem value="junior">Junior (2-4 years)</MenuItem>
+                  <MenuItem value="mid">Mid Level (4-7 years)</MenuItem>
+                  <MenuItem value="senior">Senior (7-10 years)</MenuItem>
+                  <MenuItem value="lead">Lead (10+ years)</MenuItem>
+                </Select>
               ) : (
-                <div className="profile-value">{formData.experience || 'Not set'}</div>
+                <Typography variant="body2" sx={{ fontSize: '0.95rem', color: '#555' }}>{formData.experience || 'Not set'}</Typography>
               )}
-            </div>
+            </Grid>
 
-            <div className="form-group">
-              <label>Target Role</label>
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2" sx={{ fontWeight: 700, mb: 2, color: '#333', fontSize: '1.0rem' }}>Target Role</Typography>
               {isEditing ? (
-                <input
-                  type="text"
+                <TextField
+                  fullWidth
                   name="targetRole"
                   value={formData.targetRole}
                   onChange={handleChange}
                   placeholder="e.g., Senior Developer"
+                  size="small"
+                  variant="outlined"
                 />
               ) : (
-                <div className="profile-value">{formData.targetRole || 'Not set'}</div>
+                <Typography variant="body2" sx={{ fontSize: '0.95rem', color: '#555' }}>{formData.targetRole || 'Not set'}</Typography>
               )}
-            </div>
+            </Grid>
 
-            <div className="form-group">
-              <label>Target Salary</label>
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2" sx={{ fontWeight: 700, mb: 2, color: '#333', fontSize: '1.0rem' }}>Target Salary</Typography>
               {isEditing ? (
-                <input
-                  type="text"
+                <TextField
+                  fullWidth
                   name="targetSalary"
                   value={formData.targetSalary}
                   onChange={handleChange}
                   placeholder="e.g., $80k - $120k"
+                  size="small"
+                  variant="outlined"
                 />
               ) : (
-                <div className="profile-value">{formData.targetSalary || 'Not set'}</div>
+                <Typography variant="body2" sx={{ fontSize: '0.95rem', color: '#555' }}>{formData.targetSalary || 'Not set'}</Typography>
               )}
-            </div>
-          </div>
+            </Grid>
 
-          <div className="form-group full-width">
-            <label>Skills (comma-separated)</label>
-            {isEditing ? (
-              <input
-                type="text"
-                name="skills"
-                value={formData.skills}
-                onChange={handleChange}
-                placeholder="React, Node.js, Python, SQL, etc."
-              />
-            ) : (
-              <div className="profile-value skills-tags">
-                {formData.skills ? (
-                  formData.skills.split(',').map((skill, index) => (
-                    <span key={index} className="skill-tag">{skill.trim()}</span>
-                  ))
-                ) : (
-                  'Not set'
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Education */}
-        <div className="profile-section">
-          <h2>🎓 Education</h2>
-          <div className="profile-grid">
-            <div className="form-group">
-              <label>Degree</label>
+            <Grid item xs={12} sm={12} md={8}>
+              <Typography variant="body2" sx={{ fontWeight: 700, mb: 2, color: '#333', fontSize: '1.0rem' }}>Skills</Typography>
               {isEditing ? (
-                <input
-                  type="text"
+                <TextField
+                  fullWidth
+                  name="skills"
+                  value={formData.skills}
+                  onChange={handleChange}
+                  placeholder="React, Node.js, Python, SQL, etc."
+                  size="small"
+                  variant="outlined"
+                />
+              ) : (
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                  {formData.skills ? (
+                    formData.skills.split(',').map((skill, index) => (
+                      <Chip key={index} label={skill.trim()} size="small" sx={{ background: '#667eea', color: '#fff', fontSize: '0.85rem' }} />
+                    ))
+                  ) : (
+                    <Typography variant="body2" sx={{ fontSize: '0.95rem', color: '#555' }}>Not set</Typography>
+                  )}
+                </Box>
+              )}
+            </Grid>
+          </Grid>
+        </Paper>
+
+        {/* Education Section */}
+        <Paper elevation={0} sx={{ p: 6, borderRadius: 3, border: '1px solid #e0e0e0', background: '#fff', mb: 6 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 5, fontSize: '1.2rem' }}>Education</Typography>
+          
+          <Grid container spacing={8}>
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2" sx={{ fontWeight: 700, mb: 2, color: '#333', fontSize: '1.0rem' }}>Degree</Typography>
+              {isEditing ? (
+                <TextField
+                  fullWidth
                   name="education"
                   value={formData.education}
                   onChange={handleChange}
                   placeholder="e.g., Bachelor's in CS"
+                  size="small"
+                  variant="outlined"
                 />
               ) : (
-                <div className="profile-value">{formData.education || 'Not set'}</div>
+                <Typography variant="body2" sx={{ fontSize: '0.95rem', color: '#555' }}>{formData.education || 'Not set'}</Typography>
               )}
-            </div>
+            </Grid>
 
-            <div className="form-group">
-              <label>University</label>
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2" sx={{ fontWeight: 700, mb: 2, color: '#333', fontSize: '1.0rem' }}>University</Typography>
               {isEditing ? (
-                <input
-                  type="text"
+                <TextField
+                  fullWidth
                   name="university"
                   value={formData.university}
                   onChange={handleChange}
                   placeholder="University name"
+                  size="small"
+                  variant="outlined"
                 />
               ) : (
-                <div className="profile-value">{formData.university || 'Not set'}</div>
+                <Typography variant="body2" sx={{ fontSize: '0.95rem', color: '#555' }}>{formData.university || 'Not set'}</Typography>
               )}
-            </div>
+            </Grid>
 
-            <div className="form-group">
-              <label>Graduation Year</label>
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2" sx={{ fontWeight: 700, mb: 2, color: '#333', fontSize: '1.0rem' }}>Graduation Year</Typography>
               {isEditing ? (
-                <input
-                  type="text"
+                <TextField
+                  fullWidth
                   name="graduationYear"
                   value={formData.graduationYear}
                   onChange={handleChange}
                   placeholder="2020"
+                  size="small"
+                  variant="outlined"
                 />
               ) : (
-                <div className="profile-value">{formData.graduationYear || 'Not set'}</div>
+                <Typography variant="body2" sx={{ fontSize: '0.95rem', color: '#555' }}>{formData.graduationYear || 'Not set'}</Typography>
               )}
-            </div>
-          </div>
-        </div>
+            </Grid>
+          </Grid>
+        </Paper>
 
-        {/* Job Preferences */}
-        <div className="profile-section">
-          <h2>🎯 Job Search Preferences</h2>
-          <div className="profile-grid">
-            <div className="form-group">
-              <label>Job Type</label>
+        {/* Job Preferences Section */}
+        <Paper elevation={0} sx={{ p: 6, borderRadius: 3, border: '1px solid #e0e0e0', background: '#fff', mb: 3 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 5, fontSize: '1.2rem' }}>Job Search Preferences</Typography>
+          
+          <Grid container spacing={8}>
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2" sx={{ fontWeight: 700, mb: 2, color: '#333', fontSize: '1.0rem' }}>Job Type</Typography>
               {isEditing ? (
-                <select
+                <Select
+                  fullWidth
                   name="jobType"
                   value={formData.jobType}
                   onChange={handleChange}
+                  size="small"
                 >
-                  <option value="">Select...</option>
-                  <option value="full-time">Full-time</option>
-                  <option value="part-time">Part-time</option>
-                  <option value="contract">Contract</option>
-                  <option value="freelance">Freelance</option>
-                </select>
+                  <MenuItem value="">Select...</MenuItem>
+                  <MenuItem value="full-time">Full-time</MenuItem>
+                  <MenuItem value="part-time">Part-time</MenuItem>
+                  <MenuItem value="contract">Contract</MenuItem>
+                  <MenuItem value="freelance">Freelance</MenuItem>
+                </Select>
               ) : (
-                <div className="profile-value">{formData.jobType || 'Not set'}</div>
+                <Typography variant="body2" sx={{ fontSize: '0.95rem', color: '#555' }}>{formData.jobType || 'Not set'}</Typography>
               )}
-            </div>
+            </Grid>
 
-            <div className="form-group">
-              <label>Work Mode</label>
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2" sx={{ fontWeight: 700, mb: 2, color: '#333', fontSize: '1.0rem' }}>Work Mode</Typography>
               {isEditing ? (
-                <select
+                <Select
+                  fullWidth
                   name="workMode"
                   value={formData.workMode}
                   onChange={handleChange}
+                  size="small"
                 >
-                  <option value="">Select...</option>
-                  <option value="remote">Remote</option>
-                  <option value="hybrid">Hybrid</option>
-                  <option value="onsite">On-site</option>
-                </select>
+                  <MenuItem value="">Select...</MenuItem>
+                  <MenuItem value="remote">Remote</MenuItem>
+                  <MenuItem value="hybrid">Hybrid</MenuItem>
+                  <MenuItem value="onsite">On-site</MenuItem>
+                </Select>
               ) : (
-                <div className="profile-value">{formData.workMode || 'Not set'}</div>
+                <Typography variant="body2" sx={{ fontSize: '0.95rem', color: '#555' }}>{formData.workMode || 'Not set'}</Typography>
               )}
-            </div>
+            </Grid>
 
-            <div className="form-group">
-              <label>Availability</label>
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2" sx={{ fontWeight: 700, mb: 2, color: '#333', fontSize: '1.0rem' }}>Availability</Typography>
               {isEditing ? (
-                <select
+                <Select
+                  fullWidth
                   name="availability"
                   value={formData.availability}
                   onChange={handleChange}
+                  size="small"
                 >
-                  <option value="">Select...</option>
-                  <option value="immediate">Immediate</option>
-                  <option value="2weeks">2 Weeks Notice</option>
-                  <option value="1month">1 Month</option>
-                  <option value="flexible">Flexible</option>
-                </select>
+                  <MenuItem value="">Select...</MenuItem>
+                  <MenuItem value="immediate">Immediate</MenuItem>
+                  <MenuItem value="2weeks">2 Weeks Notice</MenuItem>
+                  <MenuItem value="1month">1 Month</MenuItem>
+                  <MenuItem value="flexible">Flexible</MenuItem>
+                </Select>
               ) : (
-                <div className="profile-value">{formData.availability || 'Not set'}</div>
+                <Typography variant="body2" sx={{ fontSize: '0.95rem', color: '#555' }}>{formData.availability || 'Not set'}</Typography>
               )}
-            </div>
-          </div>
-        </div>
+            </Grid>
+          </Grid>
+        </Paper>
       </form>
 
       {toast && (
@@ -558,7 +643,7 @@ const handleSubmit = async (e) => {
           onClose={() => setToast(null)}
         />
       )}
-    </div>
+    </Container>
   );
 }
 
