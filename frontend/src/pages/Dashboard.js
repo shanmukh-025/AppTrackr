@@ -282,7 +282,7 @@ function Dashboard() {
       {/* Main Content - Two Columns */}
       <Grid container spacing={3}>
         {/* Left Column - Job Suggestions (8 columns) */}
-        <Grid item xs={12} lg={8}>
+        <Grid item xs={12} md={8}>
           <Paper 
             elevation={0}
             sx={{ 
@@ -298,7 +298,7 @@ function Dashboard() {
         </Grid>
 
         {/* Right Column - Recent Applications (4 columns) */}
-        <Grid item xs={12} lg={4}>
+        <Grid item xs={12} md={4}>
           <Paper 
             elevation={0}
             sx={{ 
