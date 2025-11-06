@@ -89,6 +89,13 @@ function Dashboard() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4, backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+      
+      {/* Debug Info - Remove after testing */}
+      {!loading && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          Debug: {applications.length} applications loaded. API URL: {API_URL}
+        </Alert>
+      )}
 
       {/* Quick Stats - Top Row (4 Cards) */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -289,8 +296,8 @@ function Dashboard() {
 
       {/* Main Content - Two Columns */}
       <Grid container spacing={3}>
-        {/* Left Column - Job Suggestions (7 columns) */}
-        <Grid item xs={12} lg={7}>
+        {/* Left Column - Job Suggestions */}
+        <Grid item xs={12} md={8}>
           <Paper 
             elevation={0}
             sx={{ 
@@ -298,15 +305,17 @@ function Dashboard() {
               borderRadius: 2,
               border: '1px solid #e0e0e0',
               background: '#fff',
-              minHeight: 500
+              minHeight: 500,
+              maxHeight: { xs: 'none', md: '600px' },
+              overflow: 'auto'
             }}
           >
             <JobSuggestions />
           </Paper>
         </Grid>
 
-        {/* Right Column - Recent Applications (5 columns) */}
-        <Grid item xs={12} lg={5}>
+        {/* Right Column - Recent Applications */}
+        <Grid item xs={12} md={4}>
           <Paper 
             elevation={0}
             sx={{ 
@@ -314,7 +323,11 @@ function Dashboard() {
               borderRadius: 2,
               border: '1px solid #e0e0e0',
               background: '#fff',
-              minHeight: 500
+              minHeight: 500,
+              maxHeight: { xs: 'none', md: '600px' },
+              overflow: 'auto',
+              position: { xs: 'relative', md: 'sticky' },
+              top: { xs: 0, md: 20 }
             }}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
