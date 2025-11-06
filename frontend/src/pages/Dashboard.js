@@ -90,6 +90,9 @@ function Dashboard() {
             elevation={0}
             sx={{ 
               height: '100%',
+              minHeight: 160,
+              display: 'flex',
+              flexDirection: 'column',
               background: '#fff',
               border: '1px solid #e0e0e0',
               borderRadius: 2,
@@ -100,7 +103,7 @@ function Dashboard() {
               }
             }}
           >
-            <CardContent sx={{ p: 3 }}>
+            <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <Avatar 
                   sx={{ 
@@ -113,8 +116,8 @@ function Dashboard() {
                   <AssessmentIcon sx={{ color: '#ff9800', fontSize: 32 }} />
                 </Avatar>
                 <Box sx={{ flex: 1, textAlign: 'right' }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                    Total Applications
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, whiteSpace: 'nowrap' }}>
+                    Total Applications Now
                   </Typography>
                   <Typography variant="h4" sx={{ fontWeight: 700, color: '#424242' }}>
                     {applications.length}
@@ -135,6 +138,9 @@ function Dashboard() {
             elevation={0}
             sx={{ 
               height: '100%',
+              minHeight: 160,
+              display: 'flex',
+              flexDirection: 'column',
               background: '#fff',
               border: '1px solid #e0e0e0',
               borderRadius: 2,
@@ -145,7 +151,7 @@ function Dashboard() {
               }
             }}
           >
-            <CardContent sx={{ p: 3 }}>
+            <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <Avatar 
                   sx={{ 
@@ -158,8 +164,8 @@ function Dashboard() {
                   <SendIcon sx={{ color: '#66bb6a', fontSize: 32 }} />
                 </Avatar>
                 <Box sx={{ flex: 1, textAlign: 'right' }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                    Applied
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, whiteSpace: 'nowrap' }}>
+                    Total Applied Till Now
                   </Typography>
                   <Typography variant="h4" sx={{ fontWeight: 700, color: '#424242' }}>
                     {applications.filter(app => app.status === 'applied').length}
@@ -180,6 +186,9 @@ function Dashboard() {
             elevation={0}
             sx={{ 
               height: '100%',
+              minHeight: 160,
+              display: 'flex',
+              flexDirection: 'column',
               background: '#fff',
               border: '1px solid #e0e0e0',
               borderRadius: 2,
@@ -190,7 +199,7 @@ function Dashboard() {
               }
             }}
           >
-            <CardContent sx={{ p: 3 }}>
+            <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <Avatar 
                   sx={{ 
@@ -203,8 +212,8 @@ function Dashboard() {
                   <ComputerIcon sx={{ color: '#ff9800', fontSize: 32 }} />
                 </Avatar>
                 <Box sx={{ flex: 1, textAlign: 'right' }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                    Interviews
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, whiteSpace: 'nowrap' }}>
+                    Total Interviews  Held
                   </Typography>
                   <Typography variant="h4" sx={{ fontWeight: 700, color: '#424242' }}>
                     {applications.filter(app => 
@@ -227,6 +236,9 @@ function Dashboard() {
             elevation={0}
             sx={{ 
               height: '100%',
+              minHeight: 160,
+              display: 'flex',
+              flexDirection: 'column',
               background: '#fff',
               border: '1px solid #e0e0e0',
               borderRadius: 2,
@@ -237,7 +249,7 @@ function Dashboard() {
               }
             }}
           >
-            <CardContent sx={{ p: 3 }}>
+            <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <Avatar 
                   sx={{ 
@@ -250,8 +262,8 @@ function Dashboard() {
                   <CheckCircleIcon sx={{ color: '#42a5f5', fontSize: 32 }} />
                 </Avatar>
                 <Box sx={{ flex: 1, textAlign: 'right' }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                    Offers
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, whiteSpace: 'nowrap' }}>
+                    Total Offers  Received 
                   </Typography>
                   <Typography variant="h4" sx={{ fontWeight: 700, color: '#424242' }}>
                     {applications.filter(app => app.status === 'offer').length}

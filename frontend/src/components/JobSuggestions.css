@@ -256,6 +256,11 @@
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.job-actions > *:last-child {
+  flex: 0 0 auto;
 }
 
 .relevance-score {
@@ -281,6 +286,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-width: 200px;
+  width: 100%;
+  max-width: 280px;
 }
 
 .apply-btn:hover {
@@ -427,8 +435,9 @@
   background: #f1f8e9;
   border: 1px solid #c5e1a5;
   transition: all 0.3s ease;
-  width: fit-content;
   cursor: pointer;
+  min-width: 160px;
+  justify-content: center;
 }
 
 .career-link-btn:hover {

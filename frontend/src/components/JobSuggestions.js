@@ -249,9 +249,9 @@ const JobSuggestions = () => {
                           console.log('🟢 GREEN BUTTON CLICKED!');
                           console.log('  Opening career page:', job.companyCareerPage);
                         }}
-                        title="Apply directly at company website!"
+                        title={`Apply directly at ${job.company}`}
                       >
-                        ✅ Apply at {job.company} →
+                        ✅ Apply Now →
                       </a>
                     ) : (
                       <button 
@@ -272,8 +272,9 @@ const JobSuggestions = () => {
                     <button 
                       className="career-link-btn secondary"
                       onClick={() => handleJobClick(job)}
+                      title={`View on ${job.source.charAt(0).toUpperCase() + job.source.slice(1)}`}
                     >
-                      📋 View on {job.source.charAt(0).toUpperCase() + job.source.slice(1)} →
+                      📋 View Listing →
                     </button>
                   </div>
                 )}
