@@ -37,18 +37,26 @@ function Dashboard() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [error, setError] = useState(null);
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   const fetchApplications = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
+      console.log('📡 Fetching applications from:', `${API_URL}/api/applications`);
+      
       const response = await axios.get(`${API_URL}/api/applications`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
+      console.log('✅ Applications fetched:', response.data.applications.length);
       setApplications(response.data.applications);
     } catch (error) {
-      console.error('Failed to fetch applications:', error);
+      console.error('❌ Failed to fetch applications:', error);
+      console.error('Error details:', error.response?.data || error.message);
+      setError(error.response?.data?.message || 'Failed to load applications');
     } finally {
       setLoading(false);
     }
@@ -334,6 +342,25 @@ function Dashboard() {
             {loading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
                 <CircularProgress />
+              </Box>
+            ) : error ? (
+              <Box sx={{ 
+                textAlign: 'center', 
+                py: 4,
+                color: 'error.main' 
+              }}>
+                <ErrorIcon sx={{ fontSize: 48, mb: 2, color: '#f44336' }} />
+                <Typography variant="body1" color="error" gutterBottom>
+                  {error}
+                </Typography>
+                <Button 
+                  variant="outlined"
+                  color="error"
+                  onClick={fetchApplications}
+                  sx={{ mt: 2, borderRadius: 2, textTransform: 'none' }}
+                >
+                  Retry
+                </Button>
               </Box>
             ) : recentApplications.length === 0 ? (
               <Box sx={{ 
