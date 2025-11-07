@@ -66,48 +66,9 @@ const DSASheets = () => {
     navigate(`/dsa-sheets/${sheetKey}`);
   };
 
-  // Calculate total progress
-  const totalProblems = Object.values(dsaSheets).reduce((sum, sheet) => sum + sheet.totalProblems, 0);
-  const totalSolved = Object.values(overallProgress).reduce((sum, count) => sum + count, 0);
-  const overallPercentage = totalProblems > 0 ? Math.round((totalSolved / totalProblems) * 100) : 0;
-
   return (
     <div className="dsa-tracker-container">
-      <div className="dsa-tracker-header">
-        <h1 className="tracker-title">
-          <span className="title-icon">🎮</span>
-          DSA Problem Tracker
-        </h1>
-        <p className="tracker-subtitle">
-          Track your progress across popular DSA sheets
-        </p>
-      </div>
-
-      {/* Overall Progress */}
-      <div className="overall-progress-card">
-        <h3>Overall Progress</h3>
-        <div className="progress-stats">
-          <div className="stat-item">
-            <span className="stat-label">Total Solved</span>
-            <span className="stat-value">{totalSolved}/{totalProblems}</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">Completion</span>
-            <span className="stat-value">{overallPercentage}%</span>
-          </div>
-        </div>
-        <div className="progress-bar-container">
-          <div 
-            className="progress-bar-fill"
-            style={{ width: `${overallPercentage}%` }}
-          ></div>
-        </div>
-      </div>
-
-      {/* Sheet Cards */}
-      <div className="sheets-section">
-        <h2 className="section-title">📚 Select a DSA Sheet</h2>
-        <div className="sheets-grid">
+      <div className="sheets-grid">
           {Object.entries(dsaSheets).map(([key, sheet]) => {
             const solved = overallProgress[key] || 0;
             const percentage = Math.round((solved / sheet.totalProblems) * 100);
@@ -115,84 +76,50 @@ const DSASheets = () => {
             return (
               <div 
                 key={key} 
-                className="sheet-card"
+                className="sheet-card-new"
                 onClick={() => handleSheetClick(key)}
-                style={{ borderColor: sheet.color }}
               >
-                <div className="sheet-card-header">
-                  <span className="sheet-icon">{sheet.icon}</span>
-                  <h3 className="sheet-name">{sheet.name}</h3>
-                </div>
-                <p className="sheet-description">{sheet.description}</p>
-                
-                <div className="sheet-stats">
-                  <div className="stat">
-                    <span className="stat-label">Problems</span>
-                    <span className="stat-value">{sheet.totalProblems}</span>
+                {/* Progress Bar at Top */}
+                <div className="sheet-card-progress-top">
+                  <div className="progress-bar-bg">
+                    <div 
+                      className="progress-bar-fill"
+                      style={{ 
+                        width: `${percentage}%`,
+                        backgroundColor: sheet.color 
+                      }}
+                    ></div>
                   </div>
-                  <div className="stat">
-                    <span className="stat-label">Solved</span>
-                    <span className="stat-value">{solved}</span>
-                  </div>
-                  <div className="stat">
-                    <span className="stat-label">Progress</span>
-                    <span className="stat-value">{percentage}%</span>
-                  </div>
+                  <span className="progress-percentage">{percentage}%</span>
                 </div>
 
-                <div className="sheet-progress">
-                  <div 
-                    className="sheet-progress-bar"
-                    style={{ 
-                      width: `${percentage}%`,
-                      backgroundColor: sheet.color 
-                    }}
-                  ></div>
-                </div>
+                {/* Card Content */}
+                <div className="sheet-card-content">
+                  {/* Title and Description */}
+                  <div className="sheet-header-section">
+                    <h3 className="sheet-name-new">{sheet.name}</h3>
+                    <p className="sheet-description-new">{sheet.description}</p>
+                  </div>
 
-                <button 
-                  className="view-sheet-btn"
-                  style={{ backgroundColor: sheet.color }}
-                >
-                  View Problems →
-                </button>
+                  {/* Followers and Stats */}
+                  <div className="sheet-meta-info">
+                    <span className="followers-badge">👥 1266 Followers</span>
+                  </div>
+
+                  {/* Questions and Solved Info */}
+                  <div className="sheet-stats-row">
+                    <div className="stat-item-new">
+                      <span className="stat-label-new">❓ {sheet.totalProblems} questions</span>
+                    </div>
+                    <div className="stat-item-new">
+                      <span className="stat-label-new">✅ {solved} solved</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             );
           })}
         </div>
-      </div>
-
-      {/* Quick Stats */}
-      <div className="quick-stats">
-        <div className="stat-box">
-          <div className="stat-icon">📊</div>
-          <div className="stat-content">
-            <h4>{totalProblems}</h4>
-            <p>Total Problems</p>
-          </div>
-        </div>
-        <div className="stat-box">
-          <div className="stat-icon">✅</div>
-          <div className="stat-content">
-            <h4>{totalSolved}</h4>
-            <p>Problems Solved</p>
-          </div>
-        </div>
-        <div className="stat-box">
-          <div className="stat-icon">🎯</div>
-          <div className="stat-content">
-            <h4>{totalProblems - totalSolved}</h4>
-            <p>Remaining</p>
-          </div>
-        </div>
-        <div className="stat-box">
-          <div className="stat-icon">🔥</div>
-          <div className="stat-content">
-            <h4>{overallPercentage}%</h4>
-            <p>Completion Rate</p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

@@ -141,12 +141,6 @@
   color: #333;
 }
 
-.sheets-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-}
-
 .sheet-card {
   padding: 25px;
   border: 3px solid #e0e0e0;
@@ -789,9 +783,21 @@
 
 .sheets-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 25px;
   margin-bottom: 40px;
+}
+
+@media (max-width: 1200px) {
+  .sheets-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .sheets-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .sheet-card {
@@ -1265,4 +1271,483 @@
   .quick-stats {
     grid-template-columns: 1fr 1fr;
   }
+}
+
+/* ===================================
+   NEW SHEET CARD DESIGN (CODIO STYLE)
+   =================================== */
+
+.sheet-card-new {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.sheet-card-new:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+  border-color: #667eea;
+}
+
+.sheet-card-progress-top {
+  position: relative;
+  height: 60px;
+  padding: 12px 15px;
+  background: #f8f9fa;
+  border-bottom: 2px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.progress-bar-bg {
+  flex: 1;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+.progress-percentage {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #333;
+  min-width: 40px;
+  text-align: right;
+}
+
+.sheet-card-content {
+  padding: 20px;
+}
+
+.sheet-header-section {
+  margin-bottom: 15px;
+}
+
+.sheet-name-new {
+  margin: 0 0 8px 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.4;
+}
+
+.sheet-description-new {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+.sheet-meta-info {
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.followers-badge {
+  display: inline-block;
+  font-size: 0.85rem;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.sheet-stats-row {
+  display: flex;
+  gap: 15px;
+}
+
+.stat-item-new {
+  flex: 1;
+}
+
+.stat-label-new {
+  display: block;
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+/* ===================================
+   DSA SHEET DETAIL - NEW LAYOUT
+   =================================== */
+
+.dsa-sheet-detail-wrapper {
+  background: #f5f7fa;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.sheet-detail-container {
+  display: flex;
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  margin-top: 20px;
+}
+
+/* Sidebar */
+.sheet-sidebar {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.progress-card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+.progress-card h3 {
+  margin: 0 0 20px 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.progress-circle {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 20px;
+}
+
+.progress-ring {
+  transform: rotate(-90deg);
+}
+
+.circle-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.percentage {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.solved-count {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 5px;
+}
+
+/* Topic Stats Sidebar */
+.topic-stats-sidebar {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.topic-stats-sidebar h4 {
+  margin: 0 0 15px 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.topic-stat-item {
+  margin-bottom: 15px;
+}
+
+.stat-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+.topic-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.stat-count {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.stat-progress {
+  height: 6px;
+  background: #f0f0f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.stat-progress-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+/* Main Content */
+.sheet-main-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.filters-section {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+  background: white;
+  padding: 15px 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.search-box {
+  flex: 1;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 10px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 10px rgba(102, 126, 234, 0.1);
+}
+
+.topic-filter {
+  min-width: 200px;
+}
+
+.topic-filter select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.topic-filter select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+/* Problems Section */
+.problems-section {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+/* Topic Group */
+.topic-group {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.topic-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.topic-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #333;
+}
+
+.topic-count {
+  background: #667eea;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Difficulty Group */
+.difficulty-group {
+  margin-bottom: 20px;
+}
+
+.difficulty-group:last-child {
+  margin-bottom: 0;
+}
+
+.difficulty-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  margin-left: 10px;
+}
+
+.difficulty-label {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  min-width: 70px;
+  text-align: center;
+}
+
+.difficulty-label.easy {
+  background: #d4edda;
+  color: #155724;
+}
+
+.difficulty-label.medium {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.difficulty-label.hard {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.difficulty-count {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Problems List */
+.problems-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-left: 20px;
+}
+
+.problem-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.problem-item:hover {
+  background: #f0f2f5;
+  transform: translateX(5px);
+}
+
+.problem-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #667eea;
+  flex-shrink: 0;
+}
+
+.problem-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.problem-title {
+  flex: 1;
+  cursor: pointer;
+  color: #333;
+  font-weight: 500;
+  transition: all 0.2s;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.problem-title:hover {
+  color: #667eea;
+  text-decoration: underline;
+}
+
+.problem-title.solved {
+  opacity: 0.6;
+  text-decoration: line-through;
+}
+
+.problem-platforms {
+  display: flex;
+  gap: 5px;
+}
+
+.platform-tag {
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* ===================================
+   COLLAPSIBLE HEADERS
+   =================================== */
+
+.topic-header.collapsible,
+.difficulty-header.collapsible {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 10px;
+  border-radius: 6px;
+}
+
+.topic-header.collapsible:hover,
+.difficulty-header.collapsible:hover {
+  background: rgba(102, 126, 234, 0.05);
+  border-left: 3px solid #667eea;
+  padding-left: 7px;
+}
+
+.toggle-icon {
+  display: inline-block;
+  font-size: 0.85rem;
+  color: #667eea;
+  font-weight: bold;
+  min-width: 15px;
+  transition: transform 0.2s ease;
+}
+
+/* Topics Container */
+.difficulty-levels {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-left: 15px;
+  border-left: 2px solid #e0e0e0;
+  padding-left: 10px;
 }

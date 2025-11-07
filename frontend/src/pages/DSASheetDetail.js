@@ -1,28 +1,90 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import '../styles/DSATrackerNew.css';
 
 const DSASheetDetail = () => {
   const { sheetId } = useParams();
   const navigate = useNavigate();
-  const [selectedTopic, setSelectedTopic] = useState('all');
+  const [expandedTopics, setExpandedTopics] = useState({}); // Track which topics are expanded
+  const [expandedDifficulties, setExpandedDifficulties] = useState({}); // Track which difficulty levels are expanded
   const [solvedProblems, setSolvedProblems] = useState(new Set());
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Load solved problems from localStorage
+  // Load solved problems from backend
   useEffect(() => {
-    const saved = localStorage.getItem(`dsa-solved-${sheetId}`);
-    if (saved) {
-      setSolvedProblems(new Set(JSON.parse(saved)));
-    } else {
-      setSolvedProblems(new Set());
-    }
+    const fetchProgress = async () => {
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const token = localStorage.getItem('token');
+
+      try {
+        const response = await axios.get(
+          `${API_URL}/api/dsa/progress/${sheetId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (response.data.success && response.data.solvedProblems) {
+          setSolvedProblems(new Set(response.data.solvedProblems));
+        }
+      } catch (error) {
+        console.error('Error fetching progress:', error);
+        // Fall back to localStorage if API fails
+        const saved = localStorage.getItem(`dsa-solved-${sheetId}`);
+        if (saved) {
+          setSolvedProblems(new Set(JSON.parse(saved)));
+        }
+      }
+    };
+
+    fetchProgress();
   }, [sheetId]);
 
   // Save to localStorage whenever solvedProblems changes
   useEffect(() => {
     localStorage.setItem(`dsa-solved-${sheetId}`, JSON.stringify([...solvedProblems]));
   }, [solvedProblems, sheetId]);
+
+  // Toggle topic expansion
+  const toggleTopic = (topic) => {
+    setExpandedTopics(prev => ({
+      ...prev,
+      [topic]: !prev[topic]
+    }));
+  };
+
+  // Toggle difficulty expansion
+  const toggleDifficulty = (key) => {
+    setExpandedDifficulties(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
+  // Get all unique topics
+  const getTopics = () => {
+    const problems = allSheetProblems[sheetId] || [];
+    return [...new Set(problems.map(p => p.topic))].sort();
+  };
+
+  // Get problems for a specific topic
+  const getProblemsByTopic = (topic) => {
+    const problems = allSheetProblems[sheetId] || [];
+    return problems.filter(p => p.topic === topic);
+  };
+
+  // Get problems for a specific topic and difficulty
+  const getProblemsByTopicAndDifficulty = (topic, difficulty) => {
+    return getProblemsByTopic(topic).filter(p => p.difficulty === difficulty);
+  };
+
+  // Get difficulties for a topic
+  const getDifficultiesForTopic = (topic) => {
+    const difficulties = [...new Set(getProblemsByTopic(topic).map(p => p.difficulty))];
+    return difficulties.sort((a, b) => {
+      const order = { 'Easy': 1, 'Medium': 2, 'Hard': 3 };
+      return order[a] - order[b];
+    });
+  };
 
   // All problem data (same as before)
   const allSheetProblems = {
@@ -556,40 +618,56 @@ const DSASheetDetail = () => {
   };
 
   const currentSheet = sheetMetadata[sheetId] || sheetMetadata.striver;
-  const problems = allSheetProblems[sheetId] || [];
-
-  // Filter problems
-  const filteredProblems = problems.filter(problem => {
-    const matchesTopic = selectedTopic === 'all' || problem.topic === selectedTopic;
-    const matchesSearch = problem.title.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesTopic && matchesSearch;
-  });
-
-  // Get unique topics
-  const topics = ['all', ...new Set(problems.map(p => p.topic))];
-
+  const allProblems = allSheetProblems[sheetId] || [];
+  
   // Calculate progress
-  const totalProblems = problems.length;
+  const totalProblems = allProblems.length;
   const solvedCount = solvedProblems.size;
   const progressPercentage = totalProblems > 0 ? Math.round((solvedCount / totalProblems) * 100) : 0;
 
   // Topic-wise stats
   const topicStats = {};
-  topics.filter(t => t !== 'all').forEach(topic => {
-    const topicProblems = problems.filter(p => p.topic === topic);
+  getTopics().forEach(topic => {
+    const topicProblems = getProblemsByTopic(topic);
     const topicSolved = topicProblems.filter(p => solvedProblems.has(p.id)).length;
     topicStats[topic] = { total: topicProblems.length, solved: topicSolved };
   });
 
   // Toggle problem solved status
-  const toggleSolved = (problemId) => {
-    const newSolved = new Set(solvedProblems);
-    if (newSolved.has(problemId)) {
-      newSolved.delete(problemId);
-    } else {
-      newSolved.add(problemId);
+  const toggleSolved = async (problemId) => {
+    const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    const token = localStorage.getItem('token');
+
+    try {
+      const newSolved = new Set(solvedProblems);
+      const isSolved = newSolved.has(problemId);
+
+      // Update local state immediately for UI feedback
+      if (isSolved) {
+        newSolved.delete(problemId);
+      } else {
+        newSolved.add(problemId);
+      }
+      setSolvedProblems(newSolved);
+
+      // Call backend API
+      const endpoint = isSolved ? '/api/dsa/progress/mark-unsolved' : '/api/dsa/progress/mark-solved';
+      await axios.post(
+        `${API_URL}${endpoint}`,
+        { sheetId, problemId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } catch (error) {
+      console.error('Error saving progress:', error);
+      // Revert local state on error
+      const reverted = new Set(solvedProblems);
+      if (solvedProblems.has(problemId)) {
+        reverted.delete(problemId);
+      } else {
+        reverted.add(problemId);
+      }
+      setSolvedProblems(reverted);
     }
-    setSolvedProblems(newSolved);
   };
 
   // Open problem link
@@ -598,7 +676,7 @@ const DSASheetDetail = () => {
   };
 
   return (
-    <div className="dsa-sheet-detail-container">
+    <div className="dsa-sheet-detail-wrapper">
       {/* Header */}
       <div className="sheet-detail-header">
         <button className="back-button" onClick={() => navigate('/dsa-sheets')}>
@@ -610,99 +688,163 @@ const DSASheetDetail = () => {
         </div>
       </div>
 
-      {/* Progress Section */}
-      <div className="progress-section">
-        <div className="progress-card">
-          <h3>Your Progress</h3>
-          <div className="progress-circle">
-            <div className="circle-content">
-              <span className="percentage">{progressPercentage}%</span>
-              <span className="solved-count">{solvedCount}/{totalProblems}</span>
-            </div>
-          </div>
-          <div className="progress-bar-large">
-            <div 
-              className="progress-fill"
-              style={{ 
-                width: `${progressPercentage}%`,
-                backgroundColor: currentSheet.color 
-              }}
-            ></div>
-          </div>
-        </div>
-
-        {/* Topic Stats */}
-        <div className="topic-stats-grid">
-          {Object.entries(topicStats).slice(0, 6).map(([topic, stats]) => (
-            <div key={topic} className="topic-stat-card">
-              <h4>{topic}</h4>
-              <p>{stats.solved}/{stats.total}</p>
-              <div className="mini-progress">
-                <div 
-                  className="mini-progress-fill"
-                  style={{ 
-                    width: `${(stats.solved / stats.total) * 100}%`,
-                    backgroundColor: currentSheet.color 
-                  }}
-                ></div>
+      <div className="sheet-detail-container">
+        {/* Left Sidebar - Progress */}
+        <div className="sheet-sidebar">
+          <div className="progress-card">
+            <h3>Progress</h3>
+            <div className="progress-circle">
+              <div className="circle-content">
+                <span className="percentage">{progressPercentage}%</span>
+                <span className="solved-count">{solvedCount}/{totalProblems}</span>
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="filters-section">
-        <div className="search-box">
-          <input
-            type="text"
-            placeholder="Search problems..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <div className="topic-filter">
-          <label>Topic:</label>
-          <select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)}>
-            {topics.map(topic => (
-              <option key={topic} value={topic}>
-                {topic === 'all' ? 'All Topics' : topic}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Problems List */}
-      <div className="problems-section">
-        <h2>Problems ({filteredProblems.length})</h2>
-        <div className="problems-list">
-          {filteredProblems.map(problem => (
-            <div key={problem.id} className="problem-card">
-              <div className="problem-checkbox">
-                <input
-                  type="checkbox"
-                  checked={solvedProblems.has(problem.id)}
-                  onChange={() => toggleSolved(problem.id)}
+              <svg className="progress-ring" width="120" height="120">
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="54"
+                  fill="none"
+                  stroke="#e0e0e0"
+                  strokeWidth="4"
                 />
-              </div>
-              <div className="problem-content">
-                <h3 
-                  className="problem-title"
-                  onClick={() => openProblem(problem.link)}
-                >
-                  {problem.title}
-                </h3>
-                <div className="problem-meta">
-                  <span className={`difficulty-badge ${problem.difficulty.toLowerCase()}`}>
-                    {problem.difficulty}
-                  </span>
-                  <span className="topic-badge">{problem.topic}</span>
-                  <span className="platform-badge">{problem.platform}</span>
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="54"
+                  fill="none"
+                  stroke={currentSheet.color}
+                  strokeWidth="4"
+                  strokeDasharray={`${(progressPercentage / 100) * 2 * Math.PI * 54} ${2 * Math.PI * 54}`}
+                  strokeLinecap="round"
+                  style={{ transform: 'rotate(-90deg)', transformOrigin: '60px 60px' }}
+                />
+              </svg>
+            </div>
+          </div>
+
+          {/* Topic Stats */}
+          <div className="topic-stats-sidebar">
+            <h4>By Topic</h4>
+            {Object.entries(topicStats).map(([topic, stats]) => (
+              <div key={topic} className="topic-stat-item">
+                <div className="stat-label">
+                  <span className="topic-name">{topic}</span>
+                  <span className="stat-count">{stats.solved}/{stats.total}</span>
+                </div>
+                <div className="stat-progress">
+                  <div 
+                    className="stat-progress-fill"
+                    style={{ 
+                      width: `${(stats.solved / stats.total) * 100}%`,
+                      backgroundColor: currentSheet.color 
+                    }}
+                  ></div>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="sheet-main-content">
+          {/* Search Box */}
+          <div className="filters-section">
+            <div className="search-box">
+              <input
+                type="text"
+                placeholder="🔍 Search problems..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
-          ))}
+          </div>
+
+          {/* Problems Grouped by Topic - Collapsible */}
+          <div className="problems-section">
+            {getTopics().map(topic => {
+              const topicKey = `${sheetId}-${topic}`;
+              const isTopicExpanded = expandedTopics[topicKey];
+              const topicProblems = getProblemsByTopic(topic);
+              const difficulties = getDifficultiesForTopic(topic);
+              
+              return (
+                <div key={topic} className="topic-group">
+                  {/* Topic Header - Collapsible */}
+                  <div 
+                    className="topic-header collapsible"
+                    onClick={() => toggleTopic(topicKey)}
+                  >
+                    <span className="toggle-icon">
+                      {isTopicExpanded ? '▼' : '▶'}
+                    </span>
+                    <h3>{topic}</h3>
+                    <span className="topic-count">{topicProblems.length} problems</span>
+                  </div>
+
+                  {/* Difficulties - Show when topic is expanded */}
+                  {isTopicExpanded && (
+                    <div className="difficulty-levels">
+                      {difficulties.map(difficulty => {
+                        const difficultyKey = `${topicKey}-${difficulty}`;
+                        const isDifficultyExpanded = expandedDifficulties[difficultyKey];
+                        const diffProblems = getProblemsByTopicAndDifficulty(topic, difficulty);
+                        const solvedCount = diffProblems.filter(p => solvedProblems.has(p.id)).length;
+                        
+                        return (
+                          <div key={difficulty} className="difficulty-group">
+                            {/* Difficulty Header - Collapsible */}
+                            <div 
+                              className="difficulty-header collapsible"
+                              onClick={() => toggleDifficulty(difficultyKey)}
+                            >
+                              <span className="toggle-icon">
+                                {isDifficultyExpanded ? '▼' : '▶'}
+                              </span>
+                              <span className={`difficulty-label ${difficulty.toLowerCase()}`}>
+                                {difficulty}
+                              </span>
+                              <span className="difficulty-count">
+                                {solvedCount}/{diffProblems.length}
+                              </span>
+                            </div>
+
+                            {/* Problems - Show when difficulty is expanded */}
+                            {isDifficultyExpanded && (
+                              <div className="problems-list">
+                                {diffProblems.map(problem => (
+                                  <div key={problem.id} className="problem-item">
+                                    <input
+                                      type="checkbox"
+                                      checked={solvedProblems.has(problem.id)}
+                                      onChange={() => toggleSolved(problem.id)}
+                                      className="problem-checkbox"
+                                    />
+                                    <div className="problem-info">
+                                      <span 
+                                        className={`problem-title ${solvedProblems.has(problem.id) ? 'solved' : ''}`}
+                                        onClick={() => openProblem(problem.link)}
+                                      >
+                                        {problem.title}
+                                      </span>
+                                      <div className="problem-platforms">
+                                        <span className={`platform-tag ${problem.platform}`}>
+                                          {problem.platform === 'leetcode' ? '💻' : '🔖'}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

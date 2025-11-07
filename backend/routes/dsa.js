@@ -394,6 +394,182 @@ router.post('/google-drive/refresh', authMiddleware, async (req, res) => {
   }
 });
 
+// ========== DSA PROGRESS TRACKING ==========
+
+/**
+ * POST /api/dsa/progress/mark-solved
+ * Mark a problem as solved in a sheet
+ * Body: { sheetId, problemId }
+ */
+router.post('/progress/mark-solved', authMiddleware, async (req, res) => {
+  try {
+    const { sheetId, problemId } = req.body;
+    
+    if (!sheetId || !problemId) {
+      return res.status(400).json({
+        success: false,
+        error: 'sheetId and problemId are required',
+      });
+    }
+
+    // Get user's profile or create progress record
+    const User = require('../prisma/client').user;
+    
+    // For now, store in user's metadata
+    let user = await User.findUnique({
+      where: { id: req.userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found',
+      });
+    }
+
+    // Parse existing DSA progress or create new
+    let dsaProgress = user.dsaProgress || {};
+    if (typeof dsaProgress === 'string') {
+      dsaProgress = JSON.parse(dsaProgress);
+    }
+
+    // Initialize sheet progress if not exists
+    if (!dsaProgress[sheetId]) {
+      dsaProgress[sheetId] = { solvedProblems: [] };
+    }
+
+    // Add problem to solved list if not already there
+    if (!dsaProgress[sheetId].solvedProblems.includes(problemId)) {
+      dsaProgress[sheetId].solvedProblems.push(problemId);
+    }
+
+    // Update user record
+    await User.update({
+      where: { id: req.userId },
+      data: {
+        dsaProgress: JSON.stringify(dsaProgress),
+      },
+    });
+
+    res.json({
+      success: true,
+      message: 'Problem marked as solved',
+      totalSolved: dsaProgress[sheetId].solvedProblems.length,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * POST /api/dsa/progress/mark-unsolved
+ * Mark a problem as unsolved in a sheet
+ * Body: { sheetId, problemId }
+ */
+router.post('/progress/mark-unsolved', authMiddleware, async (req, res) => {
+  try {
+    const { sheetId, problemId } = req.body;
+    
+    if (!sheetId || !problemId) {
+      return res.status(400).json({
+        success: false,
+        error: 'sheetId and problemId are required',
+      });
+    }
+
+    const User = require('../prisma/client').user;
+    
+    let user = await User.findUnique({
+      where: { id: req.userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found',
+      });
+    }
+
+    // Parse existing DSA progress
+    let dsaProgress = user.dsaProgress || {};
+    if (typeof dsaProgress === 'string') {
+      dsaProgress = JSON.parse(dsaProgress);
+    }
+
+    // Remove problem from solved list
+    if (dsaProgress[sheetId]) {
+      dsaProgress[sheetId].solvedProblems = dsaProgress[sheetId].solvedProblems.filter(
+        id => id !== problemId
+      );
+    }
+
+    // Update user record
+    await User.update({
+      where: { id: req.userId },
+      data: {
+        dsaProgress: JSON.stringify(dsaProgress),
+      },
+    });
+
+    res.json({
+      success: true,
+      message: 'Problem marked as unsolved',
+      totalSolved: dsaProgress[sheetId]?.solvedProblems?.length || 0,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * GET /api/dsa/progress/:sheetId
+ * Get all solved problems for a sheet
+ */
+router.get('/progress/:sheetId', authMiddleware, async (req, res) => {
+  try {
+    const { sheetId } = req.params;
+
+    const User = require('../prisma/client').user;
+    
+    const user = await User.findUnique({
+      where: { id: req.userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found',
+      });
+    }
+
+    // Parse DSA progress
+    let dsaProgress = user.dsaProgress || {};
+    if (typeof dsaProgress === 'string') {
+      dsaProgress = JSON.parse(dsaProgress);
+    }
+
+    const solvedProblems = dsaProgress[sheetId]?.solvedProblems || [];
+
+    res.json({
+      success: true,
+      sheetId,
+      totalSolved: solvedProblems.length,
+      solvedProblems,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
 // ========== ERROR HANDLERS ==========
 
 router.use((req, res) => {
@@ -412,6 +588,9 @@ router.use((req, res) => {
       'GET /api/dsa/interview-path',
       'GET /api/dsa/google-drive/companies',
       'POST /api/dsa/google-drive/refresh',
+      'POST /api/dsa/progress/mark-solved',
+      'POST /api/dsa/progress/mark-unsolved',
+      'GET /api/dsa/progress/:sheetId',
     ],
   });
 });
