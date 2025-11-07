@@ -13,7 +13,7 @@ const prisma = new PrismaClient({
 
 // Connection pool middleware for limiting concurrent requests
 class ConnectionPoolManager {
-  constructor(maxConcurrent = 20) {
+  constructor(maxConcurrent = 100) {
     this.maxConcurrent = maxConcurrent;
     this.active = 0;
     this.queue = [];
@@ -41,7 +41,7 @@ class ConnectionPoolManager {
   }
 }
 
-const poolManager = new ConnectionPoolManager(20);
+const poolManager = new ConnectionPoolManager(100);
 
 // Wrap Prisma to use connection pool
 const wrappedPrisma = new Proxy(prisma, {
