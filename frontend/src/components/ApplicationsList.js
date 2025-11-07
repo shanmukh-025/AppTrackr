@@ -37,16 +37,16 @@ function ApplicationsList({ applications, onApplicationDeleted, onApplicationUpd
 
   const getStatusColor = (status) => {
     const colorMap = {
-      wishlist: '#718096',
-      applied: '#3182ce',
-      phone_screen: '#805ad5',
-      technical: '#d69e2e',
-      onsite: '#dd6b20',
-      offer: '#38a169',
-      rejected: '#e53e3e',
-      ghosted: '#718096'
+      wishlist: 'linear-gradient(135deg, #718096 0%, #4a5568 100%)',
+      applied: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)',
+      phone_screen: 'linear-gradient(135deg, #9f7aea 0%, #805ad5 100%)',
+      technical: 'linear-gradient(135deg, #ecc94b 0%, #d69e2e 100%)',
+      onsite: 'linear-gradient(135deg, #ed8936 0%, #dd6b20 100%)',
+      offer: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
+      rejected: 'linear-gradient(135deg, #fc8181 0%, #e53e3e 100%)',
+      ghosted: 'linear-gradient(135deg, #a0aec0 0%, #718096 100%)'
     };
-    return colorMap[status] || '#718096';
+    return colorMap[status] || 'linear-gradient(135deg, #718096 0%, #4a5568 100%)';
   };
 
   const formatDate = (dateString) => {
