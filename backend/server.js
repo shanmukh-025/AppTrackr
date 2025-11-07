@@ -25,13 +25,14 @@ const { initializeStaticCompanies } = require('./utils/companyCareerPages');
 const app = express();
 
 // Request queue middleware - limit concurrent requests to prevent connection pool exhaustion
+// DISABLED: Causing 503 errors. Using Prisma connection pool instead
 const requestQueue = [];
 let activeRequests = 0;
-const MAX_CONCURRENT_REQUESTS = 5;
+const MAX_CONCURRENT_REQUESTS = 50; // Increased from 5 to allow more concurrent requests
 
 app.use((req, res, next) => {
-  if (req.path.includes('/api/resumes') || req.path.includes('/api/jobs/suggestions')) {
-    // Prioritize resume and critical operations
+  // Only queue for heavy operations
+  if (req.path.includes('/api/resumes/upload') || req.path.includes('/api/export')) {
     if (activeRequests < MAX_CONCURRENT_REQUESTS) {
       activeRequests++;
       res.on('finish', () => {
@@ -57,6 +58,7 @@ app.use((req, res, next) => {
       });
     }
   } else {
+    // All other requests bypass queue
     next();
   }
 });
