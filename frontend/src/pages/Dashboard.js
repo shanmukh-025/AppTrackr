@@ -23,9 +23,7 @@ import {
   CheckCircle as CheckCircleIcon,
   Business as BusinessIcon,
   CalendarToday as CalendarIcon,
-  TrendingUp as TrendingUpIcon,
   Update as UpdateIcon,
-  Favorite as FavoriteIcon,
   Error as ErrorIcon,
 } from '@mui/icons-material';
 import AddApplication from '../components/AddApplication';
@@ -295,9 +293,9 @@ function Dashboard() {
       </Grid>
 
       {/* Main Content - Two Columns */}
-      <Grid container spacing={3}>
-        {/* Left Column - Job Suggestions (8 columns) */}
-        <Grid item xs={12} md={8}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr', md: '2fr 1fr' }, gap: 3 }}>
+        {/* Left Column - Job Suggestions */}
+        <Box>
           <Paper 
             elevation={0}
             sx={{ 
@@ -310,10 +308,10 @@ function Dashboard() {
           >
             <JobSuggestions />
           </Paper>
-        </Grid>
+        </Box>
 
-        {/* Right Column - Recent Applications (4 columns) */}
-        <Grid item xs={12} md={4}>
+        {/* Right Column - Recent Applications */}
+        <Box>
           <Paper 
             elevation={0}
             sx={{ 
@@ -478,8 +476,8 @@ function Dashboard() {
               </Box>
             )}
           </Paper>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
 
       {showAddModal && (
         <AddApplication 
