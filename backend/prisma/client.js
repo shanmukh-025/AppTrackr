@@ -13,7 +13,7 @@ const prisma = new PrismaClient({
 
 // Connection pool middleware for limiting concurrent requests
 class ConnectionPoolManager {
-  constructor(maxConcurrent = 5) {
+  constructor(maxConcurrent = 20) {
     this.maxConcurrent = maxConcurrent;
     this.active = 0;
     this.queue = [];
@@ -30,7 +30,7 @@ class ConnectionPoolManager {
       return await Promise.race([
         fn(),
         new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Query timeout (30s)')), 30000)
+          setTimeout(() => reject(new Error('Query timeout (60s)')), 60000)
         )
       ]);
     } finally {
@@ -41,7 +41,7 @@ class ConnectionPoolManager {
   }
 }
 
-const poolManager = new ConnectionPoolManager(5);
+const poolManager = new ConnectionPoolManager(20);
 
 // Wrap Prisma to use connection pool
 const wrappedPrisma = new Proxy(prisma, {
