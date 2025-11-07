@@ -12,8 +12,8 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Bar, Line } from 'react-chartjs-2';
-import { Container, Box, Card, Typography, Grid, Button } from '@mui/material';
+import { Bar, Line, Pie } from 'react-chartjs-2';
+import { Container, Box, Card, Typography, Button } from '@mui/material';
 import './Analytics.css';
 
 // Register Chart.js components
@@ -36,7 +36,7 @@ function Analytics() {
   const [timeline, setTimeline] = useState(null);
   const [topCompanies, setTopCompanies] = useState([]);
   const [weeklyActivity, setWeeklyActivity] = useState(null);
-  const [recentApplications, setRecentApplications] = useState([]);
+  const [statusDistribution, setStatusDistribution] = useState(null);
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -57,20 +57,20 @@ function Analytics() {
         timelineRes,
         companiesRes,
         weeklyRes,
-        applicationsRes
+        statusRes
       ] = await Promise.all([
         axios.get(`${API_URL}/api/analytics/overview`, { headers }),
         axios.get(`${API_URL}/api/analytics/timeline`, { headers }),
         axios.get(`${API_URL}/api/analytics/top-companies?limit=5`, { headers }),
         axios.get(`${API_URL}/api/analytics/weekly-activity`, { headers }),
-        axios.get(`${API_URL}/api/applications?sort=-createdAt&limit=10`, { headers }).catch(() => ({ data: [] }))
+        axios.get(`${API_URL}/api/analytics/status-distribution`, { headers }).catch(() => ({ data: null }))
       ]);
 
       setOverview(overviewRes.data);
       setTimeline(timelineRes.data);
       setTopCompanies(companiesRes.data);
       setWeeklyActivity(weeklyRes.data);
-      setRecentApplications(Array.isArray(applicationsRes.data) ? applicationsRes.data : applicationsRes.data.applications || []);
+      setStatusDistribution(statusRes.data);
     } catch (err) {
       console.error('❌ Failed to fetch analytics:', err);
       setError(err.response?.data?.error || err.message || 'Failed to load analytics');
@@ -121,8 +121,18 @@ function Analytics() {
     }]
   } : null;
 
+  const statusChartData = statusDistribution ? {
+    labels: statusDistribution.labels ? statusDistribution.labels.map(l => l.charAt(0).toUpperCase() + l.slice(1)) : [],
+    datasets: [{
+      data: statusDistribution.data || [],
+      backgroundColor: ['#667eea', '#FF9800', '#9C27B0', '#4CAF50', '#8BC34A', '#F44336'],
+      borderColor: '#fff',
+      borderWidth: 2
+    }]
+  } : null;
+
   return (
-    <Container maxWidth="xl" sx={{ py: 4, backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+    <Container maxWidth={false} sx={{ py: 4, backgroundColor: '#f8f9fa', minHeight: '100vh', px: { xs: 2, sm: 3, md: 4 } }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>Analytics Dashboard</Typography>
@@ -131,63 +141,54 @@ function Analytics() {
 
       {/* Key Stats Cards */}
       {overview && (
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#666', fontSize: '0.9rem' }}>Total Applications</Typography>
-                  <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '2rem', color: '#333' }}>{overview.total}</Typography>
-                </Box>
-                <Box sx={{ color: '#667eea', fontSize: '1.5rem' }}>📋</Box>
+        <Box sx={{ display: 'flex', gap: 1.5, mb: 4, width: '100%' }}>
+          <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff', flex: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#666', fontSize: '0.9rem' }}>Total Applications</Typography>
+                <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '2rem', color: '#333' }}>{overview.total}</Typography>
               </Box>
-            </Card>
-          </Grid>
+              <Box sx={{ color: '#667eea', fontSize: '1.5rem' }}>📋</Box>
+            </Box>
+          </Card>
 
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#666', fontSize: '0.9rem' }}>Total Applied</Typography>
-                  <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '2rem', color: '#333' }}>{overview.active || 0}</Typography>
-                </Box>
-                <Box sx={{ color: '#FF9800', fontSize: '1.5rem' }}>🔄</Box>
+          <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff', flex: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#666', fontSize: '0.9rem' }}>Total Applied</Typography>
+                <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '2rem', color: '#333' }}>{overview.active || 0}</Typography>
               </Box>
-            </Card>
-          </Grid>
+              <Box sx={{ color: '#FF9800', fontSize: '1.5rem' }}>🔄</Box>
+            </Box>
+          </Card>
 
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#666', fontSize: '0.9rem' }}>Total Interviews</Typography>
-                  <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '2rem', color: '#333' }}>{overview.interviews || 0}</Typography>
-                </Box>
-                <Box sx={{ color: '#9C27B0', fontSize: '1.5rem' }}>🎯</Box>
+          <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff', flex: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#666', fontSize: '0.9rem' }}>Total Interviews</Typography>
+                <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '2rem', color: '#333' }}>{overview.interviews || 0}</Typography>
               </Box>
-            </Card>
-          </Grid>
+              <Box sx={{ color: '#9C27B0', fontSize: '1.5rem' }}>🎯</Box>
+            </Box>
+          </Card>
 
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#666', fontSize: '0.9rem' }}>Total Offers</Typography>
-                  <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '2rem', color: '#333' }}>{overview.offers || 0}</Typography>
-                </Box>
-                <Box sx={{ color: '#4CAF50', fontSize: '1.5rem' }}>💰</Box>
+          <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff', flex: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#666', fontSize: '0.9rem' }}>Total Offers</Typography>
+                <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '2rem', color: '#333' }}>{overview.offers || 0}</Typography>
               </Box>
-            </Card>
-          </Grid>
-        </Grid>
+              <Box sx={{ color: '#4CAF50', fontSize: '1.5rem' }}>💰</Box>
+            </Box>
+          </Card>
+        </Box>
       )}
 
       {/* Charts Grid */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <Box sx={{ display: 'flex', gap: 2, mb: 4, width: '100%' }}>
         {/* Application Timeline */}
-        <Grid item xs={12} md={8}>
-          <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff' }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, fontSize: '1.1rem' }}>Application Timeline</Typography>
+        <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff', minHeight: 450, display: 'flex', flexDirection: 'column', flex: '1.4' }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, fontSize: '1.1rem' }}>Application Timeline</Typography>
             {timelineChartData && timelineChartData.labels && timelineChartData.labels.length > 0 ? (
               <Box sx={{ height: 300 }}>
                 <Line
@@ -211,12 +212,10 @@ function Analytics() {
               </Typography>
             )}
           </Card>
-        </Grid>
 
         {/* Weekly Activity */}
-        <Grid item xs={12} md={4}>
-          <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff' }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, fontSize: '1.1rem' }}>Weekly Activity</Typography>
+        <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff', minHeight: 450, display: 'flex', flexDirection: 'column', flex: '1' }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, fontSize: '1.1rem' }}>Weekly Activity</Typography>
             {weeklyChartData ? (
               <Box sx={{ height: 300 }}>
                 <Bar
@@ -240,70 +239,58 @@ function Analytics() {
               </Typography>
             )}
           </Card>
-        </Grid>
-      </Grid>
+      </Box>
 
-      {/* Bottom Grid */}
-      <Grid container spacing={3}>
-        {/* Recent Applications */}
-        <Grid item xs={12} md={8}>
-          <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff' }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, fontSize: '1.1rem' }}>Recent Applications</Typography>
-            <Box>
-              {recentApplications && recentApplications.length > 0 ? (
-                recentApplications.slice(0, 5).map((app, idx) => (
-                  <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 2, borderBottom: idx < 4 ? '1px solid #f0f0f0' : 'none', '&:hover': { backgroundColor: '#f8f9fa' }, px: 1, borderRadius: 1, cursor: 'pointer', transition: 'background-color 0.2s' }}>
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#333' }}>
-                        {app.company || 'Unknown Company'}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {app.position || 'Position'} • {new Date(app.appliedDate || app.createdAt).toLocaleDateString()}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="caption" sx={{ px: 1.5, py: 0.5, backgroundColor: '#667eea', color: '#fff', borderRadius: 1, fontWeight: 600, fontSize: '0.75rem' }}>
-                        {app.status || 'Applied'}
-                      </Typography>
-                    </Box>
-                  </Box>
-                ))
-              ) : (
-                <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-                  No recent applications
-                </Typography>
-              )}
+      {/* Bottom Grid - Pie Chart and Top Companies */}
+      <Box sx={{ display: 'flex', gap: 0, mb: 4, width: '100%' }}>
+        {/* Status Distribution Pie Chart */}
+        <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff', minHeight: 450, display: 'flex', flexDirection: 'column', flex: '0 0 calc(58.33% - 0px)', mr: 0.5 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, fontSize: '1.1rem' }}>Application Status Distribution</Typography>
+          {statusChartData && statusChartData.labels && statusChartData.labels.length > 0 ? (
+            <Box sx={{ height: 300 }}>
+              <Pie
+                data={statusChartData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { position: 'bottom' }
+                  }
+                }}
+              />
             </Box>
-          </Card>
-        </Grid>
+          ) : (
+            <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
+              No status data available
+            </Typography>
+          )}
+        </Card>
 
         {/* Top Companies */}
-        <Grid item xs={12} md={4}>
-          <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff' }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, fontSize: '1.1rem' }}>Top Applied Companies</Typography>
-            <Box>
-              {topCompanies && topCompanies.length > 0 ? (
-                topCompanies.map((company, idx) => (
-                  <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 2, borderBottom: idx < topCompanies.length - 1 ? '1px solid #f0f0f0' : 'none', px: 1 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 500, color: '#333' }}>
-                      {idx + 1}. {company.company}
+        <Card sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0', background: '#fff', minHeight: 450, display: 'flex', flexDirection: 'column', flex: '0 0 calc(41.67% - 0px)', ml: 0.5 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, fontSize: '1.1rem' }}>Top Applied Companies</Typography>
+          <Box>
+            {topCompanies && topCompanies.length > 0 ? (
+              topCompanies.map((company, idx) => (
+                <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 2, borderBottom: idx < topCompanies.length - 1 ? '1px solid #f0f0f0' : 'none', px: 1 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 500, color: '#333' }}>
+                    {idx + 1}. {company.company}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 700, color: '#667eea' }}>
+                      {company.count}
                     </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="caption" sx={{ fontWeight: 700, color: '#667eea' }}>
-                        {company.count}
-                      </Typography>
-                    </Box>
                   </Box>
-                ))
-              ) : (
-                <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-                  No company data
-                </Typography>
-              )}
-            </Box>
-          </Card>
-        </Grid>
-      </Grid>
+                </Box>
+              ))
+            ) : (
+              <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
+                No company data
+              </Typography>
+            )}
+          </Box>
+        </Card>
+      </Box>
     </Container>
   );
 }
