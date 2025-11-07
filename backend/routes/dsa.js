@@ -13,6 +13,7 @@ const authMiddleware = require('../middleware/auth');
 const DSAQuestionsDatabase = require('../services/dsaQuestionsDatabase');
 const AIQuestionService = require('../services/aiQuestionService');
 const GoogleDriveService = require('../services/googleDriveService');
+const prisma = require('../prisma/client');
 
 // ========== TOP REPEATED QUESTIONS ==========
 
@@ -411,12 +412,9 @@ router.post('/progress/mark-solved', authMiddleware, async (req, res) => {
         error: 'sheetId and problemId are required',
       });
     }
-
-    // Get user's profile or create progress record
-    const User = require('../prisma/client').user;
     
-    // For now, store in user's metadata
-    let user = await User.findUnique({
+    // Get user's current progress
+    const user = await prisma.user.findUnique({
       where: { id: req.userId },
     });
 
@@ -428,9 +426,9 @@ router.post('/progress/mark-solved', authMiddleware, async (req, res) => {
     }
 
     // Parse existing DSA progress or create new
-    let dsaProgress = user.dsaProgress || {};
-    if (typeof dsaProgress === 'string') {
-      dsaProgress = JSON.parse(dsaProgress);
+    let dsaProgress = {};
+    if (user.dsaProgress) {
+      dsaProgress = JSON.parse(user.dsaProgress);
     }
 
     // Initialize sheet progress if not exists
@@ -444,7 +442,7 @@ router.post('/progress/mark-solved', authMiddleware, async (req, res) => {
     }
 
     // Update user record
-    await User.update({
+    const updated = await prisma.user.update({
       where: { id: req.userId },
       data: {
         dsaProgress: JSON.stringify(dsaProgress),
@@ -457,6 +455,7 @@ router.post('/progress/mark-solved', authMiddleware, async (req, res) => {
       totalSolved: dsaProgress[sheetId].solvedProblems.length,
     });
   } catch (error) {
+    console.error('Error marking problem solved:', error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -479,10 +478,8 @@ router.post('/progress/mark-unsolved', authMiddleware, async (req, res) => {
         error: 'sheetId and problemId are required',
       });
     }
-
-    const User = require('../prisma/client').user;
     
-    let user = await User.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id: req.userId },
     });
 
@@ -494,9 +491,9 @@ router.post('/progress/mark-unsolved', authMiddleware, async (req, res) => {
     }
 
     // Parse existing DSA progress
-    let dsaProgress = user.dsaProgress || {};
-    if (typeof dsaProgress === 'string') {
-      dsaProgress = JSON.parse(dsaProgress);
+    let dsaProgress = {};
+    if (user.dsaProgress) {
+      dsaProgress = JSON.parse(user.dsaProgress);
     }
 
     // Remove problem from solved list
@@ -507,7 +504,7 @@ router.post('/progress/mark-unsolved', authMiddleware, async (req, res) => {
     }
 
     // Update user record
-    await User.update({
+    const updated = await prisma.user.update({
       where: { id: req.userId },
       data: {
         dsaProgress: JSON.stringify(dsaProgress),
@@ -520,6 +517,7 @@ router.post('/progress/mark-unsolved', authMiddleware, async (req, res) => {
       totalSolved: dsaProgress[sheetId]?.solvedProblems?.length || 0,
     });
   } catch (error) {
+    console.error('Error marking problem unsolved:', error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -534,10 +532,8 @@ router.post('/progress/mark-unsolved', authMiddleware, async (req, res) => {
 router.get('/progress/:sheetId', authMiddleware, async (req, res) => {
   try {
     const { sheetId } = req.params;
-
-    const User = require('../prisma/client').user;
     
-    const user = await User.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id: req.userId },
     });
 
@@ -549,9 +545,9 @@ router.get('/progress/:sheetId', authMiddleware, async (req, res) => {
     }
 
     // Parse DSA progress
-    let dsaProgress = user.dsaProgress || {};
-    if (typeof dsaProgress === 'string') {
-      dsaProgress = JSON.parse(dsaProgress);
+    let dsaProgress = {};
+    if (user.dsaProgress) {
+      dsaProgress = JSON.parse(user.dsaProgress);
     }
 
     const solvedProblems = dsaProgress[sheetId]?.solvedProblems || [];
@@ -563,6 +559,7 @@ router.get('/progress/:sheetId', authMiddleware, async (req, res) => {
       solvedProblems,
     });
   } catch (error) {
+    console.error('Error fetching progress:', error);
     res.status(500).json({
       success: false,
       error: error.message,
