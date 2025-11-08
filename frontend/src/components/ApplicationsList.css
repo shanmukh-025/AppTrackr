@@ -1,12 +1,12 @@
 .applications-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 24px;
   margin-top: 24px;
 }
 
 .application-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
@@ -22,7 +22,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
+  height: 3px;
   background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
   opacity: 0;
   transition: opacity 0.3s;
@@ -30,8 +30,8 @@
 
 .application-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 12px 28px rgba(102, 126, 234, 0.25);
-  border-color: rgba(102, 126, 234, 0.2);
+  box-shadow: 0 12px 28px rgba(102, 126, 234, 0.2);
+  border-color: rgba(102, 126, 234, 0.15);
 }
 
 .application-card:hover::before {
@@ -56,40 +56,42 @@
 .company-logo {
   width: 48px;
   height: 48px;
-  border-radius: 10px;
+  border-radius: 12px;
   object-fit: contain;
   background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-  padding: 6px;
+  padding: 8px;
   border: 1px solid rgba(102, 126, 234, 0.1);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.08);
 }
 
 .company-info h3 {
   margin: 0 0 4px 0;
-  color: #1a202c;
+  color: #0f172a;
   font-size: 18px;
   font-weight: 700;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.4px;
 }
 
 .position {
   margin: 0;
-  color: #718096;
-  font-size: 14px;
-  font-weight: 500;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
 }
 
 .status-badge {
-  padding: 8px 16px;
-  border-radius: 24px;
+  padding: 6px 14px;
+  border-radius: 20px;
   color: white;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
   flex-shrink: 0;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  border: none;
 }
 
 .card-details {
@@ -103,30 +105,31 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #4a5568;
-  font-size: 14px;
-  font-weight: 500;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .detail-icon {
   font-size: 16px;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  color: #64748b;
 }
 
 .card-notes {
-  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
   padding: 14px 16px;
   border-radius: 10px;
   margin-bottom: 16px;
+  border: 1px solid rgba(102, 126, 234, 0.1);
   border-left: 3px solid #667eea;
 }
 
 .card-notes p {
   margin: 0;
-  color: #2d3748;
-  font-size: 14px;
+  color: #334155;
+  font-size: 13px;
   line-height: 1.6;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .card-actions {
@@ -136,58 +139,62 @@
 
 .action-button {
   flex: 1;
-  padding: 10px 18px;
+  padding: 9px 16px;
   border: none;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   text-align: center;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.4px;
+  text-transform: capitalize;
 }
 
 .view-button {
-  background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
-  color: #2d3748;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #1e293b;
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.08);
+  border: 1px solid rgba(102, 126, 234, 0.1);
 }
 
 .view-button:hover {
   background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
   transform: translateY(-2px);
 }
 
 .edit-button {
-  background: linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%);
-  color: #2c5282;
-  box-shadow: 0 2px 6px rgba(49, 130, 206, 0.2);
+  background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
+  color: #1e40af;
+  box-shadow: 0 2px 6px rgba(30, 64, 175, 0.15);
+  border: none;
 }
 
 .edit-button:hover {
-  background: linear-gradient(135deg, #90cdf4 0%, #63b3ed 100%);
-  box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+  background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%);
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
   transform: translateY(-2px);
 }
 
 .delete-button {
-  background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
-  color: #c53030;
-  box-shadow: 0 2px 6px rgba(197, 48, 48, 0.2);
+  background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+  color: #991b1b;
+  box-shadow: 0 2px 6px rgba(153, 27, 27, 0.15);
+  border: none;
 }
 
 .delete-button:hover {
-  background: linear-gradient(135deg, #feb2b2 0%, #fc8181 100%);
-  box-shadow: 0 4px 12px rgba(197, 48, 48, 0.3);
+  background: linear-gradient(135deg, #fca5a5 0%, #f87171 100%);
+  box-shadow: 0 4px 12px rgba(153, 27, 27, 0.25);
   transform: translateY(-2px);
 }
 
 .empty-state {
   text-align: center;
   padding: 80px 20px;
-  background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
   border: 1px solid rgba(102, 126, 234, 0.08);
@@ -197,7 +204,6 @@
   font-size: 72px;
   margin-bottom: 20px;
   animation: bounce 2s infinite;
-  filter: drop-shadow(0 4px 8px rgba(102, 126, 234, 0.2));
 }
 
 @keyframes bounce {
@@ -211,7 +217,7 @@
 
 .empty-state h3 {
   margin: 0 0 12px 0;
-  color: #1a202c;
+  color: #0f172a;
   font-size: 28px;
   font-weight: 700;
   letter-spacing: -0.5px;
@@ -220,12 +226,12 @@
 .empty-state p {
   margin: 0 0 24px 0;
   font-size: 16px;
-  color: #718096;
+  color: #64748b;
   max-width: 400px;
   margin-left: auto;
   margin-right: auto;
   line-height: 1.6;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 @media (max-width: 768px) {
