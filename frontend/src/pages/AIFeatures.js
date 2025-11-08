@@ -56,6 +56,50 @@ const AIFeatures = () => {
     }
   };
 
+  // Generate Resume PDF
+  const generateResumePDF = async () => {
+    if (!fullName || !targetRole || !skills) {
+      alert('Please fill in at least Name, Target Role, and Skills');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `${API_URL}/api/ai/generate-resume-pdf`,
+        { 
+          fullName,
+          email,
+          phone,
+          targetRole,
+          experience,
+          skills
+        },
+        { 
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: 'blob' // Important for PDF download
+        }
+      );
+
+      // Create download link
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `resume-${fullName.replace(/\s+/g, '-')}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      alert('✅ PDF Resume downloaded successfully!');
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      alert('Failed to generate PDF: ' + (error.response?.data?.error || error.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Cover Letter Generator
   const generateCoverLetter = async () => {
     if (!clCompany || !clPosition || !clJobDesc) {
@@ -194,6 +238,15 @@ const AIFeatures = () => {
               {loading ? '🔄 Generating...' : '✨ Generate Resume'}
             </button>
 
+            <button
+              className="ai-button"
+              onClick={generateResumePDF}
+              disabled={loading}
+              style={{ marginLeft: '10px', background: '#e74c3c' }}
+            >
+              {loading ? '🔄 Generating...' : '📄 Generate PDF Resume'}
+            </button>
+
             {generatedResume && (
               <div className="ai-results">
                 <h3>Your Generated Resume</h3>
@@ -215,6 +268,9 @@ const AIFeatures = () => {
                     a.click();
                   }}>
                     💾 Download as Text
+                  </button>
+                  <button onClick={generateResumePDF} disabled={loading}>
+                    📄 Download as PDF
                   </button>
                 </div>
               </div>
