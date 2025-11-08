@@ -16,6 +16,8 @@ const AIFeatures = () => {
   const [experience, setExperience] = useState('');
   const [skills, setSkills] = useState('');
   const [generatedResume, setGeneratedResume] = useState(null);
+  const [isEditingResume, setIsEditingResume] = useState(false);
+  const [editableResumeContent, setEditableResumeContent] = useState('');
 
   // Cover Letter State
   const [clCompany, setClCompany] = useState('');
@@ -304,7 +306,85 @@ const AIFeatures = () => {
               <div className="ai-results">
                 <h3>Your Generated Resume</h3>
                 
-                {/* ATS Score Badge */}
+                {/* Editable Resume Content */}
+                <div className="resume-content">
+                  {isEditingResume ? (
+                    <textarea
+                      value={editableResumeContent}
+                      onChange={(e) => setEditableResumeContent(e.target.value)}
+                      style={{
+                        width: '100%',
+                        minHeight: '500px',
+                        fontFamily: 'inherit',
+                        fontSize: '14px',
+                        padding: '20px',
+                        border: '2px solid #6366f1',
+                        borderRadius: '12px',
+                        resize: 'vertical',
+                        whiteSpace: 'pre-wrap'
+                      }}
+                    />
+                  ) : (
+                    <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>
+                      {generatedResume.content}
+                    </pre>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="action-buttons" style={{ marginBottom: '20px' }}>
+                  {isEditingResume ? (
+                    <>
+                      <button 
+                        onClick={() => {
+                          setGeneratedResume({ ...generatedResume, content: editableResumeContent });
+                          setIsEditingResume(false);
+                        }}
+                        style={{ background: '#2ecc71' }}
+                      >
+                        ✅ Save Changes
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setEditableResumeContent(generatedResume.content);
+                          setIsEditingResume(false);
+                        }}
+                        style={{ background: '#95a5a6' }}
+                      >
+                        ✖ Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button 
+                        onClick={() => {
+                          setEditableResumeContent(generatedResume.content);
+                          setIsEditingResume(true);
+                        }}
+                      >
+                        ✏️ Edit Resume
+                      </button>
+                      <button onClick={() => navigator.clipboard.writeText(generatedResume.content)}>
+                        📋 Copy to Clipboard
+                      </button>
+                      <button onClick={() => {
+                        const blob = new Blob([generatedResume.content], { type: 'text/plain' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'resume.txt';
+                        a.click();
+                      }}>
+                        💾 Download as Text
+                      </button>
+                      <button onClick={generateResumePDF} disabled={loading}>
+                        📄 Download as PDF
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                {/* ATS Score Badge - Now Below Resume */}
                 {atsResult && (
                   <div className="ats-score-badge" style={{
                     background: `linear-gradient(135deg, ${
@@ -323,7 +403,7 @@ const AIFeatures = () => {
                     }`,
                     padding: '20px',
                     borderRadius: '12px',
-                    marginBottom: '20px',
+                    marginTop: '20px',
                     textAlign: 'center'
                   }}>
                     <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#64748b' }}>
@@ -363,30 +443,6 @@ const AIFeatures = () => {
                     )}
                   </div>
                 )}
-
-                <div className="resume-content">
-                  <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>
-                    {generatedResume.content}
-                  </pre>
-                </div>
-                <div className="action-buttons">
-                  <button onClick={() => navigator.clipboard.writeText(generatedResume.content)}>
-                    📋 Copy to Clipboard
-                  </button>
-                  <button onClick={() => {
-                    const blob = new Blob([generatedResume.content], { type: 'text/plain' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'resume.txt';
-                    a.click();
-                  }}>
-                    💾 Download as Text
-                  </button>
-                  <button onClick={generateResumePDF} disabled={loading}>
-                    📄 Download as PDF
-                  </button>
-                </div>
               </div>
             )}
           </div>
