@@ -105,28 +105,62 @@ class AIService {
     try {
       this._checkAPIKey();
       
-      const { fullName, email, phone, targetRole, experience, skills } = userData;
+      const { fullName, email, phone, targetRole, experience, skills, education, university, graduationYear, currentRole, location } = userData;
       
       const prompt = `You are an expert resume writer. Generate a professional, ATS-friendly resume.
 
-USER INFORMATION:
+USER INFORMATION PROVIDED:
 - Full Name: ${fullName}
-- Email: ${email || 'N/A'}
-- Phone: ${phone || 'N/A'}
+- Email: ${email || 'Not provided'}
+- Phone: ${phone || 'Not provided'}
+- Location: ${location || 'Not provided'}
 - Target Role: ${targetRole}
-- Experience: ${experience || 'Entry level or career change'}
+- Current Role: ${currentRole || 'Not provided'}
+- Work Experience Details: ${experience || 'Not provided'}
 - Skills: ${skills}
 
-Create a well-structured resume with the following sections:
-1. Professional Summary (2-3 sentences tailored to ${targetRole})
-2. Core Skills (formatted as bullet points)
-3. Professional Experience (if experience provided, create 2-3 relevant positions with achievements)
-4. Education (create appropriate education background)
-5. Additional relevant sections if applicable
+EDUCATION FROM USER PROFILE:
+- Degree/Education: ${education || 'Not provided'}
+- University: ${university || 'Not provided'}
+- Graduation Year: ${graduationYear || 'Not provided'}
 
-Format it cleanly with clear section headers, bullet points, and professional language.
-Make it ATS-friendly and impactful.
-Return ONLY the resume text, no explanations.`;
+INSTRUCTIONS:
+1. Create a complete, professional resume structure for a ${targetRole} position
+2. For contact info: Use the EXACT name, email, phone, and location provided
+3. For Professional Summary: Write 2-3 sentences based on the target role and skills provided
+4. For Skills: Use the EXACT skills list provided: ${skills}
+5. For Work Experience:
+   ${experience ? 
+     `- Use the experience details provided: ${experience}
+      - Expand with relevant responsibilities and achievements typical for someone targeting ${targetRole}` :
+     `- Create 2-3 example positions relevant to ${targetRole} with [COMPANY NAME], [DATES] placeholders
+      - Include realistic job responsibilities and achievements for this role
+      - Make it clear these need to be customized`
+   }
+6. For Education:
+   ${education || university ? 
+     `- MUST include the education from user profile:
+      * Degree: ${education || '[Degree]'}
+      * University: ${university || '[University Name]'}
+      * Graduation Year: ${graduationYear || '[Year]'}
+      - If any field is missing, use [PLACEHOLDER] format
+      - DO NOT make up education if not provided` :
+     `- Create 1 education entry with [UNIVERSITY NAME], [DEGREE], [GRADUATION YEAR] placeholders
+      - Choose degree relevant to ${targetRole}
+      - Make it clear this needs to be customized`
+   }
+7. For Projects (Optional):
+   - Add 1-2 relevant project examples with [PROJECT NAME] placeholders if appropriate for ${targetRole}
+8. Use professional formatting with clear section headers
+9. Include action verbs and quantifiable achievements (use realistic percentages/numbers as examples)
+
+IMPORTANT: 
+- Use brackets [LIKE THIS] for any placeholder information that user needs to customize
+- Always prioritize and include the education information from the user's profile if provided
+- Make the resume complete enough to be useful, but clear about what needs customization
+- Focus on creating a strong template structure with realistic examples
+
+Return ONLY the resume text with clear formatting.`;
 
       const result = await this.model.generateContent(prompt);
       const response = await result.response;

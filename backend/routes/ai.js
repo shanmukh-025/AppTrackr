@@ -175,14 +175,38 @@ router.post('/generate-resume', auth, async (req, res) => {
       return res.status(401).json({ error: 'User ID not found in token' });
     }
 
-    // Generate resume using AI
+    // Fetch user profile to get education and other details
+    let userProfile = null;
+    try {
+      userProfile = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          education: true,
+          university: true,
+          graduationYear: true,
+          currentRole: true,
+          location: true
+        }
+      });
+      console.log('✅ User profile fetched:', userProfile);
+    } catch (profileError) {
+      console.warn('⚠️ Could not fetch user profile:', profileError.message);
+    }
+
+    // Generate resume using AI with profile data
     const resumeContent = await aiService.generateResume({
       fullName,
       email,
       phone,
       targetRole,
       experience,
-      skills
+      skills,
+      // Add profile data
+      education: userProfile?.education,
+      university: userProfile?.university,
+      graduationYear: userProfile?.graduationYear,
+      currentRole: userProfile?.currentRole,
+      location: userProfile?.location
     });
 
     const responseData = {
@@ -220,14 +244,37 @@ router.post('/generate-resume-pdf', auth, async (req, res) => {
       return res.status(401).json({ error: 'User ID not found in token' });
     }
 
-    // Generate resume content using AI
+    // Fetch user profile to get education and other details
+    let userProfile = null;
+    try {
+      userProfile = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          education: true,
+          university: true,
+          graduationYear: true,
+          currentRole: true,
+          location: true
+        }
+      });
+    } catch (profileError) {
+      console.warn('⚠️ Could not fetch user profile:', profileError.message);
+    }
+
+    // Generate resume content using AI with profile data
     const resumeContent = await aiService.generateResume({
       fullName,
       email,
       phone,
       targetRole,
       experience,
-      skills
+      skills,
+      // Add profile data
+      education: userProfile?.education,
+      university: userProfile?.university,
+      graduationYear: userProfile?.graduationYear,
+      currentRole: userProfile?.currentRole,
+      location: userProfile?.location
     });
 
     // Create PDF document

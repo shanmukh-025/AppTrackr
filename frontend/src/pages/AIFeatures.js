@@ -52,6 +52,21 @@ const AIFeatures = () => {
       );
 
       setGeneratedResume(response.data.resume);
+
+      // Automatically check ATS score after generating resume
+      console.log('🔍 Checking ATS score for generated resume...');
+      try {
+        const atsResponse = await axios.post(
+          `${API_URL}/api/ai/check-ats`,
+          { resumeText: response.data.resume.content },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setAtsResult(atsResponse.data.analysis);
+        console.log('✅ ATS score calculated:', atsResponse.data.atsScore);
+      } catch (atsError) {
+        console.error('ATS check error:', atsError);
+        // Don't fail the entire operation if ATS check fails
+      }
     } catch (error) {
       console.error('Resume generation error:', error);
       alert('Failed to generate resume: ' + (error.response?.data?.error || error.message));
@@ -288,6 +303,67 @@ const AIFeatures = () => {
             {generatedResume && (
               <div className="ai-results">
                 <h3>Your Generated Resume</h3>
+                
+                {/* ATS Score Badge */}
+                {atsResult && (
+                  <div className="ats-score-badge" style={{
+                    background: `linear-gradient(135deg, ${
+                      atsResult.overallScore >= 80 ? 'rgba(46, 204, 113, 0.1)' : 
+                      atsResult.overallScore >= 60 ? 'rgba(243, 156, 18, 0.1)' : 
+                      'rgba(231, 76, 60, 0.1)'
+                    } 0%, ${
+                      atsResult.overallScore >= 80 ? 'rgba(46, 204, 113, 0.05)' : 
+                      atsResult.overallScore >= 60 ? 'rgba(243, 156, 18, 0.05)' : 
+                      'rgba(231, 76, 60, 0.05)'
+                    } 100%)`,
+                    border: `2px solid ${
+                      atsResult.overallScore >= 80 ? '#2ecc71' : 
+                      atsResult.overallScore >= 60 ? '#f39c12' : 
+                      '#e74c3c'
+                    }`,
+                    padding: '20px',
+                    borderRadius: '12px',
+                    marginBottom: '20px',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#64748b' }}>
+                      ATS Compatibility Score
+                    </div>
+                    <div style={{ 
+                      fontSize: '48px', 
+                      fontWeight: '800',
+                      color: atsResult.overallScore >= 80 ? '#2ecc71' : 
+                             atsResult.overallScore >= 60 ? '#f39c12' : '#e74c3c'
+                    }}>
+                      {atsResult.overallScore}
+                      <span style={{ fontSize: '24px', fontWeight: '600', color: '#94a3b8' }}>/100</span>
+                    </div>
+                    <div style={{ fontSize: '13px', color: '#64748b', marginTop: '8px' }}>
+                      {atsResult.overallScore >= 80 ? '✅ Excellent - ATS Friendly' : 
+                       atsResult.overallScore >= 60 ? '⚠️ Good - Some improvements needed' : 
+                       '🚫 Needs Improvement'}
+                    </div>
+                    {atsResult.overallScore < 80 && (
+                      <button 
+                        onClick={() => setActiveTab('ats')}
+                        style={{
+                          marginTop: '12px',
+                          padding: '8px 16px',
+                          background: 'transparent',
+                          border: '1px solid currentColor',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          fontSize: '13px',
+                          fontWeight: '600',
+                          color: 'inherit'
+                        }}
+                      >
+                        View Detailed Analysis →
+                      </button>
+                    )}
+                  </div>
+                )}
+
                 <div className="resume-content">
                   <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>
                     {generatedResume.content}
@@ -396,6 +472,22 @@ const AIFeatures = () => {
           <div className="ai-section">
             <h2>🎯 ATS Compatibility Checker</h2>
             <p>Check how well your resume passes Applicant Tracking Systems</p>
+
+            {atsResult && !atsResumeText && (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%)',
+                border: '1px solid rgba(99, 102, 241, 0.2)',
+                padding: '16px',
+                borderRadius: '12px',
+                marginBottom: '20px',
+                textAlign: 'center',
+                color: '#64748b'
+              }}>
+                💡 <strong>Showing results from your last generated resume</strong>
+                <br />
+                <small>Paste new resume text below to check a different resume</small>
+              </div>
+            )}
 
             <div className="form-group">
               <label>Paste Your Resume Text:</label>
