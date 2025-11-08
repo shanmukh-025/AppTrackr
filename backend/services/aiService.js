@@ -12,8 +12,8 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 class AIService {
   constructor() {
     if (genAI) {
-      // Use gemini-1.5-flash which is the stable model
-      this.model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      // Use gemini-2.5-flash which is the latest stable model
+      this.model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     } else {
       this.model = null;
     }
