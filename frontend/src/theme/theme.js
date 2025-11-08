@@ -1,6 +1,7 @@
 import { createTheme } from '@mui/material/styles';
-import { useMemo } from 'react';
-import { useColorScheme } from '@mui/material/styles';
+// Removed unused imports
+// import { useMemo } from 'react';
+// import { useColorScheme } from '@mui/material/styles';
 
 // Create a professional Material-UI theme for AppTrackr with dark mode support
 export const getDesignTokens = (mode) => ({

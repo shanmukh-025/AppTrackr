@@ -10,6 +10,7 @@ const VideoInterviewFeedback = () => {
   const [analysisResults, setAnalysisResults] = useState([]);
   const [selectedRecording, setSelectedRecording] = useState(0);
   const [activeTab, setActiveTab] = useState('overview');
+  // eslint-disable-next-line no-unused-vars
   const [playingVideo, setPlayingVideo] = useState(false);
 
   // Load session data

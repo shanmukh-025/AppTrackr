@@ -16,6 +16,7 @@ const JobSuggestions = () => {
   useEffect(() => {
     fetchJobSuggestions();
     fetchStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchJobSuggestions = async () => {

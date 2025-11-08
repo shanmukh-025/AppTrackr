@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+// import axios from 'axios'; // Not currently used
 import '../styles/VideoInterviewSession.css';
 
 // Question data (same as in VideoInterviewHome)
