@@ -113,6 +113,47 @@ router.get('/resume-analyses', auth, async (req, res) => {
 });
 
 // ============================================
+// ATS COMPATIBILITY CHECK
+// ============================================
+
+/**
+ * POST /api/ai/check-ats
+ * Check resume ATS compatibility
+ */
+router.post('/check-ats', auth, async (req, res) => {
+  try {
+    console.log('🔍 ATS Compatibility Check Started');
+    const { resumeText } = req.body;
+    const userId = req.userId;
+
+    if (!userId) {
+      console.error('❌ userId is missing!');
+      return res.status(401).json({ error: 'User ID not found in token' });
+    }
+
+    if (!resumeText || resumeText.trim().length === 0) {
+      return res.status(400).json({ error: 'Resume text is required' });
+    }
+
+    // Call AI service for ATS analysis
+    const atsAnalysis = await aiService.checkATSCompatibility(resumeText);
+
+    const responseData = {
+      success: true,
+      atsScore: atsAnalysis.overallScore,
+      analysis: atsAnalysis,
+      checkedAt: new Date()
+    };
+
+    res.json(responseData);
+    console.log('✅ ATS check completed, score:', atsAnalysis.overallScore);
+  } catch (error) {
+    console.error('❌ ATS check error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================
 // RESUME GENERATION
 // ============================================
 

@@ -199,6 +199,81 @@ Return ONLY the resume text, no explanations.`;
       return [];
     }
   }
+
+  async checkATSCompatibility(resumeText) {
+    try {
+      this._checkAPIKey();
+      
+      if (!resumeText || resumeText.trim().length === 0) {
+        throw new Error('Resume text is empty');
+      }
+
+      const prompt = `You are an ATS (Applicant Tracking System) expert. Analyze this resume for ATS compatibility and provide a detailed score.
+
+RESUME:
+${resumeText}
+
+Evaluate the resume based on:
+1. Keyword optimization (industry-specific terms, skills)
+2. Formatting (simple, ATS-friendly structure)
+3. Contact information (clear and complete)
+4. Section headers (standard naming conventions)
+5. File readability (no images, tables, special characters)
+6. Quantifiable achievements (metrics, numbers, percentages)
+7. Action verbs and power words
+8. Proper use of bullet points
+9. Relevant skills section
+10. Grammar and spelling
+
+Return ONLY valid JSON (no markdown, no extra text) with this structure:
+{
+  "overallScore": 0-100,
+  "categories": {
+    "keywords": {"score": 0-100, "feedback": "string"},
+    "formatting": {"score": 0-100, "feedback": "string"},
+    "content": {"score": 0-100, "feedback": "string"},
+    "sections": {"score": 0-100, "feedback": "string"}
+  },
+  "strengths": ["strength1", "strength2", "strength3"],
+  "warnings": ["warning1", "warning2"],
+  "criticalIssues": ["issue1", "issue2"],
+  "suggestions": ["suggestion1", "suggestion2", "suggestion3"],
+  "missingElements": ["element1", "element2"],
+  "detectedKeywords": ["keyword1", "keyword2"],
+  "recommendation": "Overall assessment and next steps"
+}`;
+
+      console.log('🤖 Analyzing ATS compatibility...');
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      
+      if (!response) {
+        throw new Error('No response from Gemini API');
+      }
+
+      let text = response.text();
+      console.log('✅ ATS analysis received');
+
+      // Remove markdown code blocks if present
+      text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
+      let parsedData;
+      try {
+        parsedData = JSON.parse(text);
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        console.error('Response text:', text);
+        throw new Error('Failed to parse ATS analysis response');
+      }
+
+      return parsedData;
+    } catch (error) {
+      console.error('❌ ATS check error:', error);
+      throw new Error('Failed to analyze ATS compatibility: ' + error.message);
+    }
+  }
 }
+
+module.exports = new AIService();
 
 module.exports = new AIService();

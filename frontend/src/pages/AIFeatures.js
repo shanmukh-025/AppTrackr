@@ -24,6 +24,10 @@ const AIFeatures = () => {
   const [clTone, setClTone] = useState('professional');
   const [coverLetter, setCoverLetter] = useState(null);
 
+  // ATS Checker State
+  const [atsResumeText, setAtsResumeText] = useState('');
+  const [atsResult, setAtsResult] = useState(null);
+
   // Resume Generator
   const generateResume = async () => {
     if (!fullName || !targetRole || !skills) {
@@ -137,6 +141,34 @@ const AIFeatures = () => {
     }
   };
 
+  // ATS Compatibility Check
+  const checkATSScore = async () => {
+    if (!atsResumeText || atsResumeText.trim().length === 0) {
+      alert('Please paste your resume text');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      console.log('🔍 Checking ATS compatibility...');
+
+      const response = await axios.post(
+        `${API_URL}/api/ai/check-ats`,
+        { resumeText: atsResumeText },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      console.log('✅ ATS check complete:', response.data);
+      setAtsResult(response.data.analysis);
+    } catch (error) {
+      console.error('ATS check error:', error);
+      alert('Failed to check ATS score: ' + (error.response?.data?.error || error.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="ai-features-container">
       <div className="ai-header">
@@ -156,6 +188,12 @@ const AIFeatures = () => {
           onClick={() => setActiveTab('cover')}
         >
           ✉️ Cover Letter
+        </button>
+        <button
+          className={activeTab === 'ats' ? 'tab-active' : ''}
+          onClick={() => setActiveTab('ats')}
+        >
+          🎯 ATS Score Checker
         </button>
       </div>
 
@@ -346,6 +384,160 @@ const AIFeatures = () => {
                     📋 Copy to Clipboard
                   </button>
                 </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ATS SCORE CHECKER TAB */}
+      {activeTab === 'ats' && (
+        <div className="ai-content">
+          <div className="ai-section">
+            <h2>🎯 ATS Compatibility Checker</h2>
+            <p>Check how well your resume passes Applicant Tracking Systems</p>
+
+            <div className="form-group">
+              <label>Paste Your Resume Text:</label>
+              <textarea
+                rows={12}
+                placeholder="Paste your entire resume text here..."
+                value={atsResumeText}
+                onChange={(e) => setAtsResumeText(e.target.value)}
+                style={{ fontFamily: 'monospace', fontSize: '14px' }}
+              />
+            </div>
+
+            <button
+              className="ai-button"
+              onClick={checkATSScore}
+              disabled={loading}
+            >
+              {loading ? '🔄 Analyzing...' : '🎯 Check ATS Score'}
+            </button>
+
+            {atsResult && (
+              <div className="ai-results">
+                <div className="ats-score-header">
+                  <h3>ATS Compatibility Score</h3>
+                  <div className="score-circle" style={{
+                    background: `conic-gradient(
+                      ${atsResult.overallScore >= 80 ? '#2ecc71' : 
+                        atsResult.overallScore >= 60 ? '#f39c12' : '#e74c3c'} 
+                      ${atsResult.overallScore * 3.6}deg, 
+                      #ecf0f1 0deg
+                    )`
+                  }}>
+                    <div className="score-inner">
+                      <span className="score-number">{atsResult.overallScore}</span>
+                      <span className="score-label">/ 100</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Category Scores */}
+                <div className="ats-categories">
+                  <h4>📊 Category Breakdown</h4>
+                  {Object.entries(atsResult.categories || {}).map(([key, value]) => (
+                    <div key={key} className="category-item">
+                      <div className="category-header">
+                        <span className="category-name">{key.charAt(0).toUpperCase() + key.slice(1)}</span>
+                        <span className="category-score">{value.score}/100</span>
+                      </div>
+                      <div className="progress-bar">
+                        <div 
+                          className="progress-fill" 
+                          style={{ 
+                            width: `${value.score}%`,
+                            backgroundColor: value.score >= 80 ? '#2ecc71' : 
+                                           value.score >= 60 ? '#f39c12' : '#e74c3c'
+                          }}
+                        />
+                      </div>
+                      <p className="category-feedback">{value.feedback}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Strengths */}
+                {atsResult.strengths && atsResult.strengths.length > 0 && (
+                  <div className="ats-section">
+                    <h4>✅ Strengths</h4>
+                    <ul className="ats-list success">
+                      {atsResult.strengths.map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Warnings */}
+                {atsResult.warnings && atsResult.warnings.length > 0 && (
+                  <div className="ats-section">
+                    <h4>⚠️ Warnings</h4>
+                    <ul className="ats-list warning">
+                      {atsResult.warnings.map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Critical Issues */}
+                {atsResult.criticalIssues && atsResult.criticalIssues.length > 0 && (
+                  <div className="ats-section">
+                    <h4>🚫 Critical Issues</h4>
+                    <ul className="ats-list error">
+                      {atsResult.criticalIssues.map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Suggestions */}
+                {atsResult.suggestions && atsResult.suggestions.length > 0 && (
+                  <div className="ats-section">
+                    <h4>💡 Suggestions for Improvement</h4>
+                    <ul className="ats-list info">
+                      {atsResult.suggestions.map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Missing Elements */}
+                {atsResult.missingElements && atsResult.missingElements.length > 0 && (
+                  <div className="ats-section">
+                    <h4>📋 Missing Elements</h4>
+                    <ul className="ats-list">
+                      {atsResult.missingElements.map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Detected Keywords */}
+                {atsResult.detectedKeywords && atsResult.detectedKeywords.length > 0 && (
+                  <div className="ats-section">
+                    <h4>🔑 Detected Keywords</h4>
+                    <div className="keywords-cloud">
+                      {atsResult.detectedKeywords.map((keyword, idx) => (
+                        <span key={idx} className="keyword-badge">{keyword}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Recommendation */}
+                {atsResult.recommendation && (
+                  <div className="ats-section recommendation">
+                    <h4>📝 Overall Recommendation</h4>
+                    <p>{atsResult.recommendation}</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
