@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 // import axios from 'axios'; // Not currently used
 import '../styles/VideoInterviewSession.css';
@@ -108,6 +108,7 @@ const VideoInterviewSession = () => {
         clearInterval(timerIntervalRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recording, isPaused]);
 
   // Start camera
@@ -150,16 +151,14 @@ const VideoInterviewSession = () => {
       recognition.lang = 'en-US';
 
       recognition.onresult = (event) => {
-        let interimTranscript = '';
         let finalTranscript = '';
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
             finalTranscript += transcript + ' ';
-          } else {
-            interimTranscript += transcript;
           }
+          // Note: interim results are collected but not currently displayed
         }
 
         setTranscript(prev => prev + finalTranscript);

@@ -7,8 +7,10 @@ const JobSuggestions = () => {
   const [allJobs, setAllJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [stats, setStats] = useState(null);
   const [showAllJobs, setShowAllJobs] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [displayLimit, setDisplayLimit] = useState(6);
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
