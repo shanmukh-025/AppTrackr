@@ -67,6 +67,7 @@ model User {
   forumPosts          ForumPost[]
   forumComments       ForumComment[]
   resumes             Resume[]
+  coverLetterTemplates CoverLetterTemplate[] @relation("CoverLetterTemplates")
   bookmarkedJobs      JobBookmark[]    @relation("BookmarkedJobs")
   notes               Note[]           @relation("UserNotes")
   preferences         UserPreference?  @relation("UserPreferences")
@@ -405,6 +406,35 @@ model Resume {
   
   version         Int      @default(1)
   isActive        Boolean  @default(true)
+  
+  // Version Control
+  companiesSentTo String?  @db.Text  // JSON array: [{company, position, sentDate}]
+  description     String?  // User's note about this version
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId])
+}
+
+model CoverLetterTemplate {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation("CoverLetterTemplates", fields: [userId], references: [id], onDelete: Cascade)
+  
+  name            String   // e.g., "Tech Company Template"
+  industry        String   // tech, finance, healthcare, etc.
+  
+  // Template Sections (with placeholders)
+  opening         String   @db.Text   // Intro paragraph with [COMPANY] [POSITION] placeholders
+  bodyParagraph1  String   @db.Text   // Why I'm interested in [COMPANY]
+  bodyParagraph2  String   @db.Text   // My relevant experience
+  bodyParagraph3  String   @db.Text   // Skills match with [POSITION]
+  closing         String   @db.Text   // Closing statement
+  
+  // Metadata
+  tone            String   @default("professional") // professional, casual, enthusiastic
+  isDefault       Boolean  @default(false) // User's preferred template
   
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

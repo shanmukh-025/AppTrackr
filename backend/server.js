@@ -21,6 +21,7 @@ const interviewRoutes = require('./routes/interviews');
 const learningRoutes = require('./routes/learning');
 const authRoutes = require('./routes/auth');
 const healthRoutes = require('./routes/health');
+const templateRoutes = require('./routes/templates');
 const { initializeStaticCompanies } = require('./utils/companyCareerPages');
 const app = express();
 
@@ -129,6 +130,9 @@ app.use('/api/interviews', interviewRoutes);
 
 // Learning resources routes (Skill-specific learning paths)
 app.use('/api/learning', learningRoutes);
+
+// Templates routes (Cover letter templates, resume templates)
+app.use('/api/templates', templateRoutes);
 
 const PORT = process.env.PORT || 5000;
 

@@ -218,4 +218,222 @@ router.post('/:id/analyze', authenticateToken, async (req, res) => {
   }
 });
 
+// ============================================
+// RESUME VERSION CONTROL ENDPOINTS
+// ============================================
+
+/**
+ * GET /api/resumes/:id/versions
+ * Get all versions of a resume with company tracking
+ */
+router.get('/:id/versions', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check ownership
+    const resume = await prisma.resume.findFirst({
+      where: { id, userId: req.userId }
+    });
+
+    if (!resume) {
+      return res.status(404).json({ error: 'Resume not found' });
+    }
+
+    // Parse companies sent to
+    let companiesSentTo = [];
+    if (resume.companiesSentTo) {
+      try {
+        companiesSentTo = JSON.parse(resume.companiesSentTo);
+      } catch (e) {
+        companiesSentTo = [];
+      }
+    }
+
+    res.json({
+      success: true,
+      resumeId: resume.id,
+      name: resume.name,
+      version: resume.version,
+      description: resume.description,
+      companiesSentTo: companiesSentTo,
+      createdAt: resume.createdAt,
+      updatedAt: resume.updatedAt
+    });
+  } catch (error) {
+    console.error('Error fetching resume versions:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/resumes/:id/save-version
+ * Save current resume as a new version
+ */
+router.post('/:id/save-version', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { description } = req.body;
+
+    // Check ownership
+    const originalResume = await prisma.resume.findFirst({
+      where: { id, userId: req.userId }
+    });
+
+    if (!originalResume) {
+      return res.status(404).json({ error: 'Resume not found' });
+    }
+
+    // Create new version
+    const newVersion = await prisma.resume.create({
+      data: {
+        userId: req.userId,
+        name: originalResume.name,
+        template: originalResume.template,
+        description: description || `Version ${originalResume.version + 1}`,
+        version: originalResume.version + 1,
+        isActive: false,
+        personalInfo: originalResume.personalInfo,
+        summary: originalResume.summary,
+        experience: originalResume.experience,
+        education: originalResume.education,
+        skills: originalResume.skills,
+        certifications: originalResume.certifications,
+        rawText: originalResume.rawText
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Version saved successfully',
+      newVersion: {
+        id: newVersion.id,
+        version: newVersion.version,
+        description: newVersion.description,
+        createdAt: newVersion.createdAt
+      }
+    });
+  } catch (error) {
+    console.error('Error saving resume version:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/resumes/:id/mark-sent
+ * Track which company this resume was sent to
+ */
+router.post('/:id/mark-sent', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { company, position } = req.body;
+
+    if (!company) {
+      return res.status(400).json({ error: 'Company name is required' });
+    }
+
+    // Check ownership
+    const resume = await prisma.resume.findFirst({
+      where: { id, userId: req.userId }
+    });
+
+    if (!resume) {
+      return res.status(404).json({ error: 'Resume not found' });
+    }
+
+    // Parse existing companies
+    let companiesSentTo = [];
+    if (resume.companiesSentTo) {
+      try {
+        companiesSentTo = JSON.parse(resume.companiesSentTo);
+      } catch (e) {
+        companiesSentTo = [];
+      }
+    }
+
+    // Check if already sent to this company
+    const alreadySent = companiesSentTo.some(c => c.company === company);
+    if (alreadySent) {
+      return res.status(400).json({ error: 'Resume already marked as sent to this company' });
+    }
+
+    // Add new company
+    companiesSentTo.push({
+      company,
+      position: position || 'Not specified',
+      sentDate: new Date().toISOString()
+    });
+
+    // Update resume
+    const updated = await prisma.resume.update({
+      where: { id },
+      data: {
+        companiesSentTo: JSON.stringify(companiesSentTo)
+      }
+    });
+
+    res.json({
+      success: true,
+      message: `Resume marked as sent to ${company}`,
+      companiesSentTo: companiesSentTo
+    });
+  } catch (error) {
+    console.error('Error marking resume sent:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * DELETE /api/resumes/:id/remove-company-sent
+ * Remove a company from the sent list
+ */
+router.delete('/:id/remove-company-sent', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { company } = req.body;
+
+    if (!company) {
+      return res.status(400).json({ error: 'Company name is required' });
+    }
+
+    // Check ownership
+    const resume = await prisma.resume.findFirst({
+      where: { id, userId: req.userId }
+    });
+
+    if (!resume) {
+      return res.status(404).json({ error: 'Resume not found' });
+    }
+
+    // Parse existing companies
+    let companiesSentTo = [];
+    if (resume.companiesSentTo) {
+      try {
+        companiesSentTo = JSON.parse(resume.companiesSentTo);
+      } catch (e) {
+        companiesSentTo = [];
+      }
+    }
+
+    // Remove company
+    companiesSentTo = companiesSentTo.filter(c => c.company !== company);
+
+    // Update resume
+    await prisma.resume.update({
+      where: { id },
+      data: {
+        companiesSentTo: JSON.stringify(companiesSentTo)
+      }
+    });
+
+    res.json({
+      success: true,
+      message: `${company} removed from sent list`,
+      companiesSentTo: companiesSentTo
+    });
+  } catch (error) {
+    console.error('Error removing company:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
