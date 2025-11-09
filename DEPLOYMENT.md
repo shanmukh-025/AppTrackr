@@ -44,11 +44,11 @@ Make sure these are set in Render Dashboard:
 ```
 PORT=5000
 NODE_ENV=production
-DATABASE_URL=postgresql://postgres:ShanmukhaSai@db.dmiojamppsecnxltaapt.supabase.co:5432/postgres?connection_limit=100&pool_timeout=60&connect_timeout=10&statement_timeout=60000
-JWT_SECRET=your-super-secret-key-change-this-in-production-12345
-GEMINI_API_KEY=AIzaSyD4vOmGRiMqOB64eWYNj065fAk9qHSt2cc
-JOOBLE_API_KEY=dfc6bde3-45f4-4800-8e55-58b1f576af36
-APIJOBS_API_KEY=6166711c8b449b75c67d0fb5c521dfdff6ccf176dbae9e9c5a942bda7ef7a65b
+DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@YOUR_HOST:5432/postgres?connection_limit=100&pool_timeout=60
+JWT_SECRET=your-super-secret-key-change-this-in-production
+GEMINI_API_KEY=your-new-google-api-key-here
+JOOBLE_API_KEY=your-jooble-api-key
+APIJOBS_API_KEY=your-apijobs-api-key
 ```
 
 ---
