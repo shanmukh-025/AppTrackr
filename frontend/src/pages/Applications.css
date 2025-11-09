@@ -1,72 +1,58 @@
 .applications-page {
-  margin-left: 280px;
-  padding: var(--space-8);
+  padding: var(--space-10);
+  max-width: 1600px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, var(--slate-50) 0%, rgba(102, 126, 234, 0.03) 50%, rgba(139, 92, 246, 0.02) 100%);
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--slate-50) 0%, rgba(102, 126, 234, 0.05) 100%);
   position: relative;
-  animation: fadeIn 0.6s ease-out;
   overflow: hidden;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Dual floating decorative elements */
 .applications-page::before {
   content: '';
   position: absolute;
-  top: -100px;
-  right: -100px;
-  width: 600px;
-  height: 600px;
+  top: -30%;
+  right: -20%;
+  width: 800px;
+  height: 800px;
   background: radial-gradient(
     circle at center,
     rgba(99, 102, 241, 0.12) 0%,
-    rgba(139, 92, 246, 0.08) 40%,
+    rgba(139, 92, 246, 0.08) 30%,
     transparent 70%
   );
-  border-radius: 50%;
   pointer-events: none;
-  animation: floatSlow 25s ease-in-out infinite;
-  filter: blur(40px);
+  animation: float 20s ease-in-out infinite;
+  filter: blur(60px);
 }
 
 .applications-page::after {
   content: '';
   position: absolute;
-  bottom: -150px;
-  left: -150px;
-  width: 700px;
-  height: 700px;
+  bottom: -30%;
+  left: -20%;
+  width: 900px;
+  height: 900px;
   background: radial-gradient(
-    ellipse at center,
-    rgba(139, 92, 246, 0.1) 0%,
-    rgba(99, 102, 241, 0.06) 50%,
+    circle at center,
+    rgba(139, 92, 246, 0.10) 0%,
+    rgba(236, 72, 153, 0.06) 40%,
     transparent 75%
   );
   pointer-events: none;
-  animation: floatSlow 30s ease-in-out infinite reverse;
-  filter: blur(50px);
+  animation: float 25s ease-in-out infinite reverse;
+  filter: blur(70px);
 }
 
-@keyframes floatSlow {
+@keyframes float {
   0%, 100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.7;
+    transform: translate(0, 0) rotate(0deg) scale(1);
   }
   33% {
-    transform: translate(30px, -30px) scale(1.1);
-    opacity: 0.9;
+    transform: translate(30px, -30px) rotate(5deg) scale(1.05);
   }
   66% {
-    transform: translate(-20px, 20px) scale(0.95);
-    opacity: 0.8;
+    transform: translate(-20px, 20px) rotate(-5deg) scale(0.95);
   }
 }
 
@@ -74,22 +60,35 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-10);
-  animation: fadeInDown 0.5s ease;
+  margin-bottom: var(--space-12);
   position: relative;
   z-index: 1;
+  animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .applications-header h1 {
   font-size: var(--font-size-5xl);
   font-weight: var(--font-weight-800);
-  background: linear-gradient(135deg, var(--primary-600) 0%, var(--secondary-600) 100%);
+  color: var(--slate-900);
+  margin-bottom: var(--space-3);
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  letter-spacing: -0.02em;
   position: relative;
   display: inline-block;
-  letter-spacing: -0.02em;
 }
 
 .applications-header h1::after {
@@ -97,7 +96,7 @@
   position: absolute;
   bottom: -8px;
   left: 0;
-  width: 120px;
+  width: 100%;
   height: 4px;
   background: linear-gradient(90deg, var(--primary-600) 0%, var(--secondary-600) 100%);
   border-radius: var(--radius-full);
