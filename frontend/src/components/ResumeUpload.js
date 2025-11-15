@@ -13,14 +13,26 @@ const ResumeUpload = ({ onResumeUploaded }) => {
   const [analyzing, setAnalyzing] = useState(false);
   const fileInputRef = useRef(null);
 
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
   // Load resumes on mount
   React.useEffect(() => {
-    loadResumes();
-  }, []);
+    const fetchResumes = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/resumes`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setResumes(response.data.resumes || []);
+      } catch (error) {
+        console.error('Error loading resumes:', error);
+      }
+    };
+    fetchResumes();
+  }, [API_URL]);
 
   const loadResumes = async () => {
     try {
-      const response = await axios.get('/api/resumes', {
+      const response = await axios.get(`${API_URL}/api/resumes`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setResumes(response.data.resumes || []);
@@ -85,7 +97,7 @@ const ResumeUpload = ({ onResumeUploaded }) => {
       const formData = new FormData();
       formData.append('resume', file);
 
-      const response = await axios.post('/api/resumes/upload', formData, {
+      const response = await axios.post(`${API_URL}/api/resumes/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -121,7 +133,7 @@ const ResumeUpload = ({ onResumeUploaded }) => {
     setAnalyzing(true);
     try {
       const response = await axios.post(
-        `/api/resumes/${selectedResume.id}/analyze`,
+        `${API_URL}/api/resumes/${selectedResume.id}/analyze`,
         { jobDescription: analysisJob },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -139,7 +151,7 @@ const ResumeUpload = ({ onResumeUploaded }) => {
   const deleteResume = async (id) => {
     if (window.confirm('Are you sure you want to delete this resume?')) {
       try {
-        await axios.delete(`/api/resumes/${id}`, {
+        await axios.delete(`${API_URL}/api/resumes/${id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         loadResumes();

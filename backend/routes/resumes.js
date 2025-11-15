@@ -100,6 +100,71 @@ router.get('/', authenticateToken, async (req, res) => {
 });
 
 /**
+ * GET /api/resumes/analysis-history
+ * Get resume analysis history with scores
+ */
+router.get('/analysis-history', authenticateToken, async (req, res) => {
+  try {
+    const analyses = await prisma.resumeAnalysis.findMany({
+      where: { userId: req.userId },
+      orderBy: { createdAt: 'desc' },
+      take: 20 // Last 20 analyses
+    });
+
+    const formattedAnalyses = analyses.map(a => ({
+      id: a.id,
+      score: a.overallScore,
+      atsScore: a.matchScore || a.overallScore,
+      formattingScore: Math.floor(a.overallScore * 0.95), // Approximate from overall
+      keywordScore: Math.floor(a.overallScore * 0.9), // Approximate from overall
+      date: a.createdAt,
+      strengths: JSON.parse(a.strengths || '[]'),
+      weaknesses: JSON.parse(a.weaknesses || '[]'),
+      suggestions: JSON.parse(a.suggestions || '[]')
+    }));
+
+    res.json({ history: formattedAnalyses });
+  } catch (error) {
+    console.error('Get analysis history error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * DELETE /api/resumes/analysis/:id
+ * Delete a resume analysis
+ */
+router.delete('/analysis/:id', authenticateToken, async (req, res) => {
+  try {
+    const analysisId = req.params.id;
+    
+    // Check if analysis exists and belongs to user
+    const analysis = await prisma.resumeAnalysis.findUnique({
+      where: { id: analysisId }
+    });
+
+    if (!analysis) {
+      return res.status(404).json({ error: 'Analysis not found' });
+    }
+
+    if (analysis.userId !== req.userId) {
+      return res.status(403).json({ error: 'Unauthorized to delete this analysis' });
+    }
+
+    // Delete the analysis
+    await prisma.resumeAnalysis.delete({
+      where: { id: analysisId }
+    });
+
+    console.log(`✅ Analysis deleted: ${analysisId}`);
+    res.json({ success: true, message: 'Analysis deleted successfully' });
+  } catch (error) {
+    console.error('Delete analysis error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
  * GET /api/resumes/:id
  * Get specific resume
  */
@@ -192,9 +257,18 @@ router.post('/:id/analyze', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Job description is required' });
     }
 
-    const resume = await prisma.resume.findUnique({
-      where: { id: resumeId }
-    });
+    let resume;
+    try {
+      resume = await prisma.resume.findUnique({
+        where: { id: resumeId }
+      });
+    } catch (dbError) {
+      console.error('Database connection error:', dbError.message);
+      return res.status(503).json({ 
+        error: 'Database connection failed. Please ensure Supabase is running and DATABASE_URL is correct.',
+        details: dbError.message
+      });
+    }
 
     console.log(`Resume found:`, resume ? `Yes (ID: ${resume.id})` : 'No');
     console.log(`Resume userId: ${resume?.userId}, Request userId: ${req.userId}`);
@@ -215,6 +289,121 @@ router.post('/:id/analyze', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Resume analysis error:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/resumes/analyze-score
+ * Comprehensive resume analysis and scoring (no job description needed)
+ */
+router.post('/analyze-score', authenticateToken, upload.single('resume'), async (req, res) => {
+  try {
+    let resumeText = '';
+    let resumeId = null;
+
+    // Handle file upload or text paste
+    if (req.file) {
+      console.log(`📄 Processing uploaded resume: ${req.file.originalname}`);
+      const parsedResume = await resumeUploadService.processResumeFile(req.file);
+      resumeText = parsedResume.rawText;
+      
+      // Save to database
+      const resume = await prisma.resume.create({
+        data: {
+          userId: req.userId,
+          name: `${parsedResume.fullName || 'Resume'} - ${new Date().toLocaleDateString()}`,
+          personalInfo: JSON.stringify({
+            fullName: parsedResume.fullName || '',
+            email: parsedResume.email || '',
+            phone: parsedResume.phone || ''
+          }),
+          summary: parsedResume.summary || '',
+          experience: JSON.stringify(parsedResume.experience),
+          education: JSON.stringify(parsedResume.education),
+          skills: JSON.stringify(parsedResume.skills),
+          certifications: JSON.stringify(parsedResume.certifications),
+          fileName: parsedResume.fileName,
+          filePath: parsedResume.filePath,
+          fileSize: parsedResume.fileSize,
+          uploadedFrom: 'score-optimizer',
+          rawText: parsedResume.rawText
+        }
+      });
+      resumeId = resume.id;
+    } else if (req.body.resumeText) {
+      resumeText = req.body.resumeText;
+      
+      // Create a resume record for pasted text too
+      const resume = await prisma.resume.create({
+        data: {
+          userId: req.userId,
+          name: `Resume - ${new Date().toLocaleDateString()}`,
+          personalInfo: JSON.stringify({}),
+          summary: '',
+          experience: JSON.stringify([]),
+          education: JSON.stringify([]),
+          skills: JSON.stringify([]),
+          certifications: JSON.stringify([]),
+          uploadedFrom: 'paste-text',
+          rawText: resumeText
+        }
+      });
+      resumeId = resume.id;
+    } else {
+      return res.status(400).json({ error: 'Please provide resume file or text' });
+    }
+
+    if (!resumeText || resumeText.trim().length < 50) {
+      return res.status(400).json({ error: 'Resume text is too short or empty' });
+    }
+
+    console.log(`🤖 Analyzing resume (${resumeText.length} characters)...`);
+
+    // Use AI service for comprehensive analysis
+    const resumeAIService = require('../services/resumeAIService');
+    
+    // Get comprehensive analysis
+    const analysis = await resumeAIService.comprehensiveResumeAnalysis(resumeText);
+
+    // Save analysis results to ResumeAnalysis table
+    await prisma.resumeAnalysis.create({
+      data: {
+        userId: req.userId,
+        resumeText: resumeText.substring(0, 5000), // Store first 5000 chars
+        overallScore: analysis.overallScore,
+        matchScore: analysis.atsScore,
+        skillsMatched: JSON.stringify(analysis.sections?.present || []),
+        skillsGaps: JSON.stringify(analysis.sections?.missing || []),
+        suggestions: JSON.stringify(analysis.improvements || []),
+        strengths: JSON.stringify(analysis.strengths || []),
+        weaknesses: JSON.stringify(analysis.weaknesses || [])
+      }
+    });
+
+    console.log(`✅ Analysis saved for user ${req.userId}`);
+
+    res.json({
+      success: true,
+      resumeId,
+      analysis: {
+        overallScore: analysis.overallScore,
+        atsScore: analysis.atsScore,
+        formattingScore: analysis.formattingScore,
+        contentScore: analysis.contentScore,
+        keywordScore: analysis.keywordScore,
+        sections: analysis.sections,
+        strengths: analysis.strengths,
+        weaknesses: analysis.weaknesses,
+        improvements: analysis.improvements
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Resume analysis error:', error);
+    res.status(500).json({ 
+      error: 'Failed to analyze resume',
+      details: error.message 
+    });
   }
 });
 

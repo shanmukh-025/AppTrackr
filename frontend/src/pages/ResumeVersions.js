@@ -9,11 +9,12 @@ const ResumeVersions = () => {
   const [showCompanyTracking, setShowCompanyTracking] = useState(false);
   const [newCompany, setNewCompany] = useState({ company: '', position: '' });
   const token = localStorage.getItem('token');
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   const fetchResumes = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/resumes', {
+      const response = await fetch(`${API_URL}/api/resumes`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -24,7 +25,7 @@ const ResumeVersions = () => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, API_URL]);
 
   useEffect(() => {
     fetchResumes();
@@ -37,7 +38,7 @@ const ResumeVersions = () => {
     }
 
     try {
-      const response = await fetch(`/api/resumes/${resumeId}/mark-sent`, {
+      const response = await fetch(`${API_URL}/api/resumes/${resumeId}/mark-sent`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -74,7 +75,7 @@ const ResumeVersions = () => {
     if (!window.confirm(`Remove ${company} from tracking?`)) return;
 
     try {
-      const response = await fetch(`/api/resumes/${resumeId}/remove-company-sent`, {
+      const response = await fetch(`${API_URL}/api/resumes/${resumeId}/remove-company-sent`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -102,7 +103,7 @@ const ResumeVersions = () => {
     if (!window.confirm('Delete this resume?')) return;
 
     try {
-      const response = await fetch(`/api/resumes/${resumeId}`, {
+      const response = await fetch(`${API_URL}/api/resumes/${resumeId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

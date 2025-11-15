@@ -3,31 +3,37 @@
 }
 
 .learning-paths h2 {
-  color: #333;
+  color: #1e293b;
   margin: 0 0 8px 0;
-  font-size: 1.6em;
+  font-size: 1.75em;
   font-weight: 700;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
 }
 
 .learning-paths .subtitle {
-  color: #999;
-  margin-bottom: 30px;
+  color: #64748b;
+  margin-bottom: 35px;
   font-size: 0.95em;
   font-weight: 400;
+  line-height: 1.6;
 }
 
 /* Path Generator */
 .path-generator {
-  background: white;
+  background: transparent;
   padding: 0;
   border-radius: 0;
   margin-bottom: 0;
 }
 
 .form-section {
-  margin-bottom: 35px;
-  padding-bottom: 35px;
-  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 40px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
 }
 
 .form-section:last-of-type {
@@ -37,67 +43,106 @@
 }
 
 .form-section h3 {
-  color: #333;
+  color: #1e293b;
   margin: 0 0 20px 0;
-  font-size: 1.05em;
+  font-size: 1.1em;
   font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 /* Role Grid */
 .role-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
 .role-btn {
-  padding: 14px 16px;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
+  padding: 16px 18px;
+  border: 2px solid rgba(226, 232, 240, 0.8);
+  border-radius: 12px;
   background: white;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   font-weight: 500;
-  color: #666;
+  color: #64748b;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.role-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.role-btn:hover::before {
+  opacity: 1;
 }
 
 .role-btn:hover {
-  border-color: #667eea;
-  background: #f5f7ff;
-  color: #667eea;
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #6366f1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
 }
 
 .role-btn.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   color: white;
   border-color: transparent;
+  box-shadow: 
+    0 4px 12px rgba(99, 102, 241, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.role-btn.active::before {
+  opacity: 0;
 }
 
 /* Level Options */
 .level-options {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   flex-wrap: wrap;
 }
 
 .radio-option {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
+  padding: 12px 20px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.radio-option:hover {
+  background: rgba(99, 102, 241, 0.05);
+  border-color: rgba(99, 102, 241, 0.15);
 }
 
 .radio-option input[type="radio"] {
   cursor: pointer;
-  width: 18px;
-  height: 18px;
-  accent-color: #667eea;
+  width: 20px;
+  height: 20px;
+  accent-color: #6366f1;
 }
 
 .radio-text {
-  color: #666;
+  color: #475569;
   font-weight: 500;
   user-select: none;
+  font-size: 0.95em;
 }
 
 /* Skill Input */

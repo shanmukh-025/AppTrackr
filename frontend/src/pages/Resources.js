@@ -104,73 +104,71 @@ const Resources = () => {
 
   if (loading && Object.keys(resumeTemplates).length === 0) {
     return (
-      <div className="page-container">
+      <div className="resources-page">
         <div className="loading-center">
           <div className="spinner"></div>
-          <p>Loading Resources Hub...</p>
+          <p>Loading Resources...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="page-container resources-page">
-      <div className="page-header">
-        <div>
-          <h1>🎯 Resources Hub</h1>
-          <p>Ready-to-use templates, interview prep, DSA & system design questions</p>
-        </div>
+    <div className="resources-page">
+      <div className="resources-header">
+        <h1>Resources & Templates</h1>
+        <p>Explore templates, interview prep, and practice resources</p>
       </div>
 
       {error && <div className="error-banner">{error}</div>}
 
       {/* TAB NAVIGATION */}
-      <div className="resource-tabs">
-        <button
-          className={`tab-btn ${activeTab === 'resume-builder' ? 'active' : ''}`}
-          onClick={() => setActiveTab('resume-builder')}
-        >
-          📄 Resume
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'cover-letter' ? 'active' : ''}`}
-          onClick={() => setActiveTab('cover-letter')}
-        >
-          ✉️ Cover Letter
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'interview-prep' ? 'active' : ''}`}
-          onClick={() => setActiveTab('interview-prep')}
-        >
-          💼 Interview Questions
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'behavioral' ? 'active' : ''}`}
-          onClick={() => setActiveTab('behavioral')}
-        >
-          🎤 Behavioral
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'dsa' ? 'active' : ''}`}
-          onClick={() => setActiveTab('dsa')}
-        >
-          💻 DSA
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'system-design' ? 'active' : ''}`}
-          onClick={() => setActiveTab('system-design')}
-        >
-          🏗️ System Design
-        </button>
+      <div className="resources-tabs-container">
+        <div className="resources-tabs">
+          <button
+            className={`tab-btn ${activeTab === 'resume-builder' ? 'active' : ''}`}
+            onClick={() => setActiveTab('resume-builder')}
+          >
+            Resume
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'cover-letter' ? 'active' : ''}`}
+            onClick={() => setActiveTab('cover-letter')}
+          >
+            Cover Letter
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'interview-prep' ? 'active' : ''}`}
+            onClick={() => setActiveTab('interview-prep')}
+          >
+            Interview Prep
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'behavioral' ? 'active' : ''}`}
+            onClick={() => setActiveTab('behavioral')}
+          >
+            Behavioral
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'dsa' ? 'active' : ''}`}
+            onClick={() => setActiveTab('dsa')}
+          >
+            DSA
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'system-design' ? 'active' : ''}`}
+            onClick={() => setActiveTab('system-design')}
+          >
+            System Design
+          </button>
+        </div>
       </div>
 
       {/* RESUME BUILDER TAB */}
       {activeTab === 'resume-builder' && (
         <div className="tab-content">
-          <div className="section-header">
-            <h2>📄 Resume Templates - Customizable & Ready-to-Use</h2>
-            <p>Select your role and experience level</p>
-          </div>
+          <h2>Resume Templates</h2>
+          <p className="section-subtitle">Select a template to customize and download</p>
 
           <div className="template-grid">
             {Object.entries(resumeTemplates).map(([key, template]) => (
@@ -179,9 +177,9 @@ const Resources = () => {
                 className={`template-card ${selectedResumeTemplate === key ? 'selected' : ''}`}
                 onClick={() => setSelectedResumeTemplate(key)}
               >
+                <div className="template-icon">📄</div>
                 <h3>{template.name}</h3>
-                <p className="industry">{template.industry}</p>
-                <p className="description">{template.description}</p>
+                <p>{template.description}</p>
               </button>
             ))}
           </div>
@@ -192,19 +190,19 @@ const Resources = () => {
                 <h3>{resumeTemplates[selectedResumeTemplate].name}</h3>
                 <div className="action-buttons">
                   <button
-                    className="btn-copy"
+                    className="btn-secondary"
                     onClick={() => copyToClipboard(resumeTemplates[selectedResumeTemplate].template)}
                   >
-                    📋 Copy
+                    Copy
                   </button>
                   <button
-                    className="btn-download"
+                    className="btn-primary"
                     onClick={() => downloadAsFile(
                       `resume-${selectedResumeTemplate}.txt`,
                       resumeTemplates[selectedResumeTemplate].template
                     )}
                   >
-                    ⬇️ Download
+                    Download
                   </button>
                 </div>
               </div>
@@ -217,10 +215,8 @@ const Resources = () => {
       {/* COVER LETTER TAB */}
       {activeTab === 'cover-letter' && (
         <div className="tab-content">
-          <div className="section-header">
-            <h2>✉️ Cover Letter Templates - Customizable</h2>
-            <p>Multiple templates for different situations</p>
-          </div>
+          <h2>Cover Letter Templates</h2>
+          <p className="section-subtitle">Choose a template and customize it</p>
 
           <div className="template-grid">
             {Object.entries(coverLetterTemplates).map(([key, template]) => (
@@ -229,8 +225,9 @@ const Resources = () => {
                 className={`template-card ${selectedCoverLetter === key ? 'selected' : ''}`}
                 onClick={() => setSelectedCoverLetter(key)}
               >
+                <div className="template-icon">✉️</div>
                 <h3>{template.name}</h3>
-                <p className="description">{template.description}</p>
+                <p>{template.description}</p>
               </button>
             ))}
           </div>
@@ -241,19 +238,19 @@ const Resources = () => {
                 <h3>{coverLetterTemplates[selectedCoverLetter].name}</h3>
                 <div className="action-buttons">
                   <button
-                    className="btn-copy"
+                    className="btn-secondary"
                     onClick={() => copyToClipboard(coverLetterTemplates[selectedCoverLetter].template)}
                   >
-                    📋 Copy
+                    Copy
                   </button>
                   <button
-                    className="btn-download"
+                    className="btn-primary"
                     onClick={() => downloadAsFile(
                       `cover-letter-${selectedCoverLetter}.txt`,
                       coverLetterTemplates[selectedCoverLetter].template
                     )}
                   >
-                    ⬇️ Download
+                    Download
                   </button>
                 </div>
               </div>
@@ -266,45 +263,32 @@ const Resources = () => {
       {/* INTERVIEW PREP TAB */}
       {activeTab === 'interview-prep' && (
         <div className="tab-content">
-          <div className="section-header">
-            <h2>💼 Interview Preparation Resources</h2>
-            <p>Browse different types of interview questions below</p>
-          </div>
+          <h2>Interview Preparation</h2>
+          <p className="section-subtitle">Browse different types of interview resources</p>
 
-          <div className="interview-info-box">
-            <h3>🎯 Available Interview Resources</h3>
-            <div className="resources-grid-simple">
-              <div className="resource-card-simple">
-                <div className="resource-icon">🎤</div>
-                <h4>Behavioral Questions</h4>
-                <p>STAR method, leadership, teamwork questions</p>
-                <button className="btn-navigate" onClick={() => setActiveTab('behavioral')}>
-                  View Behavioral →
-                </button>
-              </div>
-              <div className="resource-card-simple">
-                <div className="resource-icon">💻</div>
-                <h4>DSA Problems</h4>
-                <p>Data structures and algorithms practice</p>
-                <button className="btn-navigate" onClick={() => setActiveTab('dsa')}>
-                  View DSA →
-                </button>
-              </div>
-              <div className="resource-card-simple">
-                <div className="resource-icon">🏗️</div>
-                <h4>System Design</h4>
-                <p>Scalability, architecture, design patterns</p>
-                <button className="btn-navigate" onClick={() => setActiveTab('system-design')}>
-                  View System Design →
-                </button>
-              </div>
+          <div className="interview-cards-grid">
+            <div className="interview-card">
+              <div className="card-icon">💬</div>
+              <h3>Behavioral Questions</h3>
+              <p>Master STAR method, leadership, and teamwork questions</p>
+              <button className="btn-link" onClick={() => setActiveTab('behavioral')}>
+                View Questions →
+              </button>
             </div>
-
-            <div className="ai-assistant-promo">
-              <h4>🤖 Want Company-Specific Questions?</h4>
-              <p>Use our AI Assistant to generate custom interview questions tailored to specific companies and roles!</p>
-              <button className="btn-primary" onClick={() => window.location.href = '/ai-features'}>
-                Go to AI Assistant
+            <div className="interview-card">
+              <div className="card-icon">💻</div>
+              <h3>DSA Problems</h3>
+              <p>Practice data structures and algorithms</p>
+              <button className="btn-link" onClick={() => setActiveTab('dsa')}>
+                View Problems →
+              </button>
+            </div>
+            <div className="interview-card">
+              <div className="card-icon">🏗️</div>
+              <h3>System Design</h3>
+              <p>Learn scalability, architecture, and design patterns</p>
+              <button className="btn-link" onClick={() => setActiveTab('system-design')}>
+                View Topics →
               </button>
             </div>
           </div>
@@ -314,39 +298,36 @@ const Resources = () => {
       {/* BEHAVIORAL TAB */}
       {activeTab === 'behavioral' && (
         <div className="tab-content">
-          <div className="section-header">
-            <h2>🎤 Behavioral Questions - {allBehavioral.length} Questions</h2>
-            <p>Master behavioral and cultural fit interviews</p>
-          </div>
+          <h2>Behavioral Questions</h2>
+          <p className="section-subtitle">{allBehavioral.length} questions to help you prepare</p>
 
-          <div className="behavioral-list">
+          <div className="questions-list">
             {allBehavioral.map(bq => (
-              <div key={bq.id} className="behavioral-card">
+              <div key={bq.id} className="question-item">
                 <div
-                  className="behavioral-header"
+                  className="question-header"
                   onClick={() => setExpandedQuestion(expandedQuestion === bq.id ? null : bq.id)}
                 >
-                  <div className="question-content">
-                    <h4>{bq.question}</h4>
-                    <div className="question-meta">
-                      <span className={`difficulty-badge ${bq.difficulty}`}>{bq.difficulty}</span>
-                      <span className="category">{bq.category}</span>
-                    </div>
+                  <div className="question-title">
+                    <span className="expand-icon">{expandedQuestion === bq.id ? '▼' : '▶'}</span>
+                    <h3>{bq.question}</h3>
                   </div>
-                  <span className="expand-icon">{expandedQuestion === bq.id ? '−' : '+'}</span>
+                  <div className="question-meta">
+                    <span className="category-badge">{bq.category}</span>
+                  </div>
                 </div>
 
                 {expandedQuestion === bq.id && (
-                  <div className="behavioral-body">
-                    <div className="tips">
-                      <strong>💡 Tips:</strong>
+                  <div className="question-content">
+                    <div className="tips-section">
+                      <h4>Tips</h4>
                       <p>{bq.tips}</p>
                     </div>
-                    <div className="sample-answer">
-                      <strong>📝 Sample Answer:</strong>
+                    <div className="answer-section">
+                      <h4>Sample Answer</h4>
                       <p>{bq.sample_answer}</p>
-                      <button className="btn-small" onClick={() => copyToClipboard(bq.sample_answer)}>
-                        📋 Copy Answer
+                      <button className="btn-secondary" onClick={() => copyToClipboard(bq.sample_answer)}>
+                        Copy Answer
                       </button>
                     </div>
                   </div>
@@ -360,15 +341,13 @@ const Resources = () => {
       {/* DSA TAB */}
       {activeTab === 'dsa' && (
         <div className="tab-content">
-          <div className="section-header">
-            <h2>💻 DSA Problems - {filteredDSA.length} Questions</h2>
-            <p>Practice data structures and algorithms</p>
-          </div>
+          <h2>DSA Problems</h2>
+          <p className="section-subtitle">{filteredDSA.length} problems found</p>
 
-          <div className="filter-row">
-            <div className="filter-section">
-              <label>Difficulty:</label>
-              <select value={dsaDifficulty} onChange={(e) => setDsaDifficulty(e.target.value)} className="filter-select">
+          <div className="filters">
+            <div className="filter-group">
+              <label>Difficulty</label>
+              <select value={dsaDifficulty} onChange={(e) => setDsaDifficulty(e.target.value)}>
                 <option value="all">All Levels</option>
                 <option value="easy">Easy</option>
                 <option value="medium">Medium</option>
@@ -376,9 +355,9 @@ const Resources = () => {
               </select>
             </div>
 
-            <div className="filter-section">
-              <label>Topic:</label>
-              <select value={dsaTopic} onChange={(e) => setDsaTopic(e.target.value)} className="filter-select">
+            <div className="filter-group">
+              <label>Topic</label>
+              <select value={dsaTopic} onChange={(e) => setDsaTopic(e.target.value)}>
                 <option value="all">All Topics</option>
                 {getUniqueDSATopics().map(topic => (
                   <option key={topic} value={topic}>{topic}</option>
@@ -389,21 +368,19 @@ const Resources = () => {
 
           <div className="problems-list">
             {filteredDSA.map(problem => (
-              <div key={problem.id} className="problem-card">
-                <div className="problem-header">
-                  <h4>{problem.id}. {problem.title}</h4>
-                  <div className="problem-badges">
-                    <span className={`difficulty ${problem.difficulty}`}>{problem.difficulty}</span>
-                  </div>
+              <div key={problem.id} className="problem-item">
+                <div className="problem-info">
+                  <h3>{problem.title}</h3>
+                  <p className="problem-platform">{problem.platform}</p>
                 </div>
-                <p className="platform">{problem.platform}</p>
-                <div className="topics">
+                <div className="problem-tags">
                   {problem.topics?.map(t => (
-                    <span key={t} className="topic-badge">{t}</span>
+                    <span key={t} className="tag">{t}</span>
                   ))}
+                  <span className={`difficulty ${problem.difficulty}`}>{problem.difficulty}</span>
                 </div>
-                <a href={problem.link} target="_blank" rel="noopener noreferrer" className="link-btn">
-                  → View on LeetCode
+                <a href={problem.link} target="_blank" rel="noopener noreferrer" className="btn-link">
+                  View on LeetCode →
                 </a>
               </div>
             ))}
@@ -414,37 +391,33 @@ const Resources = () => {
       {/* SYSTEM DESIGN TAB */}
       {activeTab === 'system-design' && (
         <div className="tab-content">
-          <div className="section-header">
-            <h2>🏗️ System Design - {filteredSD.length} Questions</h2>
-            <p>Master system design interviews</p>
-          </div>
+          <h2>System Design</h2>
+          <p className="section-subtitle">{filteredSD.length} topics to learn</p>
 
-          <div className="filter-section">
-            <label>Difficulty:</label>
-            <select value={sdDifficulty} onChange={(e) => setSdDifficulty(e.target.value)} className="filter-select">
-              <option value="all">All Levels</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
-            </select>
+          <div className="filters">
+            <div className="filter-group">
+              <label>Difficulty</label>
+              <select value={sdDifficulty} onChange={(e) => setSdDifficulty(e.target.value)}>
+                <option value="all">All Levels</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
           </div>
 
           <div className="sd-grid">
             {filteredSD.map(design => (
-              <div key={design.id} className="design-card">
-                <div className="design-header">
-                  <h3>{design.title}</h3>
-                  <span className={`difficulty ${design.difficulty}`}>{design.difficulty}</span>
-                </div>
+              <div key={design.id} className="design-item">
+                <h3>{design.title}</h3>
                 <p className="time">⏱️ {design.estimatedTime}</p>
-                <div className="topics">
+                <div className="tags">
                   {design.topics.map(t => (
-                    <span key={t} className="topic-badge">{t}</span>
+                    <span key={t} className="tag">{t}</span>
                   ))}
-                </div>
-                <div className="companies">
                   {design.companies.map(c => (
-                    <span key={c} className="company-badge">{c}</span>
+                    <span key={c} className="company">{c}</span>
                   ))}
+                  <span className={`difficulty ${design.difficulty}`}>{design.difficulty}</span>
                 </div>
               </div>
             ))}

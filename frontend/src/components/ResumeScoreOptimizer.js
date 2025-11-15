@@ -48,8 +48,6 @@ function ResumeScoreOptimizer() {
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
   const [activeTab, setActiveTab] = useState('upload');
   const [resumeFile, setResumeFile] = useState(null);
-  const [resumeText, setResumeText] = useState('');
-  const [inputMethod, setInputMethod] = useState('file');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [scoreData, setScoreData] = useState(null);
@@ -62,14 +60,16 @@ function ResumeScoreOptimizer() {
   const fetchAnalysisHistory = useCallback(async () => {
     if (!token) return;
     try {
-      const response = await axios.get(`${API_URL}/api/resumes`, {
+      const response = await axios.get(`${API_URL}/api/resumes/analysis-history`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      if (response.data.resumes) {
-        setHistory(response.data.resumes || []);
+      if (response.data.history) {
+        console.log('📊 Fetched history:', response.data.history);
+        setHistory(response.data.history || []);
       }
     } catch (err) {
       console.error('Error fetching history:', err);
+      setError('Failed to load analysis history');
     }
   }, [token, API_URL]);
 
@@ -91,34 +91,9 @@ function ResumeScoreOptimizer() {
     }
   };
 
-  const extractTextFromFile = useCallback(async (file) => {
-    const formData = new FormData();
-    formData.append('resume', file);
-
-    try {
-      const response = await axios.post(`${API_URL}/api/resumes/upload`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      
-      if (response.data.success && response.data.resume) {
-        // Store resume ID for later analysis
-        setResumeFile({ ...file, resumeId: response.data.resume.id });
-        return response.data.resume.rawText || '';
-      }
-      return '';
-    } catch (err) {
-      console.error('Error extracting text:', err);
-      setError('Failed to upload resume. Please try again.');
-      return '';
-    }
-  }, [token, API_URL]);
-
-  const analyzeResume = useCallback(async () => {
-    if (!resumeFile && !resumeText.trim()) {
-      setError('Please upload a resume or paste text');
+  const handleAnalyzeClick = async () => {
+    if (!resumeFile) {
+      setError('Please upload a resume file');
       return;
     }
 
@@ -126,124 +101,50 @@ function ResumeScoreOptimizer() {
     setError(null);
 
     try {
-      if (resumeFile && !resumeFile.resumeId) {
-        // If file is uploaded but no resumeId, extract it first
-        await extractTextFromFile(resumeFile);
+      const formData = new FormData();
+      formData.append('resume', resumeFile);
+
+      console.log('📤 Sending resume for analysis...');
+
+      const response = await axios.post(
+        `${API_URL}/api/resumes/analyze-score`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+
+      if (response.data.success) {
+        const analysis = response.data.analysis;
+        console.log('✅ Analysis received:', analysis);
+
+        setScoreData(analysis);
+        setImprovements(analysis.improvements || []);
+        setActiveTab('analysis');
+      } else {
+        throw new Error(response.data.error || 'Analysis failed');
       }
-
-      // For now, generate mock analysis without job description
-      // In production, you'd ask user for job description
-      const mockAnalysis = {
-        overallScore: Math.floor(Math.random() * 40) + 60, // 60-100
-        atsScore: Math.floor(Math.random() * 40) + 60,
-        contentScore: Math.floor(Math.random() * 40) + 60,
-        formatScore: Math.floor(Math.random() * 40) + 60,
-        strengths: [
-          'Clear formatting and structure',
-          'Good use of action verbs',
-          'Relevant technical skills included'
-        ],
-        improvements: [
-          { category: 'keywords', suggestion: 'Add more industry keywords', priority: 'High' },
-          { category: 'formatting', suggestion: 'Use consistent date formatting', priority: 'Medium' },
-          { category: 'content', suggestion: 'Quantify your achievements more', priority: 'High' }
-        ],
-        tips: OPTIMIZATION_TIPS.slice(0, 5)
-      };
-
-      setScoreData(mockAnalysis);
-      setImprovements(mockAnalysis.improvements || []);
-      setActiveTab('analysis');
     } catch (err) {
-      setError(err.response?.data?.error || 'Error analyzing resume. Please try again.');
-      console.error('Analysis error:', err);
+      console.error('❌ Analysis error:', err);
+      const apiErr = err.response?.data;
+      const detailed = apiErr?.details || apiErr?.message || '';
+      const errorMessage = apiErr?.error
+        ? `${apiErr.error}${detailed ? ': ' + detailed : ''}`
+        : err.message || 'Failed to analyze resume';
+
+      // Show more actionable messages for common failure modes
+      if ((detailed || '').toLowerCase().includes('gemini') || (detailed || '').toLowerCase().includes('ai service') ) {
+        setError('AI service is currently unavailable. Please check the backend logs or try again in a minute.');
+      } else if ((detailed || '').toLowerCase().includes('pdf') || (detailed || '').toLowerCase().includes('parse')) {
+        setError('Failed to parse the uploaded file. Try converting the PDF to text or upload a different resume. (' + (detailed || apiErr?.error || err.message) + ')');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
-    }
-  }, [resumeFile, resumeText, extractTextFromFile]);
-
-  const generateMockAnalysis = useCallback(() => {
-    const mockScore = Math.floor(Math.random() * 40) + 60;
-    const mockData = {
-      overallScore: mockScore,
-      atsScore: Math.floor(mockScore * 0.95),
-      formattingScore: Math.floor(Math.random() * 30) + 70,
-      contentScore: Math.floor(Math.random() * 35) + 65,
-      keywordScore: Math.floor(Math.random() * 35) + 65,
-      sections: {
-        present: ['Contact Info', 'Professional Summary', 'Experience', 'Skills', 'Education'],
-        missing: ['Certifications', 'Languages', 'Volunteer Work']
-      },
-      strengths: [
-        'Clear contact information and professional summary',
-        'Good use of action verbs and quantifiable metrics',
-        'Well-organized sections with consistent formatting'
-      ],
-      weaknesses: [
-        'Could benefit from more technical keywords',
-        'Some bullet points could be more concise',
-        'Missing relevant industry certifications'
-      ]
-    };
-
-    const mockImprovements = [
-      {
-        category: 'keywords',
-        priority: 'high',
-        issue: 'Missing key technical terms for your industry',
-        suggestion: 'Add relevant skills like AI, machine learning, cloud platforms mentioned in job descriptions'
-      },
-      {
-        category: 'content',
-        priority: 'high',
-        issue: 'Weak action verbs in some bullet points',
-        suggestion: 'Replace "responsible for" with stronger verbs like "spearheaded", "engineered", "optimized"'
-      },
-      {
-        category: 'formatting',
-        priority: 'medium',
-        issue: 'Inconsistent date formatting',
-        suggestion: 'Use consistent format throughout (MM/YYYY or MMM YYYY)'
-      },
-      {
-        category: 'structure',
-        priority: 'medium',
-        issue: 'Summary could be more impactful',
-        suggestion: 'Include 2-3 key achievements and years of experience upfront'
-      }
-    ];
-
-    setScoreData(mockData);
-    setImprovements(mockImprovements);
-    setActiveTab('analysis');
-  }, []);
-
-  const handleAnalyzeClick = async () => {
-    if (resumeFile) {
-      await analyzeResume();
-    } else if (resumeText.trim()) {
-      setLoading(true);
-      setError(null);
-      try {
-        const analysisResponse = await axios.post(
-          `${API_URL}/api/resume/analyze`,
-          { resumeText },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        if (analysisResponse.data.success) {
-          setScoreData(analysisResponse.data.analysis);
-          setImprovements(analysisResponse.data.improvements || []);
-          setActiveTab('analysis');
-        }
-      } catch (err) {
-        // Fall back to mock data for demo
-        generateMockAnalysis();
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      setError('Please upload a resume or paste text');
     }
   };
 
@@ -294,12 +195,46 @@ ${OPTIMIZATION_TIPS.slice(0, 5).map((t, i) => `${i + 1}. ${t}`).join('\n')}
     return '#dc2626';
   };
 
+  const handleDeleteAnalysis = async (analysisId) => {
+    if (!window.confirm('Are you sure you want to delete this analysis? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await axios.delete(`${API_URL}/api/resumes/analysis/${analysisId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.data.success) {
+        // Remove from history state
+        setHistory(history.filter(item => item.id !== analysisId));
+        
+        // If the deleted item was selected, deselect it
+        const deletedIndex = history.findIndex(item => item.id === analysisId);
+        if (selectedHistoryItem === deletedIndex) {
+          setSelectedHistoryItem(null);
+        }
+        
+        setError(null); // Clear any previous errors
+      }
+    } catch (err) {
+      console.error('Error deleting analysis:', err);
+      const errorMsg = err.response?.data?.error || err.message || 'Failed to delete analysis';
+      setError(`Failed to delete analysis: ${errorMsg}`);
+      
+      // Auto-clear error after 5 seconds
+      setTimeout(() => setError(null), 5000);
+    }
+  };
+
   return (
     <div className="resume-score-optimizer">
-      {/* Header */}
-      <div className="rso-header">
-        <h1>Resume Score Optimizer</h1>
-        <p>Analyze and optimize your resume for ATS systems and recruiters</p>
+      {/* Page Header - Dashboard Style */}
+      <div className="page-header">
+        <div>
+          <h1>Resume Score Optimizer</h1>
+          <p className="dashboard-subtitle">Analyze and optimize your resume for ATS systems and recruiters</p>
+        </div>
       </div>
 
       {/* Tab Navigation */}
@@ -336,23 +271,13 @@ ${OPTIMIZATION_TIPS.slice(0, 5).map((t, i) => `${i + 1}. ${t}`).join('\n')}
 
       {/* Upload Tab */}
       {activeTab === 'upload' && (
-        <div className="rso-content upload-section">
-          <div className="input-method-toggle">
-            <button
-              className={`method-btn ${inputMethod === 'file' ? 'active' : ''}`}
-              onClick={() => setInputMethod('file')}
-            >
-              📁 Upload File
-            </button>
-            <button
-              className={`method-btn ${inputMethod === 'text' ? 'active' : ''}`}
-              onClick={() => setInputMethod('text')}
-            >
-              ✏️ Paste Text
-            </button>
-          </div>
-
-          {inputMethod === 'file' ? (
+        <div className="upload-section">
+          {/* Upload Area - Dashboard Widget Style */}
+          <div className="dashboard-widget">
+            <div className="widget-header">
+              <h2>📄 Upload Resume</h2>
+            </div>
+            
             <div className="file-upload-area">
               <input
                 ref={fileInputRef}
@@ -371,48 +296,47 @@ ${OPTIMIZATION_TIPS.slice(0, 5).map((t, i) => `${i + 1}. ${t}`).join('\n')}
                 {resumeFile && <p className="file-name">✓ {resumeFile.name}</p>}
               </div>
             </div>
-          ) : (
-            <div className="text-input-area">
-              <textarea
-                className="resume-textarea"
-                placeholder="Paste your resume content here... Include your experience, skills, education, and achievements."
-                value={resumeText}
-                onChange={(e) => setResumeText(e.target.value)}
-                rows="12"
-              />
-            </div>
-          )}
 
-          <button
-            className="analyze-btn"
-            onClick={handleAnalyzeClick}
-            disabled={loading || (!resumeFile && !resumeText.trim())}
-          >
-            {loading ? '⏳ Analyzing...' : '🔍 Analyze Resume'}
-          </button>
+            <button
+              className="primary-btn analyze-btn"
+              onClick={handleAnalyzeClick}
+              disabled={loading || !resumeFile}
+            >
+              {loading ? '⏳ Analyzing...' : '🔍 Analyze Resume'}
+            </button>
+          </div>
 
+          {/* Benefits Grid - Dashboard Stats Style */}
           <div className="upload-benefits">
             <h3>What You'll Get:</h3>
-            <div className="benefits-grid">
-              <div className="benefit-card">
-                <div className="benefit-icon">📈</div>
-                <div className="benefit-title">ATS Score</div>
-                <div className="benefit-desc">See how well your resume passes ATS systems</div>
+            <div className="stats-grid benefits-stats">
+              <div className="stat-card benefit-card">
+                <div className="stat-icon">📈</div>
+                <div className="stat-content">
+                  <div className="stat-label">ATS Score</div>
+                  <div className="benefit-desc">See how well your resume passes ATS systems</div>
+                </div>
               </div>
-              <div className="benefit-card">
-                <div className="benefit-icon">🎯</div>
-                <div className="benefit-title">Detailed Analysis</div>
-                <div className="benefit-desc">Formatting, content, keywords breakdown</div>
+              <div className="stat-card benefit-card">
+                <div className="stat-icon">🎯</div>
+                <div className="stat-content">
+                  <div className="stat-label">Detailed Analysis</div>
+                  <div className="benefit-desc">Formatting, content, keywords breakdown</div>
+                </div>
               </div>
-              <div className="benefit-card">
-                <div className="benefit-icon">💡</div>
-                <div className="benefit-title">Improvements</div>
-                <div className="benefit-desc">Specific, actionable recommendations</div>
+              <div className="stat-card benefit-card">
+                <div className="stat-icon">💡</div>
+                <div className="stat-content">
+                  <div className="stat-label">Improvements</div>
+                  <div className="benefit-desc">Specific, actionable recommendations</div>
+                </div>
               </div>
-              <div className="benefit-card">
-                <div className="benefit-icon">📊</div>
-                <div className="benefit-title">Comparison</div>
-                <div className="benefit-desc">Track your progress over time</div>
+              <div className="stat-card benefit-card">
+                <div className="stat-icon">📊</div>
+                <div className="stat-content">
+                  <div className="stat-label">Comparison</div>
+                  <div className="benefit-desc">Track your progress over time</div>
+                </div>
               </div>
             </div>
           </div>
@@ -421,77 +345,86 @@ ${OPTIMIZATION_TIPS.slice(0, 5).map((t, i) => `${i + 1}. ${t}`).join('\n')}
 
       {/* Analysis Tab */}
       {activeTab === 'analysis' && scoreData && (
-        <div className="rso-content analysis-section">
-          <div className="score-container">
-            <div className="main-score">
-              <div className="score-circle" style={{ borderColor: getScoreColor(scoreData.overallScore) }}>
-                <div className="score-value">{scoreData.overallScore}</div>
-                <div className="score-label">Overall</div>
-              </div>
+        <div className="analysis-section">
+          {/* Main Score - Dashboard Widget Style */}
+          <div className="dashboard-widget score-widget">
+            <div className="widget-header">
+              <h2>📊 Overall Performance</h2>
             </div>
-
-            <div className="score-breakdown">
-              <div className="score-item">
-                <div className="score-label-small">ATS Score</div>
-                <div className="score-bar">
-                  <div
-                    className="score-fill"
-                    style={{
-                      width: `${scoreData.atsScore}%`,
-                      backgroundColor: getScoreColor(scoreData.atsScore)
-                    }}
-                  />
+            <div className="score-container">
+              <div className="main-score">
+                <div className="score-circle" style={{ borderColor: getScoreColor(scoreData.overallScore) }}>
+                  <div className="score-value">{scoreData.overallScore}</div>
+                  <div className="score-label">Overall</div>
                 </div>
-                <div className="score-number">{scoreData.atsScore}/100</div>
               </div>
 
-              <div className="score-item">
-                <div className="score-label-small">Formatting</div>
-                <div className="score-bar">
-                  <div
-                    className="score-fill"
-                    style={{
-                      width: `${scoreData.formattingScore}%`,
-                      backgroundColor: getScoreColor(scoreData.formattingScore)
-                    }}
-                  />
+              <div className="score-breakdown">
+                <div className="score-item">
+                  <div className="score-label-small">ATS Score</div>
+                  <div className="score-bar">
+                    <div
+                      className="score-fill"
+                      style={{
+                        width: `${scoreData.atsScore}%`,
+                        backgroundColor: getScoreColor(scoreData.atsScore)
+                      }}
+                    />
+                  </div>
+                  <div className="score-number">{scoreData.atsScore}/100</div>
                 </div>
-                <div className="score-number">{scoreData.formattingScore}/100</div>
-              </div>
 
-              <div className="score-item">
-                <div className="score-label-small">Content Quality</div>
-                <div className="score-bar">
-                  <div
-                    className="score-fill"
-                    style={{
-                      width: `${scoreData.contentScore}%`,
-                      backgroundColor: getScoreColor(scoreData.contentScore)
-                    }}
-                  />
+                <div className="score-item">
+                  <div className="score-label-small">Formatting</div>
+                  <div className="score-bar">
+                    <div
+                      className="score-fill"
+                      style={{
+                        width: `${scoreData.formattingScore}%`,
+                        backgroundColor: getScoreColor(scoreData.formattingScore)
+                      }}
+                    />
+                  </div>
+                  <div className="score-number">{scoreData.formattingScore}/100</div>
                 </div>
-                <div className="score-number">{scoreData.contentScore}/100</div>
-              </div>
 
-              <div className="score-item">
-                <div className="score-label-small">Keywords</div>
-                <div className="score-bar">
-                  <div
-                    className="score-fill"
-                    style={{
-                      width: `${scoreData.keywordScore}%`,
-                      backgroundColor: getScoreColor(scoreData.keywordScore)
-                    }}
-                  />
+                <div className="score-item">
+                  <div className="score-label-small">Content Quality</div>
+                  <div className="score-bar">
+                    <div
+                      className="score-fill"
+                      style={{
+                        width: `${scoreData.contentScore}%`,
+                        backgroundColor: getScoreColor(scoreData.contentScore)
+                      }}
+                    />
+                  </div>
+                  <div className="score-number">{scoreData.contentScore}/100</div>
                 </div>
-                <div className="score-number">{scoreData.keywordScore}/100</div>
+
+                <div className="score-item">
+                  <div className="score-label-small">Keywords</div>
+                  <div className="score-bar">
+                    <div
+                      className="score-fill"
+                      style={{
+                        width: `${scoreData.keywordScore}%`,
+                        backgroundColor: getScoreColor(scoreData.keywordScore)
+                      }}
+                    />
+                  </div>
+                  <div className="score-number">{scoreData.keywordScore}/100</div>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="analysis-grid">
-            <div className="analysis-card strengths">
-              <h3>✓ Strengths</h3>
+          {/* Analysis Cards - Dashboard Widget Style */}
+          <div className="dashboard-grid analysis-grid">
+            <div className="dashboard-widget analysis-card strengths">
+              <div className="widget-header">
+                <h2>✓ Strengths</h2>
+              </div>
               <ul>
                 {scoreData.strengths?.map((strength, idx) => (
                   <li key={idx}>{strength}</li>
@@ -499,8 +432,10 @@ ${OPTIMIZATION_TIPS.slice(0, 5).map((t, i) => `${i + 1}. ${t}`).join('\n')}
               </ul>
             </div>
 
-            <div className="analysis-card weaknesses">
-              <h3>⚠️ Areas to Improve</h3>
+            <div className="dashboard-widget analysis-card weaknesses">
+              <div className="widget-header">
+                <h2>⚠️ Areas to Improve</h2>
+              </div>
               <ul>
                 {scoreData.weaknesses?.map((weakness, idx) => (
                   <li key={idx}>{weakness}</li>
@@ -509,29 +444,35 @@ ${OPTIMIZATION_TIPS.slice(0, 5).map((t, i) => `${i + 1}. ${t}`).join('\n')}
             </div>
           </div>
 
-          <div className="sections-info">
-            <div className="sections-found">
-              <h4>Sections Found ({scoreData.sections.present.length})</h4>
-              <div className="section-badges">
-                {scoreData.sections.present.map((section) => (
-                  <span key={section} className="badge badge-success">✓ {section}</span>
-                ))}
-              </div>
+          {/* Sections Info - Dashboard Widget Style */}
+          <div className="dashboard-widget">
+            <div className="widget-header">
+              <h2>📋 Resume Sections</h2>
             </div>
-
-            {scoreData.sections.missing.length > 0 && (
-              <div className="sections-missing">
-                <h4>Sections Missing ({scoreData.sections.missing.length})</h4>
+            <div className="sections-info">
+              <div className="sections-found">
+                <h4>Sections Found ({scoreData.sections?.present?.length || 0})</h4>
                 <div className="section-badges">
-                  {scoreData.sections.missing.map((section) => (
-                    <span key={section} className="badge badge-warning">+ {section}</span>
-                  ))}
+                  {scoreData.sections?.present?.map((section) => (
+                    <span key={section} className="badge badge-success">✓ {section}</span>
+                  )) || []}
                 </div>
               </div>
-            )}
+
+              {scoreData.sections?.missing && scoreData.sections.missing.length > 0 && (
+                <div className="sections-missing">
+                  <h4>Sections Missing ({scoreData.sections.missing.length})</h4>
+                  <div className="section-badges">
+                    {scoreData.sections.missing.map((section) => (
+                      <span key={section} className="badge badge-warning">+ {section}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
-          <button className="download-btn" onClick={downloadReport}>
+          <button className="primary-btn download-btn" onClick={downloadReport}>
             ⬇️ Download Report
           </button>
         </div>
@@ -539,33 +480,40 @@ ${OPTIMIZATION_TIPS.slice(0, 5).map((t, i) => `${i + 1}. ${t}`).join('\n')}
 
       {/* Improvements Tab */}
       {activeTab === 'improvements' && (
-        <div className="rso-content improvements-section">
-          <div className="improvements-grid">
-            {improvements.map((improvement, idx) => (
-              <div key={idx} className={`improvement-card priority-${improvement.priority}`}>
-                <div className="improvement-header">
-                  <span className="category-icon">
-                    {IMPROVEMENT_CATEGORIES.find(c => c.id === improvement.category)?.icon}
-                  </span>
-                  <span className="category-name">
-                    {IMPROVEMENT_CATEGORIES.find(c => c.id === improvement.category)?.name}
-                  </span>
-                  <span className={`priority-badge priority-${improvement.priority}`}>
-                    {improvement.priority.toUpperCase()}
-                  </span>
+        <div className="improvements-section">
+          <div className="dashboard-widget">
+            <div className="widget-header">
+              <h2>✨ Actionable Improvements</h2>
+            </div>
+            <div className="improvements-grid">
+              {improvements.map((improvement, idx) => (
+                <div key={idx} className={`improvement-card priority-${improvement.priority}`}>
+                  <div className="improvement-header">
+                    <span className="category-icon">
+                      {IMPROVEMENT_CATEGORIES.find(c => c.id === improvement.category)?.icon}
+                    </span>
+                    <span className="category-name">
+                      {IMPROVEMENT_CATEGORIES.find(c => c.id === improvement.category)?.name}
+                    </span>
+                    <span className={`priority-badge priority-${improvement.priority}`}>
+                      {improvement.priority.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="improvement-issue">
+                    <strong>Issue:</strong> {improvement.issue}
+                  </div>
+                  <div className="improvement-suggestion">
+                    <strong>Suggestion:</strong> {improvement.suggestion}
+                  </div>
                 </div>
-                <div className="improvement-issue">
-                  <strong>Issue:</strong> {improvement.issue}
-                </div>
-                <div className="improvement-suggestion">
-                  <strong>Suggestion:</strong> {improvement.suggestion}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          <div className="optimization-tips">
-            <h3>📚 General Optimization Tips</h3>
+          <div className="dashboard-widget optimization-tips">
+            <div className="widget-header">
+              <h2>📚 General Optimization Tips</h2>
+            </div>
             <div className="tips-grid">
               {OPTIMIZATION_TIPS.map((tip, idx) => (
                 <div key={idx} className="tip-card">
@@ -580,41 +528,64 @@ ${OPTIMIZATION_TIPS.slice(0, 5).map((t, i) => `${i + 1}. ${t}`).join('\n')}
 
       {/* History Tab */}
       {activeTab === 'history' && (
-        <div className="rso-content history-section">
+        <div className="history-section">
           {history.length === 0 ? (
-            <div className="empty-state">
+            <div className="dashboard-widget empty-state">
               <div className="empty-icon">📜</div>
               <h3>No Analysis History</h3>
               <p>Upload and analyze your resume to see history here</p>
             </div>
           ) : (
-            <div className="history-grid">
-              {history.map((item, idx) => (
-                <div
-                  key={idx}
-                  className={`history-card ${selectedHistoryItem === idx ? 'selected' : ''}`}
-                  onClick={() => setSelectedHistoryItem(selectedHistoryItem === idx ? null : idx)}
-                >
-                  <div className="history-header">
-                    <div className="history-score">
-                      <div className="score-circle-small" style={{ borderColor: getScoreColor(item.score) }}>
-                        {item.score}
+            <div className="dashboard-widget">
+              <div className="widget-header">
+                <h2>📜 Analysis History</h2>
+              </div>
+              <div className="history-grid">
+                {history.map((item, idx) => (
+                  <div
+                    key={item.id}
+                    className={`history-card ${selectedHistoryItem === idx ? 'selected' : ''}`}
+                  >
+                    <button
+                      className="history-delete-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteAnalysis(item.id);
+                      }}
+                      title="Delete this analysis"
+                    >
+                      🗑️
+                    </button>
+                    <div 
+                      className="history-content"
+                      onClick={() => setSelectedHistoryItem(selectedHistoryItem === idx ? null : idx)}
+                    >
+                      <div className="history-header">
+                        <div className="history-score">
+                          <div className="score-circle-small" style={{ borderColor: getScoreColor(item.score) }}>
+                            {item.score}
+                          </div>
+                        </div>
+                        <div className="history-info">
+                          <div className="history-date">
+                            {item.date ? new Date(item.date).toLocaleDateString() : 'N/A'}
+                          </div>
+                          <div className="history-time">
+                            {item.date ? new Date(item.date).toLocaleTimeString() : 'N/A'}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="history-info">
-                      <div className="history-date">{new Date(item.date).toLocaleDateString()}</div>
-                      <div className="history-time">{new Date(item.date).toLocaleTimeString()}</div>
+                      {selectedHistoryItem === idx && (
+                        <div className="history-details">
+                          <p><strong>ATS Score:</strong> {item.atsScore}/100</p>
+                          <p><strong>Formatting:</strong> {item.formattingScore}/100</p>
+                          <p><strong>Keywords:</strong> {item.keywordScore}/100</p>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  {selectedHistoryItem === idx && (
-                    <div className="history-details">
-                      <p><strong>ATS Score:</strong> {item.atsScore}/100</p>
-                      <p><strong>Formatting:</strong> {item.formattingScore}/100</p>
-                      <p><strong>Keywords:</strong> {item.keywordScore}/100</p>
-                    </div>
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </div>

@@ -38,7 +38,14 @@ class AIService {
         : `You are an expert resume reviewer. Analyze this resume.\n\nRESUME:\n${resumeText}\n\nReturn ONLY valid JSON (no markdown, no extra text) with these fields:\n{\n"overallScore": 0-100,\n"strengths": ["strength1", "strength2"],\n"weaknesses": ["weakness1", "weakness2"],\n"suggestions": ["suggestion1", "suggestion2"]\n}`;
 
       console.log('🤖 Sending to Gemini API...');
-      const result = await this.model.generateContent(prompt);
+      
+      // Add timeout of 30 seconds
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Gemini API request timeout (30s)')), 30000)
+      );
+      
+      const apiPromise = this.model.generateContent(prompt);
+      const result = await Promise.race([apiPromise, timeoutPromise]);
       const response = await result.response;
       
       if (!response) {

@@ -9,7 +9,26 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 class ResumeAIService {
   constructor() {
     this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
+    this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' }); // Using flash for better availability
+    this.maxRetries = 3;
+    this.retryDelay = 1000; // 1 second initial delay
+  }
+
+  /**
+   * Retry logic with exponential backoff for API calls
+   */
+  async retryWithBackoff(fn, retries = this.maxRetries) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (retries > 0 && (error.status === 503 || error.status === 429 || error.message?.includes('overloaded'))) {
+        const delay = this.retryDelay * Math.pow(2, this.maxRetries - retries);
+        console.log(`API rate limited/overloaded. Retrying in ${delay}ms... (${retries} retries left)`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return this.retryWithBackoff(fn, retries - 1);
+      }
+      throw error;
+    }
   }
 
   /**
@@ -78,7 +97,10 @@ Return ONLY valid JSON:
   "recommendations": ["recommendation1", "recommendation2"]
 }`;
 
-      const result = await this.model.generateContent(prompt);
+      const result = await this.retryWithBackoff(async () => {
+        return await this.model.generateContent(prompt);
+      });
+
       const text = result.response.text();
       const jsonMatch = text.match(/\{[\s\S]*\}/);
 
@@ -99,7 +121,14 @@ Return ONLY valid JSON:
       return this.getDefaultResume(userProfile);
     } catch (error) {
       console.error('Error generating resume:', error.message);
-      return this.getDefaultResume(userProfile);
+      // Return error response instead of fallback
+      return {
+        success: false,
+        error: error.message?.includes('overloaded') 
+          ? 'AI service is currently busy. Please try again in a moment.'
+          : `Failed to generate resume: ${error.message}`,
+        fallback: this.getDefaultResume(userProfile)
+      };
     }
   }
 
@@ -189,7 +218,10 @@ Return as JSON:
   "keywords": ["keyword1", "keyword2", "keyword3"]
 }`;
 
-      const result = await this.model.generateContent(prompt);
+      const result = await this.retryWithBackoff(async () => {
+        return await this.model.generateContent(prompt);
+      });
+
       const text = result.response.text();
       const jsonMatch = text.match(/\{[\s\S]*\}/);
 
@@ -205,7 +237,13 @@ Return as JSON:
       return this.getDefaultCoverLetter(userProfile, targetRole, targetCompany);
     } catch (error) {
       console.error('Error generating cover letter:', error.message);
-      return this.getDefaultCoverLetter(userProfile, targetRole, targetCompany);
+      return {
+        success: false,
+        error: error.message?.includes('overloaded')
+          ? 'AI service is currently busy. Please try again in a moment.'
+          : `Failed to generate cover letter: ${error.message}`,
+        fallback: this.getDefaultCoverLetter(userProfile, targetRole, targetCompany)
+      };
     }
   }
 
@@ -260,7 +298,10 @@ Return as JSON:
   "summary": "Brief overall assessment"
 }`;
 
-      const result = await this.model.generateContent(prompt);
+      const result = await this.retryWithBackoff(async () => {
+        return await this.model.generateContent(prompt);
+      });
+
       const text = result.response.text();
       const jsonMatch = text.match(/\{[\s\S]*\}/);
 
@@ -398,7 +439,10 @@ Return as JSON:
   "certifications": ["cert1"]
 }`;
 
-      const result = await this.model.generateContent(prompt);
+      const result = await this.retryWithBackoff(async () => {
+        return await this.model.generateContent(prompt);
+      });
+
       const text = result.response.text();
       const jsonMatch = text.match(/\{[\s\S]*\}/);
 
@@ -412,7 +456,101 @@ Return as JSON:
 
       return { success: false, error: 'Could not parse resume' };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { 
+        success: false, 
+        error: error.message?.includes('overloaded')
+          ? 'AI service is currently busy. Please try again in a moment.'
+          : error.message
+      };
+    }
+  }
+
+  /**
+   * Comprehensive Resume Analysis and Scoring
+   */
+  async comprehensiveResumeAnalysis(resumeText) {
+    try {
+      const prompt = `You are an expert ATS (Applicant Tracking System) and resume reviewer. 
+Analyze this resume comprehensively and provide detailed scoring and feedback.
+
+RESUME TEXT:
+${resumeText}
+
+Analyze the resume and return ONLY valid JSON with NO markdown formatting:
+{
+  "overallScore": <number 0-100>,
+  "atsScore": <number 0-100>,
+  "formattingScore": <number 0-100>,
+  "contentScore": <number 0-100>,
+  "keywordScore": <number 0-100>,
+  "sections": {
+    "present": [<array of sections found like "Contact Info", "Summary", "Experience", "Education", "Skills", etc>],
+    "missing": [<array of commonly expected sections that are missing>]
+  },
+  "strengths": [<array of 3-5 specific strengths found in the resume>],
+  "weaknesses": [<array of 3-5 specific weaknesses or areas of concern>],
+  "improvements": [
+    {
+      "category": "<keywords|formatting|content|structure>",
+      "priority": "<high|medium|low>",
+      "issue": "<specific issue found>",
+      "suggestion": "<actionable suggestion to fix it>"
+    }
+  ]
+}
+
+Scoring Guidelines:
+- Overall Score: Holistic assessment of resume quality
+- ATS Score: How well it will pass ATS systems (keywords, formatting, structure)
+- Formatting Score: Visual organization, consistency, readability
+- Content Score: Quality of descriptions, achievements, action verbs
+- Keyword Score: Industry-relevant keywords and technical terms
+
+Be specific and actionable in your feedback.`;
+
+      const result = await this.retryWithBackoff(async () => {
+        return await this.model.generateContent(prompt);
+      });
+
+      const response = result.response;
+      let text = response.text();
+
+      // Clean up response
+      text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      
+      // Extract JSON
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('No valid JSON found in AI response');
+      }
+
+      const analysis = JSON.parse(jsonMatch[0]);
+
+      // Validate and ensure all fields exist
+      return {
+        overallScore: Math.min(100, Math.max(0, analysis.overallScore || 65)),
+        atsScore: Math.min(100, Math.max(0, analysis.atsScore || 65)),
+        formattingScore: Math.min(100, Math.max(0, analysis.formattingScore || 70)),
+        contentScore: Math.min(100, Math.max(0, analysis.contentScore || 65)),
+        keywordScore: Math.min(100, Math.max(0, analysis.keywordScore || 60)),
+        sections: {
+          present: Array.isArray(analysis.sections?.present) ? analysis.sections.present : ['Contact Info', 'Experience'],
+          missing: Array.isArray(analysis.sections?.missing) ? analysis.sections.missing : ['Certifications']
+        },
+        strengths: Array.isArray(analysis.strengths) ? analysis.strengths : ['Resume structure is clear'],
+        weaknesses: Array.isArray(analysis.weaknesses) ? analysis.weaknesses : ['Could use more specific metrics'],
+        improvements: Array.isArray(analysis.improvements) ? analysis.improvements : [
+          {
+            category: 'content',
+            priority: 'high',
+            issue: 'General content review needed',
+            suggestion: 'Add more quantifiable achievements and metrics'
+          }
+        ]
+      };
+    } catch (error) {
+      console.error('Comprehensive analysis error:', error);
+      throw new Error('Failed to analyze resume: ' + error.message);
     }
   }
 }
