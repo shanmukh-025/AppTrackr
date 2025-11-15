@@ -68,6 +68,12 @@ const DSASheets = () => {
 
   return (
     <div className="dsa-tracker-container">
+      {/* Page Header */}
+      <div className="dsa-page-header">
+        <h1 className="dsa-main-title">📚 DSA Sheets Tracker</h1>
+        <p className="dsa-subtitle">Track your progress across popular coding interview preparation sheets</p>
+      </div>
+
       <div className="sheets-grid">
           {Object.entries(dsaSheets).map(([key, sheet]) => {
             const solved = overallProgress[key] || 0;
@@ -99,11 +105,6 @@ const DSASheets = () => {
                   <div className="sheet-header-section">
                     <h3 className="sheet-name-new">{sheet.name}</h3>
                     <p className="sheet-description-new">{sheet.description}</p>
-                  </div>
-
-                  {/* Followers and Stats */}
-                  <div className="sheet-meta-info">
-                    <span className="followers-badge">👥 1266 Followers</span>
                   </div>
 
                   {/* Questions and Solved Info */}

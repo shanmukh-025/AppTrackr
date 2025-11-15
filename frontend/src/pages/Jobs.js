@@ -5,17 +5,13 @@ import './Jobs.css';
 
 // Jobs page with advanced filtering
 const Jobs = () => {
-  const [searchParams, setSearchParams] = useState({
-    keywords: '',
-    location: '',
-    remote: false
-  });
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searched, setSearched] = useState(false);
   const [savedSearches, setSavedSearches] = useState([]);
   const [showFilters, setShowFilters] = useState(true);
+  const [currentFilters, setCurrentFilters] = useState({});
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -36,7 +32,7 @@ const Jobs = () => {
   }, [fetchSavedSearches]);
 
   const handleFilterChange = (newFilters) => {
-    // Auto-search when filters change (with debounce would be better)
+    // Directly trigger search when user clicks the search button
     if (newFilters.search || newFilters.location || newFilters.techStack.length > 0) {
       handleSearchWithFilters(newFilters);
     }
@@ -81,6 +77,7 @@ const Jobs = () => {
       setLoading(true);
       setError(null);
       setSearched(true);
+      setCurrentFilters(searchFilters); // Store the filters for display
       
       const token = localStorage.getItem('token');
       const params = {
@@ -110,53 +107,7 @@ const Jobs = () => {
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setSearchParams(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    
-    if (!searchParams.keywords.trim()) {
-      setError('Please enter keywords to search');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-      setSearched(true);
-      
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_URL}/api/jobs/search`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params: {
-          keywords: searchParams.keywords,
-          location: searchParams.location || undefined,
-          remote: searchParams.remote || undefined,
-          limit: 20
-        }
-      });
-
-      if (response.data.success) {
-        setJobs(response.data.data.jobs);
-        if (response.data.data.jobs.length === 0) {
-          setError('No jobs found. Try different keywords or location.');
-        }
-      } else {
-        setError(response.data.message || 'Failed to fetch jobs');
-      }
-    } catch (err) {
-      console.error('Error searching jobs:', err);
-      setError(err.response?.data?.error || err.response?.data?.message || 'Failed to search jobs. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleJobClick = async (job) => {
     try {
@@ -257,61 +208,6 @@ const Jobs = () => {
 
         {/* Main Content */}
         <div className={`jobs-main ${showFilters ? '' : 'full-width'}`}>
-          {/* Search Form */}
-          <div className="card search-container">
-            <div className="card-header">
-              <h3>Search Jobs</h3>
-            </div>
-            <form onSubmit={handleSearch} className="card-body search-form">
-              <div className="form-row">
-                <div className="form-group flex-2">
-                  <label htmlFor="keywords">Keywords *</label>
-                  <input
-                    type="text"
-                    id="keywords"
-                    name="keywords"
-                    className="form-input"
-                    value={searchParams.keywords}
-                    onChange={handleInputChange}
-                    placeholder="e.g. React Developer, Python Engineer"
-                    required
-                  />
-                </div>
-
-                <div className="form-group flex-1">
-                  <label htmlFor="location">Location</label>
-                  <input
-                    type="text"
-                    id="location"
-                    name="location"
-                    className="form-input"
-                    value={searchParams.location}
-                    onChange={handleInputChange}
-                    placeholder="e.g. New York, Remote"
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group checkbox-group">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      name="remote"
-                      checked={searchParams.remote}
-                      onChange={handleInputChange}
-                    />
-                    <span>Remote jobs only</span>
-                  </label>
-                </div>
-
-                <button type="submit" className="btn btn-primary search-btn" disabled={loading}>
-                  {loading ? '🔄 Searching...' : '🔍 Search Jobs'}
-                </button>
-              </div>
-            </form>
-          </div>
-
           {/* Error Message */}
           {error && (
             <div className="alert alert-danger">
@@ -336,8 +232,8 @@ const Jobs = () => {
                     ? `Found ${jobs.length} job${jobs.length !== 1 ? 's' : ''}`
                     : 'No jobs found'}
                 </h2>
-                {jobs.length > 0 && (
-                  <p>Showing results for "{searchParams.keywords}"</p>
+                {jobs.length > 0 && (currentFilters.search || currentFilters.techStack?.length > 0) && (
+                  <p>Showing results for "{currentFilters.search || currentFilters.techStack?.join(', ')}"</p>
                 )}
               </div>
 

@@ -26,10 +26,6 @@ const AIFeatures = () => {
   const [clTone, setClTone] = useState('professional');
   const [coverLetter, setCoverLetter] = useState(null);
 
-  // ATS Checker State
-  const [atsResumeText, setAtsResumeText] = useState('');
-  const [atsResult, setAtsResult] = useState(null);
-
   // Resume Generator
   const generateResume = async () => {
     if (!fullName || !targetRole || !skills) {
@@ -54,21 +50,6 @@ const AIFeatures = () => {
       );
 
       setGeneratedResume(response.data.resume);
-
-      // Automatically check ATS score after generating resume
-      console.log('🔍 Checking ATS score for generated resume...');
-      try {
-        const atsResponse = await axios.post(
-          `${API_URL}/api/ai/check-ats`,
-          { resumeText: response.data.resume.content },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setAtsResult(atsResponse.data.analysis);
-        console.log('✅ ATS score calculated:', atsResponse.data.atsScore);
-      } catch (atsError) {
-        console.error('ATS check error:', atsError);
-        // Don't fail the entire operation if ATS check fails
-      }
     } catch (error) {
       console.error('Resume generation error:', error);
       alert('Failed to generate resume: ' + (error.response?.data?.error || error.message));
@@ -158,34 +139,6 @@ const AIFeatures = () => {
     }
   };
 
-  // ATS Compatibility Check
-  const checkATSScore = async () => {
-    if (!atsResumeText || atsResumeText.trim().length === 0) {
-      alert('Please paste your resume text');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      console.log('🔍 Checking ATS compatibility...');
-
-      const response = await axios.post(
-        `${API_URL}/api/ai/check-ats`,
-        { resumeText: atsResumeText },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      console.log('✅ ATS check complete:', response.data);
-      setAtsResult(response.data.analysis);
-    } catch (error) {
-      console.error('ATS check error:', error);
-      alert('Failed to check ATS score: ' + (error.response?.data?.error || error.message));
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="ai-features-container">
       <div className="ai-header">
@@ -205,12 +158,6 @@ const AIFeatures = () => {
           onClick={() => setActiveTab('cover')}
         >
           ✉️ Cover Letter
-        </button>
-        <button
-          className={activeTab === 'ats' ? 'tab-active' : ''}
-          onClick={() => setActiveTab('ats')}
-        >
-          🎯 ATS Score Checker
         </button>
       </div>
 
@@ -293,15 +240,6 @@ const AIFeatures = () => {
               {loading ? '🔄 Generating...' : '✨ Generate Resume'}
             </button>
 
-            <button
-              className="ai-button"
-              onClick={generateResumePDF}
-              disabled={loading}
-              style={{ marginLeft: '10px', background: '#e74c3c' }}
-            >
-              {loading ? '🔄 Generating...' : '📄 Generate PDF Resume'}
-            </button>
-
             {generatedResume && (
               <div className="ai-results">
                 <h3>Your Generated Resume</h3>
@@ -364,85 +302,12 @@ const AIFeatures = () => {
                       >
                         ✏️ Edit Resume
                       </button>
-                      <button onClick={() => navigator.clipboard.writeText(generatedResume.content)}>
-                        📋 Copy to Clipboard
-                      </button>
-                      <button onClick={() => {
-                        const blob = new Blob([generatedResume.content], { type: 'text/plain' });
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = 'resume.txt';
-                        a.click();
-                      }}>
-                        💾 Download as Text
-                      </button>
                       <button onClick={generateResumePDF} disabled={loading}>
                         📄 Download as PDF
                       </button>
                     </>
                   )}
                 </div>
-
-                {/* ATS Score Badge - Now Below Resume */}
-                {atsResult && (
-                  <div className="ats-score-badge" style={{
-                    background: `linear-gradient(135deg, ${
-                      atsResult.overallScore >= 80 ? 'rgba(46, 204, 113, 0.1)' : 
-                      atsResult.overallScore >= 60 ? 'rgba(243, 156, 18, 0.1)' : 
-                      'rgba(231, 76, 60, 0.1)'
-                    } 0%, ${
-                      atsResult.overallScore >= 80 ? 'rgba(46, 204, 113, 0.05)' : 
-                      atsResult.overallScore >= 60 ? 'rgba(243, 156, 18, 0.05)' : 
-                      'rgba(231, 76, 60, 0.05)'
-                    } 100%)`,
-                    border: `2px solid ${
-                      atsResult.overallScore >= 80 ? '#2ecc71' : 
-                      atsResult.overallScore >= 60 ? '#f39c12' : 
-                      '#e74c3c'
-                    }`,
-                    padding: '20px',
-                    borderRadius: '12px',
-                    marginTop: '20px',
-                    textAlign: 'center'
-                  }}>
-                    <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#64748b' }}>
-                      ATS Compatibility Score
-                    </div>
-                    <div style={{ 
-                      fontSize: '48px', 
-                      fontWeight: '800',
-                      color: atsResult.overallScore >= 80 ? '#2ecc71' : 
-                             atsResult.overallScore >= 60 ? '#f39c12' : '#e74c3c'
-                    }}>
-                      {atsResult.overallScore}
-                      <span style={{ fontSize: '24px', fontWeight: '600', color: '#94a3b8' }}>/100</span>
-                    </div>
-                    <div style={{ fontSize: '13px', color: '#64748b', marginTop: '8px' }}>
-                      {atsResult.overallScore >= 80 ? '✅ Excellent - ATS Friendly' : 
-                       atsResult.overallScore >= 60 ? '⚠️ Good - Some improvements needed' : 
-                       '🚫 Needs Improvement'}
-                    </div>
-                    {atsResult.overallScore < 80 && (
-                      <button 
-                        onClick={() => setActiveTab('ats')}
-                        style={{
-                          marginTop: '12px',
-                          padding: '8px 16px',
-                          background: 'transparent',
-                          border: '1px solid currentColor',
-                          borderRadius: '8px',
-                          cursor: 'pointer',
-                          fontSize: '13px',
-                          fontWeight: '600',
-                          color: 'inherit'
-                        }}
-                      >
-                        View Detailed Analysis →
-                      </button>
-                    )}
-                  </div>
-                )}
               </div>
             )}
           </div>
@@ -516,176 +381,6 @@ const AIFeatures = () => {
                     📋 Copy to Clipboard
                   </button>
                 </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ATS SCORE CHECKER TAB */}
-      {activeTab === 'ats' && (
-        <div className="ai-content">
-          <div className="ai-section">
-            <h2>🎯 ATS Compatibility Checker</h2>
-            <p>Check how well your resume passes Applicant Tracking Systems</p>
-
-            {atsResult && !atsResumeText && (
-              <div style={{
-                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%)',
-                border: '1px solid rgba(99, 102, 241, 0.2)',
-                padding: '16px',
-                borderRadius: '12px',
-                marginBottom: '20px',
-                textAlign: 'center',
-                color: '#64748b'
-              }}>
-                💡 <strong>Showing results from your last generated resume</strong>
-                <br />
-                <small>Paste new resume text below to check a different resume</small>
-              </div>
-            )}
-
-            <div className="form-group">
-              <label>Paste Your Resume Text:</label>
-              <textarea
-                rows={12}
-                placeholder="Paste your entire resume text here..."
-                value={atsResumeText}
-                onChange={(e) => setAtsResumeText(e.target.value)}
-                style={{ fontFamily: 'monospace', fontSize: '14px' }}
-              />
-            </div>
-
-            <button
-              className="ai-button"
-              onClick={checkATSScore}
-              disabled={loading}
-            >
-              {loading ? '🔄 Analyzing...' : '🎯 Check ATS Score'}
-            </button>
-
-            {atsResult && (
-              <div className="ai-results">
-                <div className="ats-score-header">
-                  <h3>ATS Compatibility Score</h3>
-                  <div className="score-circle" style={{
-                    background: `conic-gradient(
-                      ${atsResult.overallScore >= 80 ? '#2ecc71' : 
-                        atsResult.overallScore >= 60 ? '#f39c12' : '#e74c3c'} 
-                      ${atsResult.overallScore * 3.6}deg, 
-                      #ecf0f1 0deg
-                    )`
-                  }}>
-                    <div className="score-inner">
-                      <span className="score-number">{atsResult.overallScore}</span>
-                      <span className="score-label">/ 100</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Category Scores */}
-                <div className="ats-categories">
-                  <h4>📊 Category Breakdown</h4>
-                  {Object.entries(atsResult.categories || {}).map(([key, value]) => (
-                    <div key={key} className="category-item">
-                      <div className="category-header">
-                        <span className="category-name">{key.charAt(0).toUpperCase() + key.slice(1)}</span>
-                        <span className="category-score">{value.score}/100</span>
-                      </div>
-                      <div className="progress-bar">
-                        <div 
-                          className="progress-fill" 
-                          style={{ 
-                            width: `${value.score}%`,
-                            backgroundColor: value.score >= 80 ? '#2ecc71' : 
-                                           value.score >= 60 ? '#f39c12' : '#e74c3c'
-                          }}
-                        />
-                      </div>
-                      <p className="category-feedback">{value.feedback}</p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Strengths */}
-                {atsResult.strengths && atsResult.strengths.length > 0 && (
-                  <div className="ats-section">
-                    <h4>✅ Strengths</h4>
-                    <ul className="ats-list success">
-                      {atsResult.strengths.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Warnings */}
-                {atsResult.warnings && atsResult.warnings.length > 0 && (
-                  <div className="ats-section">
-                    <h4>⚠️ Warnings</h4>
-                    <ul className="ats-list warning">
-                      {atsResult.warnings.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Critical Issues */}
-                {atsResult.criticalIssues && atsResult.criticalIssues.length > 0 && (
-                  <div className="ats-section">
-                    <h4>🚫 Critical Issues</h4>
-                    <ul className="ats-list error">
-                      {atsResult.criticalIssues.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Suggestions */}
-                {atsResult.suggestions && atsResult.suggestions.length > 0 && (
-                  <div className="ats-section">
-                    <h4>💡 Suggestions for Improvement</h4>
-                    <ul className="ats-list info">
-                      {atsResult.suggestions.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Missing Elements */}
-                {atsResult.missingElements && atsResult.missingElements.length > 0 && (
-                  <div className="ats-section">
-                    <h4>📋 Missing Elements</h4>
-                    <ul className="ats-list">
-                      {atsResult.missingElements.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Detected Keywords */}
-                {atsResult.detectedKeywords && atsResult.detectedKeywords.length > 0 && (
-                  <div className="ats-section">
-                    <h4>🔑 Detected Keywords</h4>
-                    <div className="keywords-cloud">
-                      {atsResult.detectedKeywords.map((keyword, idx) => (
-                        <span key={idx} className="keyword-badge">{keyword}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Recommendation */}
-                {atsResult.recommendation && (
-                  <div className="ats-section recommendation">
-                    <h4>📝 Overall Recommendation</h4>
-                    <p>{atsResult.recommendation}</p>
-                  </div>
-                )}
               </div>
             )}
           </div>

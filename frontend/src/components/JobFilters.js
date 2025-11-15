@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import './JobFilters.css';
 
 function JobFilters({ onFilterChange, onSaveSearch, savedSearches, onLoadSearch, onDeleteSearch }) {
@@ -40,10 +40,10 @@ function JobFilters({ onFilterChange, onSaveSearch, savedSearches, onLoadSearch,
     'GraphQL', 'REST API', 'Git', 'CI/CD', 'Agile', 'Scrum'
   ];
 
-  useEffect(() => {
-    // Notify parent component when filters change
+  const handleSearch = () => {
+    // Only trigger search when explicitly called
     onFilterChange(filters);
-  }, [filters, onFilterChange]);
+  };
 
   const handleInputChange = (field, value) => {
     setFilters(prev => ({
@@ -242,6 +242,16 @@ function JobFilters({ onFilterChange, onSaveSearch, savedSearches, onLoadSearch,
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Search Button */}
+      <div className="filter-group">
+        <button 
+          className="btn-search-filters"
+          onClick={handleSearch}
+        >
+          🔍 Search Jobs
+        </button>
       </div>
 
       {/* Save Search Dialog */}
