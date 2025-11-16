@@ -77,7 +77,7 @@ function Applications() {
 
   return (
     <div className="page-container">
-      <div className="page-header card">
+      <div className="page-header">
         <div>
           <h1>📋 Applications</h1>
           <p className="dashboard-subtitle">Track and manage all your job applications</p>

@@ -187,9 +187,9 @@ const Jobs = () => {
   };
 
   return (
-    <div className="page-container jobs-page">
+    <div className="page-container">
       <div className="page-header">
-        <div className="header-content">
+        <div>
           <h1>🔍 Search Jobs</h1>
           <p className="dashboard-subtitle">Find your next opportunity from thousands of job listings</p>
         </div>
