@@ -187,14 +187,14 @@ const Jobs = () => {
   };
 
   return (
-    <div className="dashboard-page jobs-page">
-      <div className="dashboard-header">
+    <div className="page-container jobs-page">
+      <div className="page-header">
         <div className="header-content">
-          <h1 className="page-title">🔍 Search Jobs</h1>
-          <p className="page-subtitle">Find your next opportunity from thousands of job listings</p>
+          <h1>🔍 Search Jobs</h1>
+          <p className="dashboard-subtitle">Find your next opportunity from thousands of job listings</p>
         </div>
         <button 
-          className="btn btn-primary toggle-filters-btn"
+          className="primary-btn"
           onClick={() => setShowFilters(!showFilters)}
         >
           {showFilters ? '❌ Hide Filters' : '⚙️ Show Filters'}
