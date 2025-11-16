@@ -7,6 +7,7 @@ import ApplicationsList from '../components/ApplicationsList';
 import Pipeline from '../components/Pipeline';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import Toast from '../components/Toast';
+import './Dashboard.css';
 import './Applications.css';
 
 function Applications() {
@@ -79,58 +80,70 @@ function Applications() {
       <div className="page-header card">
         <div>
           <h1>📋 Applications</h1>
-          <p>Track and manage all your job applications</p>
+          <p className="dashboard-subtitle">Track and manage all your job applications</p>
         </div>
-        <button className="btn btn-primary primary-btn" onClick={() => setShowAddModal(true)}>
+        <button className="primary-btn" onClick={() => setShowAddModal(true)}>
           + Add Application
         </button>
       </div>
 
       {/* Search & Filter */}
-      <div className="card search-filter-bar">
-        <div className="search-box">
-          <span className="search-icon">🔍</span>
-          <input
-            type="text"
-            placeholder="Search by company or position..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="form-input search-input"
-          />
-          {searchQuery && (
-            <button className="btn btn-ghost clear-search" onClick={() => setSearchQuery('')}>
-              ✕
-            </button>
-          )}
-        </div>
+      <div className="filters-section">
+        <div className="filters-row">
+          <div className="filter-group">
+            <label>🔍 Search Applications</label>
+            <input
+              type="text"
+              placeholder="Search by company or position..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+          </div>
 
-        <select 
-          className="form-select status-filter"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <option value="all">All Status</option>
-          <option value="wishlist">📋 Wishlist</option>
-          <option value="applied">📤 Applied</option>
-          <option value="phone_screen">📞 Phone Screen</option>
-          <option value="technical">💻 Technical</option>
-          <option value="onsite">🏢 Onsite</option>
-          <option value="offer">✅ Offer</option>
-          <option value="rejected">❌ Rejected</option>
-          <option value="ghosted">👻 Ghosted</option>
-        </select>
+          <div className="filter-group">
+            <label>📊 Status Filter</label>
+            <select 
+              className="filter-select"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">All Status</option>
+              <option value="wishlist">📋 Wishlist</option>
+              <option value="applied">📤 Applied</option>
+              <option value="phone_screen">📞 Phone Screen</option>
+              <option value="technical">💻 Technical</option>
+              <option value="onsite">🏢 Onsite</option>
+              <option value="offer">✅ Offer</option>
+              <option value="rejected">❌ Rejected</option>
+              <option value="ghosted">👻 Ghosted</option>
+            </select>
+          </div>
+
+          <div className="filter-group">
+            <label style={{visibility: 'hidden'}}>Clear</label>
+            {(searchQuery || statusFilter !== 'all') && (
+              <button className="clear-filters-btn" onClick={() => {
+                setSearchQuery('');
+                setStatusFilter('all');
+              }}>
+                🔄 Clear Filters
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* View Tabs */}
-      <div className="tabs view-tabs">
+      <div className="view-toggle">
         <button 
-          className={`tab ${activeView === 'list' ? 'tab-active' : ''}`}
+          className={`view-toggle-btn ${activeView === 'list' ? 'active' : ''}`}
           onClick={() => setActiveView('list')}
         >
           📋 List View
         </button>
         <button 
-          className={`tab ${activeView === 'pipeline' ? 'tab-active' : ''}`}
+          className={`view-toggle-btn ${activeView === 'pipeline' ? 'active' : ''}`}
           onClick={() => setActiveView('pipeline')}
         >
           🎯 Pipeline

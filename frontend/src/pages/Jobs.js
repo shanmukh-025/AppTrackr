@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import JobFilters from '../components/JobFilters';
+import './Dashboard.css';
 import './Jobs.css';
 
 // Jobs page with advanced filtering
@@ -178,11 +179,11 @@ const Jobs = () => {
   };
 
   return (
-    <div className="jobs-page">
-      <div className="page-header card">
-        <div>
-          <h1>🔍 Search Jobs</h1>
-          <p>Find your next opportunity from thousands of job listings</p>
+    <div className="dashboard-page jobs-page">
+      <div className="dashboard-header">
+        <div className="header-content">
+          <h1 className="page-title">🔍 Search Jobs</h1>
+          <p className="page-subtitle">Find your next opportunity from thousands of job listings</p>
         </div>
         <button 
           className="btn btn-primary toggle-filters-btn"
