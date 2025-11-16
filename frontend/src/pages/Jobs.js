@@ -178,6 +178,14 @@ const Jobs = () => {
     return '#757575';
   };
 
+  const stripHtmlTags = (html) => {
+    if (!html) return '';
+    // Create a temporary div element to parse HTML
+    const tmp = document.createElement('DIV');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+  };
+
   return (
     <div className="dashboard-page jobs-page">
       <div className="dashboard-header">
@@ -282,8 +290,8 @@ const Jobs = () => {
 
                       {job.description && (
                         <p className="job-description">
-                          {job.description.substring(0, 250)}
-                          {job.description.length > 250 ? '...' : ''}
+                          {stripHtmlTags(job.description).substring(0, 250)}
+                          {stripHtmlTags(job.description).length > 250 ? '...' : ''}
                         </p>
                       )}
 
