@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './JobSuggestions.css';
+import { stripHtmlTags } from '../utils/textUtils';
 
 const JobSuggestions = () => {
   const [jobs, setJobs] = useState([]);
@@ -221,8 +222,15 @@ const JobSuggestions = () => {
                 
                 {job.description && (
                   <p className="job-description">
-                    {job.description.substring(0, 120)}
-                    {job.description.length > 120 ? '...' : ''}
+                    {(() => {
+                      const clean = stripHtmlTags(job.description);
+                      return (
+                        <>
+                          {clean.substring(0, 120)}
+                          {clean.length > 120 ? '...' : ''}
+                        </>
+                      );
+                    })()}
                   </p>
                 )}
 
