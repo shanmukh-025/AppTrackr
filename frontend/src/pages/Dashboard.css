@@ -1,50 +1,13 @@
 /* ============================
-   DASHBOARD CONTAINER - ULTRA PREMIUM
+   DASHBOARD CONTAINER - CLEAN & LIGHT
    ============================ */
 .page-container {
   padding: var(--space-10);
   max-width: 1600px;
   margin: 0 auto;
-  background: linear-gradient(135deg, var(--slate-50) 0%, rgba(102, 126, 234, 0.03) 50%, rgba(139, 92, 246, 0.02) 100%);
+  background: #f8f9fa;
   min-height: 100vh;
   position: relative;
-  overflow: hidden;
-}
-
-.page-container::before {
-  content: '';
-  position: absolute;
-  top: -30%;
-  right: -20%;
-  width: 800px;
-  height: 800px;
-  background: radial-gradient(
-    circle at center,
-    rgba(99, 102, 241, 0.12) 0%,
-    rgba(139, 92, 246, 0.08) 30%,
-    transparent 70%
-  );
-  pointer-events: none;
-  animation: float 20s ease-in-out infinite;
-  filter: blur(60px);
-}
-
-.page-container::after {
-  content: '';
-  position: absolute;
-  bottom: -30%;
-  left: -20%;
-  width: 900px;
-  height: 900px;
-  background: radial-gradient(
-    circle at center,
-    rgba(139, 92, 246, 0.10) 0%,
-    rgba(236, 72, 153, 0.06) 40%,
-    transparent 75%
-  );
-  pointer-events: none;
-  animation: float 25s ease-in-out infinite reverse;
-  filter: blur(70px);
 }
 
 @keyframes float {
@@ -86,12 +49,8 @@
 .page-header h1 {
   font-size: var(--font-size-5xl);
   font-weight: var(--font-weight-800);
-  color: var(--slate-900);
+  color: #1f2937;
   margin-bottom: var(--space-3);
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
   letter-spacing: -0.02em;
   position: relative;
   display: inline-block;
@@ -104,7 +63,7 @@
   left: 0;
   width: 100%;
   height: 4px;
-  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+  background: #1f2937;
   border-radius: var(--radius-full);
   opacity: 0.3;
   filter: blur(4px);
@@ -119,16 +78,16 @@
 }
 
 .primary-btn {
-  background: linear-gradient(135deg, var(--primary-600) 0%, var(--secondary-600) 100%);
-  color: var(--bg-white);
+  background: #1f2937;
+  color: white;
   border: none;
   padding: var(--space-3) var(--space-6);
   border-radius: var(--radius-lg);
   font-weight: var(--font-weight-600);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: all var(--duration-300) var(--easing-ease-out);
-  box-shadow: var(--shadow-lg);
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
 }
@@ -152,8 +111,8 @@
 }
 
 .primary-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-2xl);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .primary-btn:active {

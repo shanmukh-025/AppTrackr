@@ -14,13 +14,9 @@
 }
 
 [data-theme=light] .sidebar {
-  background: linear-gradient(180deg, 
-    #f8fafc 0%, 
-    #f1f5f9 50%,
-    #e2e8f0 100%
-  );
-  border-right: 1px solid rgba(148, 163, 184, 0.2);
-  box-shadow: 2px 0 16px rgba(0, 0, 0, 0.04);
+  background: #FAFAFA;
+  border-right: 1px solid #E4E4E7;
+  box-shadow: none;
 }
 
 [data-theme=dark] .sidebar {

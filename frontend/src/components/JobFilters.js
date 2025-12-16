@@ -110,20 +110,6 @@ function JobFilters({ onFilterChange, onSaveSearch, savedSearches, onLoadSearch,
         <h3>🔍 Filter Jobs</h3>
         <div className="filter-actions">
           <button 
-            className="btn-icon"
-            onClick={() => setShowSavedSearches(!showSavedSearches)}
-            title="Saved Searches"
-          >
-            📋 {savedSearches?.length || 0}
-          </button>
-          <button 
-            className="btn-icon"
-            onClick={() => setShowSaveDialog(true)}
-            title="Save Current Search"
-          >
-            💾
-          </button>
-          <button 
             className="btn-clear"
             onClick={handleClearFilters}
           >

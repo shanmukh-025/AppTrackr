@@ -52,6 +52,11 @@ model User {
   // DSA Progress Tracking
   dsaProgress     String?  @db.Text  // JSON object storing solved problems per sheet
   
+  // GitHub Integration
+  githubToken     String?  @db.Text
+  githubUsername  String?
+  githubProfileUrl String?
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
@@ -73,6 +78,29 @@ model User {
   preferences         UserPreference?  @relation("UserPreferences")
   interviewSessions   InterviewSession[]
   learningPaths       SavedLearningPath[]
+  jobClones           JobClone[]
+  blacklistedCompanies CompanyBlacklist[]
+  smartNotifications  SmartNotification[]
+  automationRules     AutomationRule[]
+  networkConnections  NetworkConnection[]
+  referralPaths       ReferralPath[]
+  careerDNA           CareerDNA?
+  resourceProgress    UserResourceProgress[]
+  learningPathsCreated LearningPath[]
+  learningStreaks     LearningStreak?
+  achievements        LearningAchievement[]
+  resourceFeedback    ResourceFeedback[]
+  
+  // Futuristic AI Features
+  quantumLearningState    QuantumLearningState?
+  aiPersona               AIPersona?
+  brainSyncSessions       BrainSyncSession[]
+  skillEvolutions         SkillEvolutionTimeline[]
+  neuralRecommendations   NeuralRecommendation[]
+  futureSelfSimulations   FutureSelfSimulation[]
+  emotionalIntelligence   EmotionalIntelligenceProfile?
+  skillTradesOffered      SkillMarketplaceTrade[]  @relation("SkillOfferer")
+  skillTradesReceived     SkillMarketplaceTrade[]  @relation("SkillReceiver")
 }
 
 model Application {
@@ -622,4 +650,878 @@ model SavedLearningPath {
   @@index([userId])
   @@index([isActive])
   @@index([lastAccessedAt])
+}
+// ============================================
+// JOB CLONE DETECTOR MODELS
+// ============================================
+
+model JobClone {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  originalJobId   String
+  cloneJobId      String
+  cloneType       String   // "exact_repost", "content_clone", "recruiter_clone", "scam"
+  similarity      Float    // 0.0 to 1.0
+  isHidden        Boolean  @default(false)
+  
+  // Job details for comparison
+  originalCompany String
+  cloneCompany    String
+  originalTitle   String
+  cloneTitle      String
+  
+  createdAt       DateTime @default(now())
+  
+  @@index([userId])
+  @@index([originalJobId])
+  @@index([cloneJobId])
+}
+
+model CompanyBlacklist {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  companyName     String
+  reason          String?  @db.Text
+  blockedCount    Int      @default(0)
+  
+  createdAt       DateTime @default(now())
+  
+  @@unique([userId, companyName])
+  @@index([userId])
+}
+
+// ============================================
+// SMART NOTIFICATIONS MODELS
+// ============================================
+
+model SmartNotification {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type            String   // "predictive", "timing", "follow-up", "market-trend", "competitor"
+  title           String
+  message         String   @db.Text
+  priority        String   // "high", "medium", "low"
+  confidence      Float    // 0.0 to 1.0
+  isRead          Boolean  @default(false)
+  actionUrl       String?
+  actionText      String?
+  
+  // Related entities
+  relatedJobId        String?
+  relatedApplicationId String?
+  relatedCompany      String?
+  
+  // Metadata
+  metadata        String?  @db.Text // JSON for additional data
+  
+  createdAt       DateTime @default(now())
+  expiresAt       DateTime?
+  
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@index([type])
+}
+
+model AutomationRule {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name            String
+  description     String?  @db.Text
+  
+  // Condition: "if this happens"
+  conditionType   String   // "no_response", "job_posted_days", "company_type", "skill_match"
+  conditionValue  String   @db.Text // JSON: {operator, value, params}
+  
+  // Action: "do this"
+  actionType      String   // "send_followup", "skip_application", "notify", "auto_apply"
+  actionParams    String   @db.Text // JSON: action-specific parameters
+  
+  isEnabled       Boolean  @default(true)
+  triggerCount    Int      @default(0)
+  lastTriggered   DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId, isEnabled])
+  @@index([userId, conditionType])
+}
+
+// ============================================
+// NETWORK INTELLIGENCE MODELS
+// ============================================
+
+model NetworkConnection {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  connectionName  String
+  connectionEmail String?
+  company         String
+  position        String
+  relationshipType String  // "1st-degree", "2nd-degree", "3rd-degree"
+  strength        Float    // 0.0 to 1.0
+  
+  // LinkedIn data
+  linkedInUrl     String?
+  profilePicture  String?
+  
+  // Interaction tracking
+  lastInteraction DateTime?
+  interactionCount Int     @default(0)
+  
+  // Metadata
+  notes           String?  @db.Text
+  tags            String?  // Comma-separated
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId, company])
+  @@index([userId, relationshipType])
+}
+
+model ReferralPath {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  targetCompany   String
+  targetEmployee  String
+  targetPosition  String
+  
+  // Path: User -> Connection1 -> Connection2 -> Target
+  pathNodes       String   @db.Text // JSON array: [{name, company, relationship}]
+  pathLength      Int      // Number of hops (1 = direct, 2 = 2nd degree, etc.)
+  
+  likelihood      Float    // 0.0 to 1.0 (probability of successful intro)
+  
+  // Status tracking
+  status          String   @default("discovered") // "discovered", "requested", "introduced", "failed"
+  requestedAt     DateTime?
+  introducedAt    DateTime?
+  
+  notes           String?  @db.Text
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId, targetCompany])
+  @@index([userId, status])
+}
+
+// ============================================
+// INTERVIEW INTELLIGENCE MODELS
+// ============================================
+
+model InterviewIntelligence {
+  id              String   @id @default(uuid())
+  company         String
+  role            String
+  
+  // Interview Process
+  interviewStyle  String?
+  rounds          Int?
+  avgDuration     String?  // e.g., "3-5 weeks"
+  difficulty      String?  // "Easy", "Medium", "Hard", "Very Hard"
+  passRate        String?  // e.g., "25%"
+  
+  // Questions & Insights
+  recentQuestions String?  @db.Text // JSON array
+  panelInsights   String?  @db.Text // JSON array
+  successTips     String?  @db.Text // JSON array
+  
+  // Compensation
+  salaryRange     String?  // e.g., "\ - \"
+  negotiationTips String?  @db.Text // JSON array
+  
+  // Metadata
+  dataPoints      Int      @default(0) // Number of candidate submissions
+  lastUpdated     DateTime @default(now())
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([company, role])
+  @@index([company])
+  @@index([role])
+}
+
+model InterviewQuestion {
+  id              String   @id @default(uuid())
+  
+  question        String   @db.Text
+  type            String   // "technical", "behavioral", "system-design"
+  difficulty      String   // "easy", "medium", "hard"
+  
+  companies       String   @db.Text // JSON array of company names
+  frequency       String   // "Very High", "High", "Medium", "Low"
+  askedRecently   Boolean  @default(true)
+  
+  expectedDuration String? // e.g., "45-60 min"
+  keyPoints       String   @db.Text // JSON array
+  realAnswer      String   @db.Text // JSON object with approach/solution
+  
+  submittedBy     String?  // User ID (optional, for crowdsourcing)
+  upvotes         Int      @default(0)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([type])
+  @@index([difficulty])
+  @@index([askedRecently])
+}
+
+model SuccessPattern {
+  id              String   @id @default(uuid())
+  
+  pattern         String   // Name of the pattern
+  description     String   @db.Text
+  whenToUse       String   @db.Text
+  example         String   @db.Text
+  
+  companies       String   @db.Text // JSON array
+  successRate     Int      // Percentage
+  
+  category        String   // "communication", "problem-solving", "technical"
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([category])
+  @@index([successRate])
+}
+
+// ===================================
+// CAREER DNA & LEARNING MARKETPLACE
+// ===================================
+
+model CareerDNA {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Learning Profile
+  learningStyle   String   // "visual", "hands-on", "reading", "mixed"
+  timeAvailable   String   // "1-2h/day", "weekends", "flexible"
+  budget          Int      // Monthly budget in dollars
+  preferredPace   String   // "slow", "medium", "fast"
+  motivation      String   // "career-switch", "upskill", "promotion", "hobby"
+  currentLevel    String   // "beginner", "intermediate", "advanced", "expert"
+  
+  // Behavioral Data
+  avgCompletionRate Float  @default(0)
+  preferredFormat String   // "video", "article", "interactive", "project"
+  bestLearningTime String  // "morning", "afternoon", "evening", "night"
+  
+  // Career Goals
+  targetRole      String?
+  targetCompany   String?
+  timelineWeeks   Int?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([userId])
+  @@index([userId])
+}
+
+model LearningResource {
+  id              String   @id @default(uuid())
+  
+  // Resource Details
+  title           String
+  description     String   @db.Text
+  url             String
+  thumbnailUrl    String?
+  
+  // Metadata
+  type            String   // "video", "article", "course", "interactive", "book", "challenge"
+  category        String   // "frontend", "backend", "devops", "data-science", etc.
+  skillTags       String   @db.Text // JSON array of skills
+  difficulty      String   // "beginner", "intermediate", "advanced"
+  duration        String   // "10min", "2h", "8h", "40h"
+  
+  // Pricing
+  price           Float    @default(0)
+  currency        String   @default("USD")
+  
+  // Ratings & Stats
+  rating          Float    @default(0)
+  reviewCount     Int      @default(0)
+  completionCount Int      @default(0)
+  avgCompletionRate Float  @default(0)
+  
+  // Provider
+  provider        String   // "Udemy", "Coursera", "FreeCodeCamp", "YouTube", etc.
+  authorName      String?
+  
+  // Trending
+  trendingScore   Float    @default(0)
+  viewCount       Int      @default(0)
+  
+  // AI Matching
+  qualityScore    Float    @default(0)
+  relevanceScore  Float    @default(0)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([type])
+  @@index([category])
+  @@index([difficulty])
+  @@index([rating])
+  @@index([trendingScore])
+}
+
+model UserResourceProgress {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resourceId      String
+  
+  // Progress Tracking
+  status          String   // "saved", "started", "in-progress", "completed", "dropped"
+  progressPercent Int      @default(0)
+  timeSpent       Int      @default(0) // Minutes
+  
+  // Engagement
+  liked           Boolean  @default(false)
+  bookmarked      Boolean  @default(false)
+  rating          Int?     // 1-5
+  review          String?  @db.Text
+  
+  // Timestamps
+  startedAt       DateTime?
+  completedAt     DateTime?
+  lastAccessedAt  DateTime @default(now())
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([userId, resourceId])
+  @@index([userId])
+  @@index([status])
+  @@index([bookmarked])
+}
+
+model LearningPath {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Path Details
+  name            String
+  description     String   @db.Text
+  targetRole      String
+  
+  // Path Configuration
+  resources       String   @db.Text // JSON array of resource IDs with order
+  estimatedWeeks  Int
+  totalHours      Int
+  
+  // Progress
+  currentStep     Int      @default(0)
+  completedSteps  Int      @default(0)
+  progressPercent Int      @default(0)
+  
+  // Metadata
+  isPublic        Boolean  @default(false)
+  isAIGenerated   Boolean  @default(false)
+  difficulty      String
+  
+  // Stats
+  enrolledCount   Int      @default(0)
+  completionRate  Float    @default(0)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([isPublic])
+  @@index([targetRole])
+}
+
+model MicroOpportunity {
+  id              String   @id @default(uuid())
+  
+  // Opportunity Details
+  title           String
+  description     String   @db.Text
+  type            String   // "freelance", "challenge", "mentoring", "pair-programming"
+  
+  // Skills & Requirements
+  requiredSkills  String   @db.Text // JSON array
+  difficulty      String
+  estimatedHours  Int
+  
+  // Compensation
+  compensation    Float
+  currency        String   @default("USD")
+  compensationType String  // "fixed", "hourly", "prize"
+  
+  // Challenge Details
+  startDate       DateTime?
+  endDate         DateTime?
+  maxParticipants Int?
+  currentParticipants Int @default(0)
+  
+  // Provider
+  providerName    String
+  providerAvatar  String?
+  providerRating  Float?
+  
+  // Status
+  status          String   @default("active") // "active", "filled", "completed", "cancelled"
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([type])
+  @@index([status])
+  @@index([difficulty])
+}
+
+model LearningStreak {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Streak Data
+  currentStreak   Int      @default(0)
+  longestStreak   Int      @default(0)
+  totalDays       Int      @default(0)
+  lastActivityDate DateTime @default(now())
+  
+  // Monthly Stats
+  monthlyHours    Int      @default(0)
+  monthlyResources Int     @default(0)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([userId])
+  @@index([userId])
+}
+
+model LearningAchievement {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Achievement Details
+  achievementType String   // "streak", "completion", "skill-master", "fast-learner"
+  title           String
+  description     String
+  icon            String
+  
+  // Metadata
+  earnedAt        DateTime @default(now())
+  isShared        Boolean  @default(false)
+  
+  @@index([userId])
+  @@index([achievementType])
+}
+
+model ResourceFeedback {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resourceId      String
+  
+  // Feedback Type
+  feedbackType    String   // "not-interested", "too-hard", "too-easy", "love"
+  reason          String?  @db.Text
+  
+  createdAt       DateTime @default(now())
+  
+  @@index([userId])
+  @@index([resourceId])
+  @@index([feedbackType])
+}
+
+// ===================================
+// FUTURISTIC AI FEATURES (200 YEARS FROM NOW)
+// ===================================
+
+model QuantumLearningState {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Quantum Neural Mapping
+  brainWavePattern String  @db.Text // JSON - Alpha, Beta, Theta, Gamma frequencies
+  cognitiveLoad    Float   @default(0) // 0-100 mental capacity usage
+  focusIntensity   Float   @default(0) // 0-100 concentration level
+  creativityIndex  Float   @default(0) // 0-100 creative thinking capacity
+  
+  // Predictive Intelligence
+  futureSelfProjection String @db.Text // JSON - AI prediction of skills in 6mo, 1yr, 5yr
+  careerTrajectory     String @db.Text // JSON - Predicted career path with 95% confidence
+  skillDecayRate       String @db.Text // JSON - Skills losing relevance over time
+  emergingSkillsRadar  String @db.Text // JSON - Skills that will be valuable in future
+  
+  // Time-Shifted Learning
+  parallelUniversePaths String @db.Text // JSON - Alternative career paths in parallel timelines
+  retroactiveSkillGaps  String @db.Text // JSON - Skills you should have learned 6 months ago
+  futureJobMarketFit    Float  @default(0) // 0-100 fit for jobs in 2030
+  
+  // Neural Optimization
+  optimalLearningWindows String @db.Text // JSON - Best times to learn based on circadian rhythm
+  memoryRetentionRate    Float  @default(85) // 0-100 information retention capability
+  neuralPlasticity       Float  @default(75) // 0-100 ability to learn new concepts
+  
+  lastQuantumScan     DateTime @default(now())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  @@unique([userId])
+  @@index([userId])
+  @@index([futureJobMarketFit])
+}
+
+model AIPersona {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Digital Twin
+  personaName     String
+  avatarUrl       String?
+  voiceSignature  String?  // AI-generated voice ID
+  
+  // Learning Clone
+  learningDNA     String   @db.Text // JSON - Complete behavioral learning pattern
+  thoughtProcess  String   @db.Text // JSON - How the person thinks and solves problems
+  decisionMatrix  String   @db.Text // JSON - How they make career decisions
+  
+  // Predictive Behavior
+  nextSkillPrediction String @db.Text // JSON - What skill they'll want to learn next (98% accuracy)
+  jobSwitchProbability Float @default(0) // 0-100 likelihood of changing jobs in 6 months
+  burnoutRiskScore     Float @default(0) // 0-100 risk of career burnout
+  
+  // Multi-Timeline Identity
+  alternateCareerSelves String @db.Text // JSON - Who you'd be in different career paths
+  skillPersonalityMatch String @db.Text // JSON - Skills that match your personality type
+  
+  // AI Mentor Mode
+  mentorPersonality String   // "socratic", "coach", "friend", "strict-teacher", "adaptive"
+  teachingStyle     String   // "visual", "storytelling", "challenge-based", "conversational"
+  motivationTriggers String  @db.Text // JSON - What motivates this user most
+  
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([userId])
+  @@index([userId])
+}
+
+model BrainSyncSession {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resourceId      String?
+  
+  // Neural Interface Data
+  sessionType     String   // "deep-learning", "speed-reading", "skill-absorption", "flow-state"
+  brainwaveData   String   @db.Text // JSON - Real-time EEG-like data simulation
+  focusScore      Float    @default(0) // 0-100
+  comprehensionRate Float  @default(0) // 0-100
+  
+  // Memory Encoding
+  neuralPathways  String   @db.Text // JSON - How information is being stored in brain
+  synapticStrength Float   @default(0) // 0-100 strength of learned connections
+  memoryConsolidation Float @default(0) // 0-100 how well info moved to long-term memory
+  
+  // Flow State Tracking
+  flowStateAchieved Boolean @default(false)
+  flowStateDuration Int     @default(0) // Minutes in flow state
+  distractionCount  Int     @default(0)
+  
+  // Performance Metrics
+  learningVelocity  Float   @default(0) // Concepts per hour
+  informationDensity Float  @default(0) // Complexity of material absorbed
+  
+  // Biometric Data (Simulated)
+  heartRateAvg    Int?
+  stressLevel     Float    @default(0) // 0-100
+  energyLevel     Float    @default(100) // 0-100
+  
+  sessionDuration Int      @default(0) // Minutes
+  startedAt       DateTime @default(now())
+  endedAt         DateTime?
+  
+  createdAt       DateTime @default(now())
+  
+  @@index([userId])
+  @@index([sessionType])
+  @@index([flowStateAchieved])
+}
+
+model SkillEvolutionTimeline {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Skill Tracking
+  skillName       String
+  category        String
+  
+  // Evolution Data
+  proficiencyHistory String @db.Text // JSON - Timeline of skill level over time
+  currentLevel       Float  @default(0) // 0-100
+  peakLevel          Float  @default(0) // Highest level achieved
+  decayRate          Float  @default(0) // How fast skill is deteriorating if not used
+  
+  // Future Projection
+  projectedLevel6Mo  Float  @default(0) // Where you'll be in 6 months at current pace
+  projectedLevel1Yr  Float  @default(0)
+  projectedLevel5Yr  Float  @default(0)
+  
+  // Market Intelligence
+  marketDemand       Float  @default(0) // 0-100 current job market demand
+  futureDemand2030   Float  @default(0) // Predicted demand in 2030
+  salaryImpact       Float  @default(0) // USD - How much this skill adds to salary
+  
+  // Learning Efficiency
+  hoursInvested      Int    @default(0)
+  learningEfficiency Float  @default(0) // Progress per hour invested
+  retentionRate      Float  @default(0) // 0-100 how well you retain this skill
+  
+  // Skill Relationships
+  prerequisiteSkills String @db.Text // JSON - Skills needed before this
+  synergisticSkills  String @db.Text // JSON - Skills that boost this one
+  competingSkills    String @db.Text // JSON - Alternative skills for same goal
+  
+  firstLearnedAt  DateTime?
+  lastPracticedAt DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([userId, skillName])
+  @@index([userId])
+  @@index([skillName])
+  @@index([marketDemand])
+  @@index([futureDemand2030])
+}
+
+model CollectiveIntelligence {
+  id              String   @id @default(uuid())
+  
+  // Hive Mind Learning
+  topicCluster    String   // e.g., "React Hooks", "System Design"
+  
+  // Collective Patterns
+  optimalLearningPath String @db.Text // JSON - Best path discovered by analyzing 1000s of users
+  commonPitfalls      String @db.Text // JSON - Where most people get stuck
+  breakthroughMoments String @db.Text // JSON - What causes "aha!" moments
+  
+  // Crowd Intelligence
+  averageTimeToMaster Int    @default(0) // Hours needed to master this topic
+  successRate         Float  @default(0) // % of people who complete this successfully
+  dropoutRate         Float  @default(0) // % who give up
+  
+  // Best Practices Emerged
+  winningStrategies   String @db.Text // JSON - Strategies used by top 10% performers
+  resourceCombinations String @db.Text // JSON - Best combo of courses/resources
+  studyPatterns       String @db.Text // JSON - Most effective study schedules
+  
+  // Real-Time Network Effect
+  currentLearners     Int    @default(0) // People learning this right now
+  trendingMomentum    Float  @default(0) // 0-100 how hot this topic is
+  
+  // Predictive Intelligence
+  nextHotTopic        String? // What will be trending next month
+  decliningRelevance  Float   @default(0) // 0-100 how fast this is becoming obsolete
+  
+  participantCount Int      @default(0) // Total users who contributed data
+  lastUpdated      DateTime @default(now())
+  createdAt        DateTime @default(now())
+  
+  @@unique([topicCluster])
+  @@index([topicCluster])
+  @@index([trendingMomentum])
+}
+
+model NeuralRecommendation {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // AI Recommendation
+  recommendationType String // "next-skill", "career-pivot", "urgent-upskill", "opportunity"
+  
+  // Deep Learning Analysis
+  confidenceScore    Float  @default(0) // 0-100 AI confidence in this recommendation
+  reasoningChain     String @db.Text // JSON - Step-by-step AI logic that led to this
+  alternativeOptions String @db.Text // JSON - Other paths considered and why rejected
+  
+  // Predictive Impact
+  expectedROI        Float  @default(0) // Expected return on time invested
+  careerImpact       Float  @default(0) // 0-100 impact on career trajectory
+  timeToImpact       Int    @default(0) // Days until you see results
+  
+  // Urgency Analysis
+  urgencyLevel       String // "critical", "high", "medium", "low"
+  windowOfOpportunity Int?  // Days - how long this opportunity stays valid
+  competitorAnalysis  String @db.Text // JSON - How many others are pursuing this
+  
+  // Personalization
+  personalizedReason String @db.Text // Why this is perfect FOR YOU specifically
+  successProbability Float  @default(0) // 0-100 chance you'll succeed at this
+  
+  // Action Items
+  actionSteps        String @db.Text // JSON - Concrete next steps to take
+  resourcesNeeded    String @db.Text // JSON - What resources you need
+  estimatedCost      Float  @default(0) // Total cost to pursue this
+  estimatedHours     Int    @default(0) // Time commitment needed
+  
+  // Tracking
+  status             String @default("pending") // "pending", "accepted", "rejected", "completed"
+  userFeedback       String? @db.Text
+  actualOutcome      String? @db.Text // What happened if user followed this
+  
+  expiresAt       DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([recommendationType])
+  @@index([urgencyLevel])
+  @@index([status])
+}
+
+model FutureSelfSimulation {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Timeline
+  simulationDate  DateTime // Future date being simulated (6mo, 1yr, 5yr, 10yr)
+  
+  // Career Projection
+  projectedRole   String
+  projectedCompany String?
+  projectedSalary Float?
+  projectedLocation String?
+  
+  // Skills Mastery
+  skillsAcquired  String   @db.Text // JSON - Skills you'll have by then
+  skillsObsolete  String   @db.Text // JSON - Skills that became irrelevant
+  
+  // Life Simulation
+  satisfactionScore Float  @default(0) // 0-100 predicted career satisfaction
+  workLifeBalance   Float  @default(0) // 0-100
+  stressLevel       Float  @default(0) // 0-100
+  
+  // Achievement Prediction
+  majorMilestones   String @db.Text // JSON - Key achievements by that time
+  careerHighlights  String @db.Text // JSON - Notable accomplishments
+  
+  // Alternative Timelines
+  bestCaseScenario  String @db.Text // JSON - If everything goes perfectly
+  worstCaseScenario String @db.Text // JSON - If you make wrong choices
+  mostLikelyPath    String @db.Text // JSON - Realistic projection (70% probability)
+  
+  // Decision Impact
+  keyDecisions      String @db.Text // JSON - Critical decisions that shape this future
+  pivotPoints       String @db.Text // JSON - Moments where different choices lead to different futures
+  
+  // Confidence
+  accuracyScore     Float  @default(0) // 0-100 AI confidence in this prediction
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([simulationDate])
+}
+
+model EmotionalIntelligenceProfile {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Emotional Patterns
+  learningEmotions String  @db.Text // JSON - How you feel when learning different things
+  stressTriggers   String  @db.Text // JSON - What causes anxiety while learning
+  motivationDrivers String @db.Text // JSON - What keeps you going
+  
+  // Behavioral Intelligence
+  procrastinationPattern String @db.Text // JSON - When and why you procrastinate
+  peakProductivityTime   String @db.Text // JSON - When you learn best
+  burnoutWarnings        String @db.Text // JSON - Early signs of burnout detected
+  
+  // Social Learning
+  collaborationStyle String // "solo-learner", "pair-learner", "group-learner", "mentor-seeker"
+  feedbackPreference String // "direct", "gentle", "data-driven", "encouraging"
+  
+  // Resilience Metrics
+  failureRecoveryRate Float  @default(0) // 0-100 how fast you bounce back
+  persistenceScore    Float  @default(0) // 0-100 tendency to stick with hard things
+  adaptabilityScore   Float  @default(0) // 0-100 comfort with change
+  
+  // Growth Mindset
+  mindsetScore        Float  @default(0) // 0-100 fixed vs growth mindset
+  challengeSeekingBehavior Float @default(0) // 0-100 tendency to seek difficult tasks
+  
+  lastAnalysis    DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([userId])
+  @@index([userId])
+}
+
+model SkillMarketplaceTrade {
+  id              String   @id @default(uuid())
+  
+  // Trading Parties
+  offererId       String
+  offerer         User     @relation("SkillOfferer", fields: [offererId], references: [id], onDelete: Cascade)
+  receiverId      String?
+  receiver        User?    @relation("SkillReceiver", fields: [receiverId], references: [id], onDelete: SetNull)
+  
+  // Skill Exchange
+  skillOffered    String   // What the offerer teaches
+  skillRequested  String   // What the offerer wants to learn
+  
+  // Trade Details
+  tradeType       String   // "peer-to-peer", "group-session", "async-exchange"
+  sessionCount    Int      @default(1)
+  hoursPerSession Int      @default(1)
+  
+  // Value Analysis
+  skillValueMatch Float    @default(0) // 0-100 how fair is the exchange
+  marketValue     Float    @default(0) // USD equivalent value
+  
+  // Status
+  status          String   @default("open") // "open", "matched", "in-progress", "completed", "cancelled"
+  
+  // Ratings
+  offererRating   Float?   // 0-5
+  receiverRating  Float?   // 0-5
+  feedback        String?  @db.Text
+  
+  matchedAt       DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([offererId])
+  @@index([receiverId])
+  @@index([status])
+  @@index([skillOffered])
+  @@index([skillRequested])
 }

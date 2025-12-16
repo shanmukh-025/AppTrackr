@@ -1,9 +1,61 @@
 ﻿.resources-simplified {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8f9fa 0%, rgba(99, 102, 241, 0.02) 50%, rgba(139, 92, 246, 0.015) 100%);
+  background: #f8f9fa;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   display: flex;
   flex-direction: column;
+  padding: 2.5rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* Remove padding when DSA Tracker is active */
+.resources-simplified:has(.dsa-tracker-new) {
+  padding: 0 !important;
+  max-width: 100% !important;
+}
+
+.resources-simplified:has(.dsa-tracker-new) .page-header,
+.resources-simplified:has(.dsa-tracker-new) .resources-navbar {
+  margin-left: 2.5rem;
+  margin-right: 2.5rem;
+}
+
+/* Page Header - Match Dashboard Style */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+  position: relative;
+}
+
+.page-header h1::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: #1f2937;
+  border-radius: 50px;
+  opacity: 0.3;
+}
+
+.dashboard-subtitle {
+  color: #6b7280;
+  font-size: 1rem;
+  margin-top: 0.75rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 .notification {
@@ -54,50 +106,47 @@
 }
 
 .resources-navbar {
-  background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
-  border-bottom: 1px solid rgba(99, 102, 241, 0.12);
-  margin-bottom: 32px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
 }
 
 .navbar-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 12px 24px;
   display: flex;
-  gap: 8px;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 24px;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
   border: none;
-  background: transparent;
-  border-radius: 10px;
+  background: #f9fafb;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   white-space: nowrap;
-  font-size: 14px;
+  font-size: 0.95rem;
   font-weight: 500;
-  color: #64748b;
+  color: #6b7280;
   position: relative;
 }
 
 .nav-item:hover {
-  color: #334155;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
-  transform: translateY(-1px);
+  color: #1f2937;
+  background: #f3f4f6;
 }
 
 .nav-item.active {
-  color: #6366f1;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.12) 100%);
-  box-shadow: 
-    0 2px 8px rgba(99, 102, 241, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  color: #1f2937;
+  background: #333333;
+  color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .nav-icon {
@@ -115,9 +164,6 @@
 }
 
 .resources-main-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px 24px;
   width: 100%;
   flex: 1;
 }
@@ -125,55 +171,50 @@
 /* Enhanced content wrapper */
 .resources-main-content > div {
   background: white;
-  border-radius: 16px;
-  padding: 40px;
-  box-shadow: 
-    0 4px 16px rgba(15, 23, 42, 0.04),
-    0 0 0 1px rgba(99, 102, 241, 0.08);
-  transition: all 0.3s ease;
-  border-top: 3px solid transparent;
-  border-image: linear-gradient(90deg, #6366f1, #8b5cf6) 1;
-  position: relative;
-  overflow: hidden;
-}
-
-.resources-main-content > div::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
-  opacity: 0.8;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
 }
 
 .resources-main-content > div:hover {
-  box-shadow: 
-    0 8px 24px rgba(15, 23, 42, 0.08),
-    0 0 0 1px rgba(99, 102, 241, 0.12);
-  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* DSA Tracker - Remove wrapper styles */
+.resources-main-content .dsa-tracker-new {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+.resources-main-content .dsa-tracker-new:hover {
+  box-shadow: none !important;
 }
 
 .error-container {
-  padding: 40px;
+  padding: 2.5rem;
   text-align: center;
-  color: #666;
+  color: #6b7280;
   background: white;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .error-container p {
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
   color: #ef4444;
 }
 
 .error-container small {
-  font-size: 13px;
-  color: #999;
+  font-size: 0.875rem;
+  color: #9ca3af;
 }
 
 @keyframes slideInRight {
@@ -188,16 +229,21 @@
 }
 
 @media (max-width: 768px) {
+  .resources-simplified {
+    padding: 1.5rem;
+  }
+  
   .navbar-inner {
-    padding: 0 8px;
     overflow-x: auto;
   }
+  
   .nav-item {
-    padding: 16px 20px;
-    font-size: 14px;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
   }
+  
   .nav-icon {
-    font-size: 16px;
+    font-size: 1rem;
   }
   .resources-main-content {
     padding: 0 16px 16px;

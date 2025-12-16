@@ -5,6 +5,7 @@ import '../styles/ResourcesSimplified.css';
 // Import all components
 import LearningPaths from '../components/LearningPaths';
 import MyLearningPaths from '../components/MyLearningPaths';
+import DSATrackerSimple from '../components/DSATrackerSimple';
 
 const ResourcesSimplified = () => {
   const [activeTab, setActiveTab] = useState('learning-paths');
@@ -18,6 +19,7 @@ const ResourcesSimplified = () => {
       items: [
         { id: 'learning-paths', name: 'Learning Paths', icon: '📚', description: 'Personalized learning roadmaps', color: '#667eea' },
         { id: 'my-learning-paths', name: 'My Learning Paths', icon: '📖', description: 'Track your saved learning paths', color: '#764ba2' },
+        { id: 'dsa-tracker', name: 'DSA Sheets', icon: '📝', description: 'Track DSA problem sheets', color: '#047857' },
         { id: 'behavioral', name: 'AI Video Interview', icon: '🎥', description: 'Practice with AI feedback', color: '#10b981' },
       ]
     }
@@ -30,6 +32,8 @@ const ResourcesSimplified = () => {
           return <LearningPaths setNotification={setNotification} />;
         case 'my-learning-paths':
           return <MyLearningPaths setNotification={setNotification} />;
+        case 'dsa-tracker':
+          return <DSATrackerSimple />;
         case 'behavioral':
           // Redirect to Behavioral Questions page
           navigate('/behavioral');
@@ -50,6 +54,14 @@ const ResourcesSimplified = () => {
 
   return (
     <div className="resources-simplified">
+      {/* Page Header - Match Dashboard Style */}
+      <div className="page-header">
+        <div>
+          <h1>Resources & Learning</h1>
+          <p className="dashboard-subtitle">Enhance your skills with curated learning paths and interview prep</p>
+        </div>
+      </div>
+
       {/* Notification */}
       {notification && (
         <div className={`notification notification-${notification.type || 'info'}`}>

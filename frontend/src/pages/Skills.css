@@ -1,29 +1,28 @@
 .skills-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--slate-50) 0%, var(--slate-100) 100%);
-  padding: var(--space-8);
+  background: #ffffff;
+  padding: 2rem 2.5rem;
   margin-left: 280px;
-  position: relative;
-  overflow: hidden;
 }
 
-/* Dual floating decorative elements */
-.skills-page::before {
-  content: '';
-  position: absolute;
-  top: 10%;
-  left: -150px;
-  width: 700px;
-  height: 700px;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(99, 102, 241, 0.08) 0%,
-    rgba(139, 92, 246, 0.05) 50%,
-    transparent 75%
-  );
-  pointer-events: none;
-  animation: floatDiagonal 32s ease-in-out infinite;
-  filter: blur(55px);
+.skills-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #E4E4E7;
+}
+
+.skills-header h1 {
+  color: #18181B;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+
+.skills-subtitle {
+  color: #71717A;
+  font-size: 0.95rem;
+  font-weight: 400;
 }
 
 .skills-page::after {

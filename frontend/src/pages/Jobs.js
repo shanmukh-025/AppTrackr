@@ -193,30 +193,22 @@ const Jobs = () => {
           <h1>🔍 Search Jobs</h1>
           <p className="dashboard-subtitle">Find your next opportunity from thousands of job listings</p>
         </div>
-        <button 
-          className="primary-btn"
-          onClick={() => setShowFilters(!showFilters)}
-        >
-          {showFilters ? '❌ Hide Filters' : '⚙️ Show Filters'}
-        </button>
       </div>
 
       <div className="jobs-content">
         {/* Advanced Filters Panel */}
-        {showFilters && (
-          <aside className="filters-sidebar">
-            <JobFilters
-              onFilterChange={handleFilterChange}
-              onSaveSearch={handleSaveSearch}
-              savedSearches={savedSearches}
-              onLoadSearch={(search) => handleFilterChange(search.filters)}
-              onDeleteSearch={handleDeleteSearch}
-            />
-          </aside>
-        )}
+        <aside className="filters-sidebar">
+          <JobFilters
+            onFilterChange={handleFilterChange}
+            onSaveSearch={handleSaveSearch}
+            savedSearches={savedSearches}
+            onLoadSearch={(search) => handleFilterChange(search.filters)}
+            onDeleteSearch={handleDeleteSearch}
+          />
+        </aside>
 
         {/* Main Content */}
-        <div className={`jobs-main ${showFilters ? '' : 'full-width'}`}>
+        <div className="jobs-main">
           {/* Error Message */}
           {error && (
             <div className="alert alert-danger">
@@ -254,7 +246,7 @@ const Jobs = () => {
               ) : (
                 <div className="jobs-list">
                   {jobs.map((job) => (
-                    <div key={job.id} className="card job-card-large">
+                    <div key={job.id} className="job-card-large">
                       <div className="job-card-header">
                         <div className="job-title-section">
                           <h3 className="job-title">{job.title}</h3>
@@ -317,23 +309,15 @@ const Jobs = () => {
             </div>
           )}
 
-          {/* Initial State */}
+          {/* Initial State - Before Search */}
           {!loading && !searched && (
-            <div className="card initial-state">
-              <div className="search-illustration">🎯</div>
-              <h3>Start Your Job Search</h3>
-              <p>Enter keywords above to find jobs from multiple sources</p>
-              <div className="alert alert-info search-tips">
-                <h4>💡 Search Tips:</h4>
-                <ul>
-                  <li>Use specific job titles like "React Developer" or "Data Scientist"</li>
-                  <li>Add location for more targeted results</li>
-                  <li>Enable "Remote jobs only" for work-from-home opportunities</li>
-                  <li>Try different keywords if you don't find what you're looking for</li>
-                </ul>
-              </div>
+            <div className="initial-job-search">
+              <div className="job-search-icon">🎯</div>
+              <h2>FIND YOUR PREFERRED JOB</h2>
+              <p>Use the filters to search for your dream opportunity</p>
             </div>
           )}
+
         </div>
       </div>
     </div>

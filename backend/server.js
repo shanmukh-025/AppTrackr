@@ -22,6 +22,9 @@ const learningRoutes = require('./routes/learning');
 const authRoutes = require('./routes/auth');
 const healthRoutes = require('./routes/health');
 const templateRoutes = require('./routes/templates');
+const jobCloneDetectorRoutes = require('./routes/jobCloneDetector');
+const smartNotificationsRoutes = require('./routes/smartNotifications');
+const githubRoutes = require('./routes/github');
 const { initializeStaticCompanies } = require('./utils/companyCareerPages');
 const app = express();
 
@@ -94,6 +97,15 @@ app.use('/api/jobs', jobRoutes);
 
 // AI routes (Resume Analyzer, Cover Letter Generator, Interview Prep)
 app.use('/api/ai', aiRoutes);
+
+// Job Clone Detector routes
+app.use('/api/job-clone-detector', jobCloneDetectorRoutes);
+
+// Smart Notifications routes
+app.use('/api/smart-notifications', smartNotificationsRoutes);
+
+// GitHub Integration routes
+app.use('/api/github', githubRoutes);
 
 // Notification routes (Email settings, saved searches)
 app.use('/api/notifications', notificationRoutes);

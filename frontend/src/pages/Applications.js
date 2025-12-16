@@ -7,7 +7,6 @@ import ApplicationsList from '../components/ApplicationsList';
 import Pipeline from '../components/Pipeline';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import Toast from '../components/Toast';
-import './Dashboard.css';
 import './Applications.css';
 
 function Applications() {
@@ -27,12 +26,12 @@ function Applications() {
   const fetchApplications = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_URL}/api/applications`, {
+      const res = await axios.get(`${API_URL}/api/applications`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setApplications(response.data.applications);
-    } catch (error) {
-      console.error('Failed to fetch applications:', error);
+      setApplications(res.data.applications);
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -48,127 +47,165 @@ function Applications() {
     setToast({ message: 'Application added successfully!', type: 'success' });
   };
 
-  const handleApplicationDeleted = (id) => {
-    setApplications(applications.filter(app => app.id !== id));
-    setToast({ message: 'Application deleted', type: 'success' });
-  };
-
-  const handleEditClick = (app) => {
-    setEditingApplication(app);
-    setShowEditModal(true);
-  };
-
   const handleApplicationUpdated = (updatedApp) => {
-    setApplications(applications.map(app => 
+    setApplications(applications.map(app =>
       app.id === updatedApp.id ? updatedApp : app
     ));
     setShowEditModal(false);
     setEditingApplication(null);
-    setToast({ message: 'Application updated successfully!', type: 'success' });
+    setToast({ message: 'Application updated!', type: 'success' });
   };
 
-  const filteredApplications = applications.filter(app => {
-    const matchesSearch = 
+  const handleApplicationDeleted = (id) => {
+    setApplications(applications.filter(app => app.id !== id));
+    setToast({ message: 'Application deleted!', type: 'success' });
+  };
+
+  const filteredApps = applications.filter(app => {
+    const matchesSearch =
       app.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
       app.position.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || app.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
+  // Calculate stats
+  const stats = {
+    total: applications.length,
+    applied: applications.filter(app => app.status === 'applied').length,
+    interviewing: applications.filter(app => ['phone_screen', 'technical', 'onsite'].includes(app.status)).length,
+    offers: applications.filter(app => app.status === 'offer').length,
+  };
+
   return (
     <div className="page-container">
-      <div className="page-header">
-        <div>
-          <h1>📋 Applications</h1>
-          <p className="dashboard-subtitle">Track and manage all your job applications</p>
-        </div>
+      
+      {/* Header Title */}
+      <div className="page-title-row">
+        <h1 className="page-title">Applications</h1>
         <button className="primary-btn" onClick={() => setShowAddModal(true)}>
-          + Add Application
+          <span style={{ fontSize: '1.125rem', fontWeight: '600' }}>+</span>
+          Add Application
         </button>
       </div>
 
-      {/* Search & Filter */}
-      <div className="filters-section">
-        <div className="filters-row">
-          <div className="filter-group">
-            <label>🔍 Search Applications</label>
-            <input
-              type="text"
-              placeholder="Search by company or position..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="search-input"
-            />
+      {/* Quick Stats - Dashboard Style Cards */}
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)' }}>
+            📋
           </div>
-
-          <div className="filter-group">
-            <label>📊 Status Filter</label>
-            <select 
-              className="filter-select"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="all">All Status</option>
-              <option value="wishlist">📋 Wishlist</option>
-              <option value="applied">📤 Applied</option>
-              <option value="phone_screen">📞 Phone Screen</option>
-              <option value="technical">💻 Technical</option>
-              <option value="onsite">🏢 Onsite</option>
-              <option value="offer">✅ Offer</option>
-              <option value="rejected">❌ Rejected</option>
-              <option value="ghosted">👻 Ghosted</option>
-            </select>
+          <div className="stat-content">
+            <div className="stat-label">Total Applications Now</div>
+            <div className="stat-value">{stats.total}</div>
+            <div className="stat-footer">🔄 Update Now</div>
           </div>
+        </div>
 
-          <div className="filter-group">
-            <label style={{visibility: 'hidden'}}>Clear</label>
-            {(searchQuery || statusFilter !== 'all') && (
-              <button className="clear-filters-btn" onClick={() => {
-                setSearchQuery('');
-                setStatusFilter('all');
-              }}>
-                🔄 Clear Filters
-              </button>
-            )}
+        <div className="stat-card">
+          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #66bb6a 0%, #43a047 100%)' }}>
+            ✉️
+          </div>
+          <div className="stat-content">
+            <div className="stat-label">Total Applied Till Now</div>
+            <div className="stat-value">{stats.applied}</div>
+            <div className="stat-footer">📅 Last day</div>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #ffa726 0%, #fb8c00 100%)' }}>
+            💻
+          </div>
+          <div className="stat-content">
+            <div className="stat-label">Total Interviews Held</div>
+            <div className="stat-value">{stats.interviewing}</div>
+            <div className="stat-footer">⏳ In Progress</div>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%)' }}>
+            ✅
+          </div>
+          <div className="stat-content">
+            <div className="stat-label">Total Offers Received</div>
+            <div className="stat-value">{stats.offers}</div>
+            <div className="stat-footer">✓ Received</div>
           </div>
         </div>
       </div>
 
-      {/* View Tabs */}
-      <div className="view-toggle">
-        <button 
-          className={`view-toggle-btn ${activeView === 'list' ? 'active' : ''}`}
-          onClick={() => setActiveView('list')}
+      {/* 2. Compact Inline Filters */}
+      <div className="inline-filters">
+        <input 
+          type="text" 
+          className="search-input" 
+          placeholder="🔍 Search applications..." 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <select 
+          className="filter-select"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
         >
-          📋 List View
-        </button>
-        <button 
-          className={`view-toggle-btn ${activeView === 'pipeline' ? 'active' : ''}`}
-          onClick={() => setActiveView('pipeline')}
-        >
-          🎯 Pipeline
-        </button>
+          <option value="all">All Status</option>
+          <option value="wishlist">Wishlist</option>
+          <option value="applied">Applied</option>
+          <option value="phone_screen">Phone Screen</option>
+          <option value="technical">Technical</option>
+          <option value="onsite">Onsite</option>
+          <option value="offer">Offer</option>
+          <option value="rejected">Rejected</option>
+          <option value="ghosted">Ghosted</option>
+        </select>
+        <div className="view-toggle-inline">
+          <button 
+            className={`view-btn ${activeView === 'list' ? 'active' : ''}`}
+            onClick={() => setActiveView('list')}
+            title="List View"
+          >
+            ☰
+          </button>
+          <button 
+            className={`view-btn ${activeView === 'pipeline' ? 'active' : ''}`}
+            onClick={() => setActiveView('pipeline')}
+            title="Pipeline View"
+          >
+            ⋮⋮⋮
+          </button>
+        </div>
+        {(searchQuery || statusFilter !== 'all') && (
+          <button 
+            className="clear-btn"
+            onClick={() => {
+              setSearchQuery('');
+              setStatusFilter('all');
+            }}
+          >
+            ✕ Clear
+          </button>
+        )}
       </div>
 
-      {/* Content */}
-      {activeView === 'list' && (
+      {/* MAIN CONTENT */}
+      {activeView === 'list' ? (
         loading ? (
           <LoadingSkeleton />
         ) : (
-          <ApplicationsList 
-            applications={filteredApplications}
+          <ApplicationsList
+            applications={filteredApps}
             onApplicationDeleted={handleApplicationDeleted}
-            onApplicationUpdated={handleEditClick}
+            onApplicationUpdated={setEditingApplication}
           />
         )
-      )}
-
-      {activeView === 'pipeline' && (
-        <Pipeline applications={filteredApplications} />
+      ) : (
+        <Pipeline applications={filteredApps} />
       )}
 
       {showAddModal && (
-        <AddApplication 
+        <AddApplication
           onApplicationAdded={handleApplicationAdded}
           onClose={() => setShowAddModal(false)}
         />
@@ -186,7 +223,7 @@ function Applications() {
       )}
 
       {toast && (
-        <Toast 
+        <Toast
           message={toast.message}
           type={toast.type}
           onClose={() => setToast(null)}
