@@ -122,10 +122,10 @@ p {
 .btn-primary, button.primary-btn, .primary-btn {
   background: var(--color-primary) !important;
   color: white !important;
-  padding: 0.625rem 1.25rem !important;
-  border-radius: var(--radius-md) !important;
+  /* padding: 0.625rem 1.25rem !important; */
+  border-radius: 20px;
   font-weight: 500 !important;
-  font-size: 0.875rem !important;
+  font-size: 1rem !important;
   border: none !important;
   cursor: pointer !important;
   transition: all var(--transition-fast) !important;

@@ -84,7 +84,7 @@ function Applications() {
       <div className="page-title-row">
         <h1 className="page-title">Applications</h1>
         <button className="primary-btn" onClick={() => setShowAddModal(true)}>
-          <span style={{ fontSize: '1.125rem', fontWeight: '600' }}>+</span>
+          <span style={{ fontSize: '0.875rem', fontWeight: '600' }}>+</span>
           Add Application
         </button>
       </div>
@@ -92,46 +92,46 @@ function Applications() {
       {/* Quick Stats - Dashboard Style Cards */}
       <div className="stats-grid">
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)' }}>
-            📋
+          <div className="stat-icon">
+            📊
           </div>
           <div className="stat-content">
-            <div className="stat-label">Total Applications Now</div>
+            <div className="stat-label">Total Applications</div>
             <div className="stat-value">{stats.total}</div>
-            <div className="stat-footer">🔄 Update Now</div>
+            <div className="stat-footer">💼 All Submissions</div>
           </div>
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #66bb6a 0%, #43a047 100%)' }}>
-            ✉️
+          <div className="stat-icon">
+            🚀
           </div>
           <div className="stat-content">
-            <div className="stat-label">Total Applied Till Now</div>
+            <div className="stat-label">Applications Sent</div>
             <div className="stat-value">{stats.applied}</div>
-            <div className="stat-footer">📅 Last day</div>
+            <div className="stat-footer">✨ Awaiting Response</div>
           </div>
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #ffa726 0%, #fb8c00 100%)' }}>
-            💻
+          <div className="stat-icon">
+            🎯
           </div>
           <div className="stat-content">
-            <div className="stat-label">Total Interviews Held</div>
+            <div className="stat-label">Interview Stage</div>
             <div className="stat-value">{stats.interviewing}</div>
-            <div className="stat-footer">⏳ In Progress</div>
+            <div className="stat-footer">⚡ In Progress</div>
           </div>
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%)' }}>
-            ✅
+          <div className="stat-icon">
+            🎉
           </div>
           <div className="stat-content">
-            <div className="stat-label">Total Offers Received</div>
+            <div className="stat-label">Offers Received</div>
             <div className="stat-value">{stats.offers}</div>
-            <div className="stat-footer">✓ Received</div>
+            <div className="stat-footer">🏆 Success!</div>
           </div>
         </div>
       </div>
