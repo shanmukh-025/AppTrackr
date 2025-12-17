@@ -193,8 +193,10 @@ const Resources = () => {
   return (
     <div className="resources-page">
       <div className="resources-header">
-        <h1>Resources & Templates</h1>
-        <p>Explore templates, interview prep, and practice resources</p>
+        <div>
+          <h1>Resources & Learning</h1>
+          <p className="resources-subtitle">Enhance your skills with curated learning paths and interview prep</p>
+        </div>
       </div>
 
       {error && <div className="error-banner">{error}</div>}
@@ -203,82 +205,22 @@ const Resources = () => {
       <div className="resources-tabs-container">
         <div className="resources-tabs">
           <button
-            className={`tab-btn ${activeTab === 'resume-builder' ? 'active' : ''}`}
-            onClick={() => setActiveTab('resume-builder')}
-          >
-            Resume
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'cover-letter' ? 'active' : ''}`}
-            onClick={() => setActiveTab('cover-letter')}
-          >
-            Cover Letter
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'interview-prep' ? 'active' : ''}`}
-            onClick={() => setActiveTab('interview-prep')}
-          >
-            Interview Prep
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'behavioral' ? 'active' : ''}`}
-            onClick={() => setActiveTab('behavioral')}
-          >
-            Behavioral
-          </button>
-          <button
             className={`tab-btn ${activeTab === 'learning-path' ? 'active' : ''}`}
             onClick={() => setActiveTab('learning-path')}
           >
-            📚 Learning Path
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'video-library' ? 'active' : ''}`}
-            onClick={() => setActiveTab('video-library')}
-          >
-            🎥 Video Library
+            Learning Paths
           </button>
           <button
             className={`tab-btn ${activeTab === 'dsa-tracker' ? 'active' : ''}`}
             onClick={() => setActiveTab('dsa-tracker')}
           >
-            📝 DSA Sheets
+            DSA Sheets
           </button>
           <button
-            className={`tab-btn ${activeTab === 'dsa' ? 'active' : ''}`}
-            onClick={() => setActiveTab('dsa')}
+            className={`tab-btn ${activeTab === 'video-library' ? 'active' : ''}`}
+            onClick={() => setActiveTab('video-library')}
           >
-            DSA Problems
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'system-design' ? 'active' : ''}`}
-            onClick={() => setActiveTab('system-design')}
-          >
-            System Design
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'coding-playground' ? 'active' : ''}`}
-            onClick={() => setActiveTab('coding-playground')}
-          >
-            🎮 Playground
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'peer-review' ? 'active' : ''}`}
-            onClick={() => setActiveTab('peer-review')}
-          >
-            🤝 Peer Review
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'career-dna' ? 'active' : ''}`}
-            onClick={() => setActiveTab('career-dna')}
-          >
-            🧬 Career DNA
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'autopilot' ? 'active' : ''}`}
-            onClick={() => setActiveTab('autopilot')}
-          >
-            🤖 Smart Autopilot
+            Video Library
           </button>
         </div>
       </div>
