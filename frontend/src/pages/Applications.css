@@ -110,12 +110,14 @@ body {
 }
 
 .page-container {
-  padding: 2rem 0;
+  padding: 0;
+  padding-left: 15px;
   max-width: 100%;
   margin: 0;
   background: #ffffff;
   min-height: 100vh;
   position: relative;
+  width: 100%;
 }
 
 /* Header Section */
@@ -344,7 +346,7 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
-  padding: 0 2rem;
+  padding: 0 2rem 2rem 2rem;
 }
 
 .application-card {
@@ -680,8 +682,10 @@ body {
 /* Fix spacing - Remove left margin that causes gap */
 .page-container {
   /* margin-left: 280px !important; */
-  padding: 1.5rem 2rem !important;
+  padding: 0 !important;
+  padding-left: 15px !important;
   max-width: none !important;
+  width: 100% !important;
 }
 
 /* Page Title Row */
@@ -691,7 +695,7 @@ body {
   align-items: center;
   margin-bottom: 1.5rem;
   gap: 2rem;
-  padding: 0 2rem;
+  padding: 2rem 2rem 0 2rem;
 }
 
 .page-title {
@@ -938,7 +942,8 @@ body {
 
 /* Reduce page container padding */
 .page-container {
-  padding: 1.25rem 2rem !important;
+  padding: 0 !important;
+  padding-left: 15px !important;
 }
 
 /* Make grid more compact - 3 columns */
