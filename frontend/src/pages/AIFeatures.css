@@ -1,7 +1,7 @@
 .ai-features-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem 2.5rem;
+  max-width: 100%;
+  margin: 0;
+  padding: 2rem 50px;
   background: #ffffff;
   min-height: 100vh;
 }

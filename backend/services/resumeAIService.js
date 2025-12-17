@@ -5,6 +5,7 @@
  */
 
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const crypto = require('crypto');
 
 class ResumeAIService {
   constructor() {
@@ -12,6 +13,14 @@ class ResumeAIService {
     this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' }); // Using flash for better availability
     this.maxRetries = 3;
     this.retryDelay = 1000; // 1 second initial delay
+    this.analysisCache = new Map(); // Cache for consistent results
+  }
+
+  /**
+   * Generate a hash of resume text for caching
+   */
+  hashResumeText(text) {
+    return crypto.createHash('sha256').update(text.trim()).digest('hex');
   }
 
   /**
@@ -470,13 +479,22 @@ Return as JSON:
    */
   async comprehensiveResumeAnalysis(resumeText) {
     try {
-      const prompt = `You are an expert ATS (Applicant Tracking System) and resume reviewer. 
-Analyze this resume comprehensively and provide detailed scoring and feedback.
+      // Limit resume text to 3000 characters for faster processing
+      const limitedText = resumeText.substring(0, 3000);
+      
+      // Check cache first for consistent results
+      const resumeHash = this.hashResumeText(limitedText);
+      if (this.analysisCache.has(resumeHash)) {
+        console.log('📦 Returning cached analysis for identical resume');
+        return this.analysisCache.get(resumeHash);
+      }
+      
+      const prompt = `You are an expert ATS resume reviewer. Analyze this resume quickly and provide scoring.
 
-RESUME TEXT:
-${resumeText}
+RESUME:
+${limitedText}
 
-Analyze the resume and return ONLY valid JSON with NO markdown formatting:
+Return ONLY valid JSON (no markdown):
 {
   "overallScore": <number 0-100>,
   "atsScore": <number 0-100>,
@@ -509,7 +527,19 @@ Scoring Guidelines:
 Be specific and actionable in your feedback.`;
 
       const result = await this.retryWithBackoff(async () => {
-        return await this.model.generateContent(prompt);
+        const request = this.model.generateContent(prompt, {
+          generationConfig: {
+            maxOutputTokens: 2048,
+            temperature: 0, // Set to 0 for deterministic, consistent results
+            topP: 1,
+            topK: 1,
+          },
+        });
+        // Increase timeout to 150 seconds
+        const timeout = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('AI analysis timed out after 150 seconds')), 150000)
+        );
+        return await Promise.race([request, timeout]);
       });
 
       const response = result.response;
@@ -527,7 +557,7 @@ Be specific and actionable in your feedback.`;
       const analysis = JSON.parse(jsonMatch[0]);
 
       // Validate and ensure all fields exist
-      return {
+      const finalResult = {
         overallScore: Math.min(100, Math.max(0, analysis.overallScore || 65)),
         atsScore: Math.min(100, Math.max(0, analysis.atsScore || 65)),
         formattingScore: Math.min(100, Math.max(0, analysis.formattingScore || 70)),
@@ -548,6 +578,17 @@ Be specific and actionable in your feedback.`;
           }
         ]
       };
+
+      // Cache the result for consistent future analyses
+      this.analysisCache.set(resumeHash, finalResult);
+      
+      // Limit cache size to prevent memory issues (keep last 100 analyses)
+      if (this.analysisCache.size > 100) {
+        const firstKey = this.analysisCache.keys().next().value;
+        this.analysisCache.delete(firstKey);
+      }
+
+      return finalResult;
     } catch (error) {
       console.error('Comprehensive analysis error:', error);
       throw new Error('Failed to analyze resume: ' + error.message);

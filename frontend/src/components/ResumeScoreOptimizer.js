@@ -69,7 +69,7 @@ function ResumeScoreOptimizer() {
       }
     } catch (err) {
       console.error('Error fetching history:', err);
-      setError('Failed to load analysis history');
+      // Silently fail - history is not critical
     }
   }, [token, API_URL]);
 
@@ -113,7 +113,8 @@ function ResumeScoreOptimizer() {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data'
-          }
+          },
+          timeout: 180000 // 3 minutes to match backend timeout
         }
       );
 
@@ -346,97 +347,79 @@ ${OPTIMIZATION_TIPS.slice(0, 5).map((t, i) => `${i + 1}. ${t}`).join('\n')}
       {/* Analysis Tab */}
       {activeTab === 'analysis' && scoreData && (
         <div className="analysis-section">
-          {/* Main Score - Dashboard Widget Style */}
-          <div className="dashboard-widget score-widget">
-            <div className="widget-header">
-              <h2>📊 Overall Performance</h2>
-            </div>
-            <div className="score-container">
-              <div className="main-score">
-                <div className="score-circle" style={{ borderColor: getScoreColor(scoreData.overallScore) }}>
-                  <div className="score-value">{scoreData.overallScore}</div>
-                  <div className="score-label">Overall</div>
+          {/* Scores Grid - Minimal Style */}
+          <div className="scores-grid">
+            <div className="score-card-mini">
+              <div className="score-icon">🎯</div>
+              <div className="score-details">
+                <div className="score-label">Overall Score</div>
+                <div className="score-value-large" style={{ color: getScoreColor(scoreData.overallScore) }}>
+                  {scoreData.overallScore}/100
                 </div>
               </div>
+            </div>
 
-              <div className="score-breakdown">
-                <div className="score-item">
-                  <div className="score-label-small">ATS Score</div>
-                  <div className="score-bar">
-                    <div
-                      className="score-fill"
-                      style={{
-                        width: `${scoreData.atsScore}%`,
-                        backgroundColor: getScoreColor(scoreData.atsScore)
-                      }}
-                    />
-                  </div>
-                  <div className="score-number">{scoreData.atsScore}/100</div>
+            <div className="score-card-mini">
+              <div className="score-icon">🤖</div>
+              <div className="score-details">
+                <div className="score-label">ATS Score</div>
+                <div className="score-value-large" style={{ color: getScoreColor(scoreData.atsScore) }}>
+                  {scoreData.atsScore}/100
                 </div>
+              </div>
+            </div>
 
-                <div className="score-item">
-                  <div className="score-label-small">Formatting</div>
-                  <div className="score-bar">
-                    <div
-                      className="score-fill"
-                      style={{
-                        width: `${scoreData.formattingScore}%`,
-                        backgroundColor: getScoreColor(scoreData.formattingScore)
-                      }}
-                    />
-                  </div>
-                  <div className="score-number">{scoreData.formattingScore}/100</div>
+            <div className="score-card-mini">
+              <div className="score-icon">📝</div>
+              <div className="score-details">
+                <div className="score-label">Formatting</div>
+                <div className="score-value-large" style={{ color: getScoreColor(scoreData.formattingScore) }}>
+                  {scoreData.formattingScore}/100
                 </div>
+              </div>
+            </div>
 
-                <div className="score-item">
-                  <div className="score-label-small">Content Quality</div>
-                  <div className="score-bar">
-                    <div
-                      className="score-fill"
-                      style={{
-                        width: `${scoreData.contentScore}%`,
-                        backgroundColor: getScoreColor(scoreData.contentScore)
-                      }}
-                    />
-                  </div>
-                  <div className="score-number">{scoreData.contentScore}/100</div>
+            <div className="score-card-mini">
+              <div className="score-icon">✍️</div>
+              <div className="score-details">
+                <div className="score-label">Content</div>
+                <div className="score-value-large" style={{ color: getScoreColor(scoreData.contentScore) }}>
+                  {scoreData.contentScore}/100
                 </div>
+              </div>
+            </div>
 
-                <div className="score-item">
-                  <div className="score-label-small">Keywords</div>
-                  <div className="score-bar">
-                    <div
-                      className="score-fill"
-                      style={{
-                        width: `${scoreData.keywordScore}%`,
-                        backgroundColor: getScoreColor(scoreData.keywordScore)
-                      }}
-                    />
-                  </div>
-                  <div className="score-number">{scoreData.keywordScore}/100</div>
+            <div className="score-card-mini">
+              <div className="score-icon">🔍</div>
+              <div className="score-details">
+                <div className="score-label">Keywords</div>
+                <div className="score-value-large" style={{ color: getScoreColor(scoreData.keywordScore) }}>
+                  {scoreData.keywordScore}/100
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Analysis Cards - Dashboard Widget Style */}
-          <div className="dashboard-grid analysis-grid">
-            <div className="dashboard-widget analysis-card strengths">
-              <div className="widget-header">
-                <h2>✓ Strengths</h2>
+          {/* Analysis Details - Minimal Cards */}
+          <div className="analysis-details-grid">
+            <div className="detail-card">
+              <div className="detail-header">
+                <span className="detail-icon">✅</span>
+                <h3>Strengths</h3>
               </div>
-              <ul>
+              <ul className="simple-list">
                 {scoreData.strengths?.map((strength, idx) => (
                   <li key={idx}>{strength}</li>
                 ))}
               </ul>
             </div>
 
-            <div className="dashboard-widget analysis-card weaknesses">
-              <div className="widget-header">
-                <h2>⚠️ Areas to Improve</h2>
+            <div className="detail-card">
+              <div className="detail-header">
+                <span className="detail-icon">💡</span>
+                <h3>Areas to Improve</h3>
               </div>
-              <ul>
+              <ul className="simple-list">
                 {scoreData.weaknesses?.map((weakness, idx) => (
                   <li key={idx}>{weakness}</li>
                 ))}
@@ -444,36 +427,24 @@ ${OPTIMIZATION_TIPS.slice(0, 5).map((t, i) => `${i + 1}. ${t}`).join('\n')}
             </div>
           </div>
 
-          {/* Sections Info - Dashboard Widget Style */}
-          <div className="dashboard-widget">
-            <div className="widget-header">
-              <h2>📋 Resume Sections</h2>
+          {/* Sections Info - Minimal */}
+          <div className="detail-card">
+            <div className="detail-header">
+              <span className="detail-icon">📋</span>
+              <h3>Resume Sections</h3>
             </div>
-            <div className="sections-info">
-              <div className="sections-found">
-                <h4>Sections Found ({scoreData.sections?.present?.length || 0})</h4>
-                <div className="section-badges">
-                  {scoreData.sections?.present?.map((section) => (
-                    <span key={section} className="badge badge-success">✓ {section}</span>
-                  )) || []}
-                </div>
-              </div>
-
-              {scoreData.sections?.missing && scoreData.sections.missing.length > 0 && (
-                <div className="sections-missing">
-                  <h4>Sections Missing ({scoreData.sections.missing.length})</h4>
-                  <div className="section-badges">
-                    {scoreData.sections.missing.map((section) => (
-                      <span key={section} className="badge badge-warning">+ {section}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
+            <div className="sections-compact">
+              {scoreData.sections?.present?.map((section) => (
+                <span key={section} className="section-tag">✓ {section}</span>
+              ))}
+              {scoreData.sections?.missing?.map((section) => (
+                <span key={section} className="section-tag missing">+ {section}</span>
+              ))}
             </div>
           </div>
 
-          <button className="primary-btn download-btn" onClick={downloadReport}>
-            ⬇️ Download Report
+          <button className="minimal-btn download-btn" onClick={downloadReport}>
+            📥 Download Report
           </button>
         </div>
       )}

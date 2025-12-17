@@ -15,7 +15,6 @@ import ResourcesSimplified from './pages/ResourcesSimplified';
 import DSASheetDetail from './pages/DSASheetDetail';
 import Jobs from './pages/Jobs';
 import AIFeatures from './pages/AIFeatures';
-import Resumes from './pages/Resumes';
 
 import VideoInterviewHome from './pages/VideoInterviewHome';
 import VideoInterviewSession from './pages/VideoInterviewSession';
@@ -95,9 +94,9 @@ function App() {
                 <Route path="/applications" element={<Applications />} />
                 <Route path="/jobs" element={<Jobs />} />
                 <Route path="/ai-features" element={<AIFeatures />} />
-                {/* Redirect old resume-score route to unified resumes page */}
-                <Route path="/resume-score" element={<Navigate to="/resumes" replace />} />
-                <Route path="/resumes" element={<Resumes />} />
+                {/* Redirect old resume routes to AI Assistant */}
+                <Route path="/resume-score" element={<Navigate to="/ai-features" replace />} />
+                <Route path="/resumes" element={<Navigate to="/ai-features" replace />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/resources" element={<ResourcesSimplified />} />

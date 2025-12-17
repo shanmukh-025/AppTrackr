@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import ResumeScoreOptimizer from '../components/ResumeScoreOptimizer';
 import './AIFeatures.css';
 
 const AIFeatures = () => {
@@ -158,6 +159,12 @@ const AIFeatures = () => {
           onClick={() => setActiveTab('cover')}
         >
           ✉️ Cover Letter
+        </button>
+        <button
+          className={activeTab === 'optimizer' ? 'tab-active' : ''}
+          onClick={() => setActiveTab('optimizer')}
+        >
+          📊 Resume Optimizer
         </button>
       </div>
 
@@ -384,6 +391,13 @@ const AIFeatures = () => {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* RESUME OPTIMIZER TAB */}
+      {activeTab === 'optimizer' && (
+        <div className="ai-content">
+          <ResumeScoreOptimizer />
         </div>
       )}
     </div>

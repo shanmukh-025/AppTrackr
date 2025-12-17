@@ -9,6 +9,12 @@ const prisma = new PrismaClient({
       url: process.env.DATABASE_URL,
     },
   },
+  // Increase connection pool timeout to 5 minutes for long-running operations
+  __internal: {
+    engine: {
+      connectionTimeout: 300000, // 5 minutes
+    }
+  }
 });
 
 // Connection pool middleware for limiting concurrent requests
@@ -30,7 +36,7 @@ class ConnectionPoolManager {
       return await Promise.race([
         fn(),
         new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Query timeout (60s)')), 60000)
+          setTimeout(() => reject(new Error('Query timeout (180s)')), 180000)
         )
       ]);
     } finally {

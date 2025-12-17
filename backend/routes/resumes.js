@@ -297,6 +297,10 @@ router.post('/:id/analyze', authenticateToken, async (req, res) => {
  * Comprehensive resume analysis and scoring (no job description needed)
  */
 router.post('/analyze-score', authenticateToken, upload.single('resume'), async (req, res) => {
+  // Increase timeout for AI analysis
+  req.setTimeout(180000); // 3 minutes
+  res.setTimeout(180000); // 3 minutes
+  
   try {
     let resumeText = '';
     let resumeId = null;

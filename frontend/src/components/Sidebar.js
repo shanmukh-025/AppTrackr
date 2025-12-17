@@ -111,7 +111,6 @@ function Sidebar() {
     { path: '/smart-autopilot', icon: <SmartToyIcon />, label: '🤖 Smart Autopilot' },
     { path: '/job-clone-detector', icon: <SmartToyIcon />, label: '🔬 Clone Detector' },
     { path: '/smart-notifications', icon: <SmartToyIcon />, label: '🔔 Smart Alerts' },
-    { path: '/resumes', icon: <ArticleIcon />, label: 'Resumes' },
     { path: '/analytics', icon: <BarChartIcon />, label: 'Analytics' },
     { path: '/profile', icon: <PersonIcon />, label: 'Profile' },
     { path: '/resources', icon: <MenuBookIcon />, label: 'Resources' }
