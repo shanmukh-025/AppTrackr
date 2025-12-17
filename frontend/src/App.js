@@ -19,10 +19,6 @@ import AIFeatures from './pages/AIFeatures';
 import VideoInterviewHome from './pages/VideoInterviewHome';
 import VideoInterviewSession from './pages/VideoInterviewSession';
 import VideoInterviewFeedback from './pages/VideoInterviewFeedback';
-import ProjectBuilderAI from './components/ProjectBuilderAI';
-import CareerNetworkBuilder from './components/CareerNetworkBuilder';
-import AICareerDNA from './components/AICareerDNA';
-import SmartAutopilot from './components/SmartAutopilot';
 import AIJobCloneDetector from './components/AIJobCloneDetector';
 import SmartNotifications from './components/SmartNotifications';
 import './App.css';
@@ -104,11 +100,7 @@ function App() {
                 <Route path="/behavioral" element={<VideoInterviewHome />} />
                 <Route path="/video-interview/session" element={<VideoInterviewSession />} />
                 <Route path="/video-interview/feedback/:sessionId" element={<VideoInterviewFeedback />} />
-                <Route path="/project-builder" element={<ProjectBuilderAI />} />
-                <Route path="/network-builder" element={<CareerNetworkBuilder />} />
-              <Route path="/career-dna" element={<AICareerDNA />} />
-              <Route path="/smart-autopilot" element={<SmartAutopilot />} />
-              <Route path="/job-clone-detector" element={<AIJobCloneDetector />} />
+                <Route path="/job-clone-detector" element={<AIJobCloneDetector />} />
               <Route path="/smart-notifications" element={<SmartNotifications />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Routes>
