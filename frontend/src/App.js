@@ -19,8 +19,7 @@ import AIFeatures from './pages/AIFeatures';
 import VideoInterviewHome from './pages/VideoInterviewHome';
 import VideoInterviewSession from './pages/VideoInterviewSession';
 import VideoInterviewFeedback from './pages/VideoInterviewFeedback';
-import AIJobCloneDetector from './components/AIJobCloneDetector';
-import SmartNotifications from './components/SmartNotifications';
+import ProjectBuilderAI from './components/ProjectBuilderAI';
 import './App.css';
 
 // Color mode context
@@ -100,8 +99,7 @@ function App() {
                 <Route path="/behavioral" element={<VideoInterviewHome />} />
                 <Route path="/video-interview/session" element={<VideoInterviewSession />} />
                 <Route path="/video-interview/feedback/:sessionId" element={<VideoInterviewFeedback />} />
-                <Route path="/job-clone-detector" element={<AIJobCloneDetector />} />
-              <Route path="/smart-notifications" element={<SmartNotifications />} />
+                <Route path="/project-builder" element={<ProjectBuilderAI />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Routes>
             </main>

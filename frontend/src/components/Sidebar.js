@@ -106,8 +106,6 @@ function Sidebar() {
     { path: '/jobs', icon: <WorkIcon />, label: 'Jobs' },
     { path: '/ai-features', icon: <SmartToyIcon />, label: 'AI Assistant' },
     { path: '/project-builder', icon: <SmartToyIcon />, label: '🛠️ Project Builder' },
-    { path: '/job-clone-detector', icon: <SmartToyIcon />, label: '🔬 Clone Detector' },
-    { path: '/smart-notifications', icon: <SmartToyIcon />, label: '🔔 Smart Alerts' },
     { path: '/analytics', icon: <BarChartIcon />, label: 'Analytics' },
     { path: '/profile', icon: <PersonIcon />, label: 'Profile' },
     { path: '/resources', icon: <MenuBookIcon />, label: 'Resources' }

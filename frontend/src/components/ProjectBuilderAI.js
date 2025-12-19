@@ -26,8 +26,17 @@ const ProjectBuilderAI = () => {
   const [selectedImprovement, setSelectedImprovement] = useState(null);
   const [improvementCode, setImprovementCode] = useState(null);
   const [implementationStep, setImplementationStep] = useState(0);
+  const [savedResources, setSavedResources] = useState([]);
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+  // Load saved resources from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('savedResources');
+    if (saved) {
+      setSavedResources(JSON.parse(saved));
+    }
+  }, []);
 
   const techStackOptions = [
     'React', 'Node.js', 'Express', 'MongoDB', 'PostgreSQL', 
@@ -37,6 +46,39 @@ const ProjectBuilderAI = () => {
     'Redis', 'GraphQL', 'REST API', 'Socket.io',
     'TailwindCSS', 'Material-UI', 'Bootstrap'
   ];
+
+  // Save resource to learning tracker
+  const saveResource = (resource) => {
+    const resourceToSave = {
+      id: Date.now(),
+      title: resource.title,
+      url: resource.url,
+      savedAt: new Date().toLocaleDateString(),
+      completed: false
+    };
+    
+    const updated = [...savedResources, resourceToSave];
+    setSavedResources(updated);
+    localStorage.setItem('savedResources', JSON.stringify(updated));
+    alert('✅ Resource saved to Learning Tracker!');
+  };
+
+  // Open URL in new tab with proper handling
+  // Remove saved resource
+  const removeSavedResource = (id) => {
+    const updated = savedResources.filter(r => r.id !== id);
+    setSavedResources(updated);
+    localStorage.setItem('savedResources', JSON.stringify(updated));
+  };
+
+  // Mark resource as completed
+  const toggleResourceCompletion = (id) => {
+    const updated = savedResources.map(r => 
+      r.id === id ? { ...r, completed: !r.completed } : r
+    );
+    setSavedResources(updated);
+    localStorage.setItem('savedResources', JSON.stringify(updated));
+  };
 
   useEffect(() => {
     checkGitHubStatus();
@@ -386,6 +428,12 @@ const ProjectBuilderAI = () => {
                 💻 Implement
               </button>
             )}
+            <button
+              className={'tab-btn ' + (activeTab === 'tracker' ? 'active' : '')}
+              onClick={() => setActiveTab('tracker')}
+            >
+              📚 Learning Tracker {savedResources.length > 0 && `(${savedResources.length})`}
+            </button>
             {generatedProject && (
               <button
                 className={'tab-btn ' + (activeTab === 'review' ? 'active' : '')}
@@ -575,12 +623,69 @@ const ProjectBuilderAI = () => {
                             <span className="category">{improvement.category}</span>
                             <span className="time">⏱️ {improvement.estimatedTime}</span>
                           </div>
-                          <button
-                            onClick={() => generateImprovement(improvement)}
-                            className="implement-btn"
-                          >
-                            🚀 Generate Code & Implement
-                          </button>
+                          
+                          {/* Resources Section */}
+                          {improvement.resources && improvement.resources.length > 0 && (
+                            <div className="improvement-resources">
+                              <h5>📚 Learning Resources</h5>
+                              <div className="resources-grid">
+                                {improvement.resources.map((resource, idx) => {
+                                  const resourceObj = typeof resource === 'object' ? resource : { title: resource, url: '' };
+                                  const url = resourceObj.url || resource;
+                                  const title = resourceObj.title || (typeof resource === 'string' ? resource : 'Resource');
+                                  
+                                  console.log('Resource:', idx, 'Title:', title, 'URL:', url, 'Type:', typeof resource);
+                                  
+                                  return (
+                                    <div key={idx} className="resource-item-card">
+                                      <div className="resource-title">{title}</div>
+                                      <div className="resource-button-group">
+                                        <button
+                                          style={{
+                                            padding: '10px 20px',
+                                            backgroundColor: '#4CAF50',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '5px',
+                                            cursor: 'pointer',
+                                            fontSize: '14px',
+                                            fontWeight: 'bold'
+                                          }}
+                                          onClick={() => {
+                                            alert('BUTTON CLICKED! URL: ' + url);
+                                            if (url && typeof url === 'string' && url.startsWith('http')) {
+                                              window.open(url, '_blank');
+                                            }
+                                          }}
+                                        >
+                                          🔗 CLICK ME
+                                        </button>
+                                        <button 
+                                          style={{
+                                            padding: '10px 20px',
+                                            backgroundColor: '#2196F3',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '5px',
+                                            cursor: 'pointer',
+                                            fontSize: '14px',
+                                            fontWeight: 'bold'
+                                          }}
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            console.log('Saving resource:', resourceObj);
+                                            saveResource(resourceObj);
+                                          }}
+                                        >
+                                          💾 Save
+                                        </button>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -742,6 +847,65 @@ const ProjectBuilderAI = () => {
                     Cancel
                   </button>
                 </div>
+              </div>
+            )}
+
+            {/* LEARNING TRACKER TAB */}
+            {activeTab === 'tracker' && (
+              <div className="learning-tracker">
+                <h2>📚 Your Learning Tracker</h2>
+                
+                {savedResources.length === 0 ? (
+                  <div className="empty-tracker">
+                    <p>No saved resources yet. Click "Save" on any resource to add it here!</p>
+                  </div>
+                ) : (
+                  <div className="saved-resources-list">
+                    <p className="tracker-summary">
+                      Total Resources: {savedResources.length} | 
+                      Completed: {savedResources.filter(r => r.completed).length}
+                    </p>
+                    
+                    {savedResources.map((resource) => (
+                      <div key={resource.id} className={`saved-resource-card ${resource.completed ? 'completed' : ''}`}>
+                        <div className="resource-header">
+                          <input 
+                            type="checkbox" 
+                            checked={resource.completed}
+                            onChange={() => toggleResourceCompletion(resource.id)}
+                            className="completion-checkbox"
+                          />
+                          <div className="resource-info">
+                            <h4 className={resource.completed ? 'completed-text' : ''}>
+                              {resource.title}
+                            </h4>
+                            <p className="saved-date">Saved: {resource.savedAt}</p>
+                          </div>
+                        </div>
+                        <div className="resource-actions-tracker">
+                          <button 
+                            onClick={() => {
+                              console.log('Opening resource:', resource.url);
+                              if (resource.url && resource.url.startsWith('http')) {
+                                window.open(resource.url, '_blank');
+                              }
+                            }}
+                            className="open-btn"
+                            type="button"
+                          >
+                            🌐 Open
+                          </button>
+                          <button 
+                            className="remove-btn"
+                            onClick={() => removeSavedResource(resource.id)}
+                          >
+                            ✕ Remove
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
