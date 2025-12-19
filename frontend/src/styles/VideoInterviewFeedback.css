@@ -6,6 +6,250 @@
   padding: 2rem;
 }
 
+/* AI Smart Analysis Section */
+.ai-smart-analysis {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 2px solid #3b82f6;
+}
+
+.ai-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.ai-header h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  color: #1e40af;
+}
+
+.domain-badge {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.ai-scores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.ai-score-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ai-score-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.ai-score-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e40af;
+  margin-bottom: 0.25rem;
+}
+
+.ai-score-label {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* STAR Compliance Section */
+.star-compliance-section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.star-compliance-section h3 {
+  margin: 0 0 1rem 0;
+  color: #1e293b;
+  font-size: 1.2rem;
+}
+
+.star-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.star-item {
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  border: 2px solid #e2e8f0;
+}
+
+.star-item.present {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.star-item.weak {
+  background: #fef3c7;
+  border-color: #fbbf24;
+}
+
+.star-item.missing {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+.star-letter {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.star-name {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.star-status {
+  font-size: 1.5rem;
+}
+
+.star-status.present {
+  color: #22c55e;
+}
+
+.star-status.weak {
+  color: #f59e0b;
+}
+
+.star-status.missing {
+  color: #ef4444;
+}
+
+.star-feedback {
+  margin: 1rem 0 0 0;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  color: #334155;
+  line-height: 1.6;
+  border-left: 4px solid #3b82f6;
+}
+
+/* Detailed AI Feedback */
+.ai-detailed-feedback {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.ai-detailed-feedback h3 {
+  margin: 0 0 1rem 0;
+  color: #1e293b;
+  font-size: 1.2rem;
+}
+
+.feedback-text {
+  margin: 0;
+  color: #475569;
+  line-height: 1.8;
+  font-size: 1.05rem;
+}
+
+/* Key Insights */
+.key-insights {
+  background: #f0fdf4;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #22c55e;
+}
+
+.key-insights h3 {
+  margin: 0 0 1rem 0;
+  color: #15803d;
+  font-size: 1.2rem;
+}
+
+.key-insights ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.key-insights li {
+  color: #166534;
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+/* Red Flags */
+.red-flags {
+  background: #fef2f2;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #ef4444;
+}
+
+.red-flags h3 {
+  margin: 0 0 1rem 0;
+  color: #991b1b;
+  font-size: 1.2rem;
+}
+
+.red-flags ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.red-flags li {
+  color: #7f1d1d;
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+/* Response Adequacy Badge */
+.meta-item.adequacy-too-short {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+}
+
+.meta-item.adequacy-too-long {
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+}
+
+.meta-item.adequacy-adequate {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+}
+
 /* Loading State */
 .feedback-loading {
   display: flex;

@@ -313,8 +313,213 @@ Return ONLY valid JSON (no markdown, no extra text) with this structure:
       throw new Error('Failed to analyze ATS compatibility: ' + error.message);
     }
   }
-}
 
-module.exports = new AIService();
+  /**
+   * Generate domain-specific interview questions
+   */
+  async generateInterviewQuestions(domain, difficulty, count) {
+    try {
+      this._checkAPIKey();
+
+      const domainDescriptions = {
+        'software-engineering': 'Software Engineering, Programming, System Design, and Technical Leadership',
+        'data-science': 'Data Science, Machine Learning, Analytics, and AI',
+        'product-management': 'Product Management, Strategy, Roadmapping, and User Experience',
+        'project-management': 'Project Management, Agile, Scrum, and Delivery',
+        'business-analysis': 'Business Analysis, Requirements Gathering, and Process Improvement',
+        'marketing': 'Marketing, Growth, Digital Marketing, and Brand Management',
+        'sales': 'Sales, Business Development, and Client Relations',
+        'design': 'UX/UI Design, Product Design, and User Research',
+        'hr': 'Human Resources, Talent Acquisition, and People Management',
+        'finance': 'Finance, Accounting, and Financial Analysis',
+        'customer-success': 'Customer Success, Support, and Relationship Management',
+        'general': 'General Behavioral and Leadership'
+      };
+
+      const domainName = domainDescriptions[domain] || domain;
+
+      const prompt = `You are an expert interviewer specializing in ${domainName}.
+
+Generate exactly ${count} unique, high-quality interview questions for a ${domain} role.
+
+REQUIREMENTS:
+1. Questions should be behavioral, situational, or role-specific
+2. Difficulty levels: ${difficulty === 'Mixed' ? 'randomly distribute as Easy (30%), Medium (50%), Hard (20%)' : `All ${difficulty}`}
+3. Questions MUST be specific and relevant to ${domainName}
+4. Include mix of technical competency and soft skills questions
+5. Make questions realistic and scenario-based
+6. Questions should encourage STAR method responses
+
+CRITICAL: Return ONLY valid JSON array (no markdown, no extra text, no code blocks).
+Start with [ and end with ]. No explanation before or after.
+
+[
+  {
+    "question": "The actual question text specific to ${domain}",
+    "category": "Technical/Leadership/Communication/Problem-Solving/etc",
+    "difficulty": "Easy|Medium|Hard",
+    "expectedFocus": "What interviewer wants to learn",
+    "starPrompt": "Hint about STAR method approach"
+  }
+]
+
+Generate exactly ${count} diverse questions appropriate for ${domainName}.`;
+
+      console.log(`🤖 Generating ${count} interview questions for ${domain}...`);
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      
+      if (!response) {
+        throw new Error('No response from Gemini API');
+      }
+
+      let text = response.text().trim();
+      console.log('Raw response (first 500 chars):', text.substring(0, 500));
+
+      // Remove markdown code blocks if present
+      text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
+      // Find JSON array
+      let jsonMatch = text.match(/\[[\s\S]*\]/);
+      if (!jsonMatch) {
+        console.error('No JSON array found in response:', text);
+        throw new Error('Could not find JSON array in AI response');
+      }
+
+      let jsonStr = jsonMatch[0];
+      let parsedData = JSON.parse(jsonStr);
+      
+      // Ensure we got an array
+      if (!Array.isArray(parsedData)) {
+        console.error('Response is not an array:', parsedData);
+        throw new Error('AI response is not an array of questions');
+      }
+
+      // Validate we have questions
+      if (parsedData.length === 0) {
+        throw new Error('No questions were generated');
+      }
+
+      // Add unique IDs and ensure all required fields
+      const questionsWithIds = parsedData.map((q, idx) => ({
+        id: idx + 1,
+        question: q.question || '',
+        category: q.category || 'General',
+        difficulty: q.difficulty || 'Medium',
+        expectedFocus: q.expectedFocus || '',
+        starPrompt: q.starPrompt || ''
+      }));
+
+      console.log(`✅ Successfully generated ${questionsWithIds.length} questions for ${domain}`);
+      return questionsWithIds;
+    } catch (error) {
+      console.error('❌ Generate questions error:', error.message);
+      console.error('Full error:', error);
+      throw new Error(`Failed to generate interview questions: ${error.message}`);
+    }
+  }
+
+  /**
+   * Analyze interview response with smart AI analysis
+   */
+  async analyzeInterviewResponse({ question, answer, transcript, duration, domain, category }) {
+    try {
+      this._checkAPIKey();
+
+      const wordCount = (transcript || answer || '').split(/\s+/).length;
+      const durationInSeconds = duration || 0;
+
+      const prompt = `You are an expert interview coach with deep knowledge in behavioral interviewing, communication analysis, and professional assessment.
+
+INTERVIEW QUESTION:
+"${question}"
+
+CANDIDATE'S RESPONSE:
+${transcript || answer}
+
+RESPONSE METADATA:
+- Duration: ${durationInSeconds} seconds (${Math.floor(durationInSeconds / 60)}m ${durationInSeconds % 60}s)
+- Word Count: ${wordCount} words
+- Domain: ${domain || 'General'}
+- Category: ${category || 'Behavioral'}
+
+ANALYZE THE RESPONSE ACROSS MULTIPLE DIMENSIONS:
+
+1. **Content Quality** (40% weight):
+   - STAR method compliance (Situation, Task, Action, Result)
+   - Specificity and concrete examples
+   - Relevance to the question
+   - Depth of insight and self-awareness
+   - Quantifiable results mentioned
+
+2. **Communication Skills** (30% weight):
+   - Clarity and coherence
+   - Structure and organization
+   - Professional language
+   - Confidence in delivery (based on word choice)
+   - Conciseness vs verbosity
+
+3. **Behavioral Indicators** (30% weight):
+   - Problem-solving approach
+   - Leadership qualities
+   - Teamwork and collaboration
+   - Adaptability and learning
+   - Ownership and accountability
+
+Return ONLY valid JSON (no markdown) with this structure:
+{
+  "overallScore": 0-100,
+  "contentScore": 0-100,
+  "communicationScore": 0-100,
+  "behavioralScore": 0-100,
+  "starCompliance": {
+    "score": 0-100,
+    "situation": "present/missing/weak",
+    "task": "present/missing/weak",
+    "action": "present/missing/weak",
+    "result": "present/missing/weak",
+    "feedback": "Specific feedback on STAR usage"
+  },
+  "strengths": ["3-5 specific strengths"],
+  "improvements": ["3-5 specific areas to improve"],
+  "detailedFeedback": "Comprehensive paragraph analyzing the response",
+  "keyInsights": ["2-3 key insights about the candidate"],
+  "redFlags": ["Any concerning patterns or gaps"],
+  "suggestions": "Specific actionable advice for improvement",
+  "estimatedFillerWords": 0-50,
+  "responseAdequacy": "too-short/adequate/too-long",
+  "professionalismScore": 0-100,
+  "specificityScore": 0-100,
+  "impactScore": 0-100
+}`;
+
+      console.log('🤖 Analyzing interview response...');
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      
+      if (!response) {
+        throw new Error('No response from Gemini API');
+      }
+
+      let text = response.text();
+      console.log('✅ Response analysis complete');
+
+      // Remove markdown code blocks
+      text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('Could not find JSON in AI response');
+      }
+
+      let parsedData = JSON.parse(jsonMatch[0]);
+
+      return parsedData;
+    } catch (error) {
+      console.error('❌ Analyze response error:', error);
+      throw new Error('Failed to analyze interview response: ' + error.message);
+    }
+  }
+}
 
 module.exports = new AIService();

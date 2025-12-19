@@ -166,6 +166,87 @@ const VideoInterviewFeedback = () => {
           {/* Overview Tab */}
           {activeTab === 'overview' && (
             <div className="overview-tab">
+              {/* AI Smart Analysis Section */}
+              {currentAnalysis.aiAnalysis && (
+                <div className="ai-smart-analysis">
+                  <div className="ai-header">
+                    <h2>🤖 AI Smart Analysis</h2>
+                    {sessionData.domain && (
+                      <span className="domain-badge">Domain: {sessionData.domain}</span>
+                    )}
+                  </div>
+                  
+                  {/* AI Scores Grid */}
+                  <div className="ai-scores-grid">
+                    <div className="ai-score-card">
+                      <div className="ai-score-icon">📝</div>
+                      <div className="ai-score-value">{currentAnalysis.aiAnalysis.contentScore}/100</div>
+                      <div className="ai-score-label">Content Quality</div>
+                    </div>
+                    <div className="ai-score-card">
+                      <div className="ai-score-icon">💬</div>
+                      <div className="ai-score-value">{currentAnalysis.aiAnalysis.communicationScore}/100</div>
+                      <div className="ai-score-label">Communication</div>
+                    </div>
+                    <div className="ai-score-card">
+                      <div className="ai-score-icon">🎯</div>
+                      <div className="ai-score-value">{currentAnalysis.aiAnalysis.behavioralScore}/100</div>
+                      <div className="ai-score-label">Behavioral</div>
+                    </div>
+                  </div>
+
+                  {/* STAR Compliance Analysis */}
+                  {currentAnalysis.aiAnalysis.starCompliance && (
+                    <div className="star-compliance-section">
+                      <h3>⭐ STAR Method Analysis</h3>
+                      <div className="star-grid">
+                        {['situation', 'task', 'action', 'result'].map((component) => (
+                          <div key={component} className={`star-item ${currentAnalysis.aiAnalysis.starCompliance[component]}`}>
+                            <span className="star-letter">{component[0].toUpperCase()}</span>
+                            <span className="star-name">{component.charAt(0).toUpperCase() + component.slice(1)}</span>
+                            <span className={`star-status ${currentAnalysis.aiAnalysis.starCompliance[component]}`}>
+                              {currentAnalysis.aiAnalysis.starCompliance[component] === 'present' ? '✓' : 
+                               currentAnalysis.aiAnalysis.starCompliance[component] === 'weak' ? '⚠' : '✗'}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="star-feedback">{currentAnalysis.aiAnalysis.starCompliance.feedback}</p>
+                    </div>
+                  )}
+
+                  {/* Detailed AI Feedback */}
+                  <div className="ai-detailed-feedback">
+                    <h3>📊 Comprehensive Analysis</h3>
+                    <p className="feedback-text">{currentAnalysis.aiAnalysis.detailedFeedback}</p>
+                  </div>
+
+                  {/* Key Insights */}
+                  {currentAnalysis.aiAnalysis.keyInsights && currentAnalysis.aiAnalysis.keyInsights.length > 0 && (
+                    <div className="key-insights">
+                      <h3>💡 Key Insights</h3>
+                      <ul>
+                        {currentAnalysis.aiAnalysis.keyInsights.map((insight, idx) => (
+                          <li key={idx}>{insight}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Red Flags */}
+                  {currentAnalysis.aiAnalysis.redFlags && currentAnalysis.aiAnalysis.redFlags.length > 0 && (
+                    <div className="red-flags">
+                      <h3>🚨 Areas of Concern</h3>
+                      <ul>
+                        {currentAnalysis.aiAnalysis.redFlags.map((flag, idx) => (
+                          <li key={idx}>{flag}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Question Info */}
               <div className="question-info-card">
                 <h2>Question:</h2>
@@ -173,6 +254,13 @@ const VideoInterviewFeedback = () => {
                 <div className="question-meta">
                   <span className="meta-item">📂 {currentAnalysis.category}</span>
                   <span className="meta-item">⏱️ {Math.floor(currentAnalysis.duration / 60)}:{(currentAnalysis.duration % 60).toString().padStart(2, '0')}</span>
+                  {currentAnalysis.aiAnalysis?.responseAdequacy && (
+                    <span className={`meta-item adequacy-${currentAnalysis.aiAnalysis.responseAdequacy}`}>
+                      {currentAnalysis.aiAnalysis.responseAdequacy === 'too-short' ? '⚠️ Too Short' :
+                       currentAnalysis.aiAnalysis.responseAdequacy === 'too-long' ? '⚠️ Too Long' :
+                       '✓ Good Length'}
+                    </span>
+                  )}
                 </div>
               </div>
 

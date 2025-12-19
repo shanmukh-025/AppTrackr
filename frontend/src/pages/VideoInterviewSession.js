@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-// import axios from 'axios'; // Not currently used
+import axios from 'axios';
 import '../styles/VideoInterviewSession.css';
+
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_URL = API_BASE.endsWith('/api') ? API_BASE : `${API_BASE}/api`;
 
 // Question data (same as in VideoInterviewHome)
 const BEHAVIORAL_QUESTIONS = [
@@ -56,9 +59,16 @@ const VideoInterviewSession = () => {
   const timerIntervalRef = useRef(null);
   const recognitionRef = useRef(null);
 
-  // Get selected question IDs from navigation state
+  // Get data from navigation state
+  const useAIQuestions = location.state?.useAIQuestions || false;
+  const aiQuestions = location.state?.aiQuestions || [];
+  const domain = location.state?.domain || '';
   const questionIds = location.state?.questionIds || [];
-  const questions = BEHAVIORAL_QUESTIONS.filter(q => questionIds.includes(q.id));
+  
+  // Use AI questions if available, otherwise use predefined questions
+  const questions = useAIQuestions && aiQuestions.length > 0
+    ? aiQuestions
+    : BEHAVIORAL_QUESTIONS.filter(q => questionIds.includes(q.id));
 
   // State
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -69,6 +79,7 @@ const VideoInterviewSession = () => {
   const [recordedVideos, setRecordedVideos] = useState([]);
   const [showTranscript, setShowTranscript] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
+  const [aiAnalysisResults, setAiAnalysisResults] = useState([]);
 
   const currentQuestion = questions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === questions.length - 1;
@@ -290,6 +301,60 @@ const VideoInterviewSession = () => {
     setAnalyzing(true);
 
     try {
+      const token = localStorage.getItem('token');
+      const analysisResults = [];
+
+      // Analyze each recording with AI
+      for (const recording of recordedVideos) {
+        try {
+          // Call backend AI analysis API
+          const response = await axios.post(
+            `${API_URL}/interviews/analyze-response`,
+            {
+              question: recording.question,
+              answer: recording.transcript || '',
+              transcript: recording.transcript || '',
+              duration: recording.duration,
+              domain: domain,
+              category: recording.category
+            },
+            {
+              headers: { Authorization: `Bearer ${token}` }
+            }
+          );
+
+          // Merge AI analysis with recording data
+          analysisResults.push({
+            questionId: recording.questionId,
+            question: recording.question,
+            category: recording.category,
+            duration: recording.duration,
+            transcript: recording.transcript,
+            ...response.data.analysis,
+            // Map AI analysis fields to expected format
+            eyeContact: response.data.analysis.behavioralScore || 75,
+            facialExpressions: response.data.analysis.professionalismScore || 75,
+            bodyLanguage: response.data.analysis.communicationScore || 75,
+            confidence: response.data.analysis.overallScore || 75,
+            clarity: response.data.analysis.communicationScore || 75,
+            pacing: response.data.analysis.communicationScore || 75,
+            tone: response.data.analysis.professionalismScore || 75,
+            fillerWords: response.data.analysis.estimatedFillerWords || 5,
+            starCompliance: response.data.analysis.starCompliance?.score || 70,
+            answerStructure: response.data.analysis.contentScore || 75,
+            relevance: response.data.analysis.specificityScore || 75,
+            depth: response.data.analysis.impactScore || 75,
+            overallScore: response.data.analysis.overallScore || 75,
+            // AI-specific fields
+            aiAnalysis: response.data.analysis
+          });
+        } catch (error) {
+          console.error('Failed to analyze recording:', error);
+          // Fallback to basic analysis if AI fails
+          analysisResults.push(await simulateAIAnalysis(recording));
+        }
+      }
+
       // Create session data
       const sessionId = Date.now();
       const sessionData = {
@@ -297,22 +362,15 @@ const VideoInterviewSession = () => {
         date: new Date().toISOString(),
         questionsCount: recordedVideos.length,
         recordings: recordedVideos,
-        averageScore: null // Will be calculated after AI analysis
+        averageScore: null, // Will be calculated after AI analysis
+        domain: domain,
+        useAIQuestions: useAIQuestions
       };
 
       // Save to localStorage
       const history = JSON.parse(localStorage.getItem('video-interview-history') || '[]');
       history.push(sessionData);
       localStorage.setItem('video-interview-history', JSON.stringify(history));
-
-      // For each recording, perform AI analysis
-      const analysisPromises = recordedVideos.map(async (recording) => {
-        // In production, this would call actual AI API
-        // For now, simulate AI analysis
-        return await simulateAIAnalysis(recording);
-      });
-
-      const analysisResults = await Promise.all(analysisPromises);
 
       // Save analysis results
       localStorage.setItem(`interview-analysis-${sessionId}`, JSON.stringify(analysisResults));
@@ -567,29 +625,44 @@ const VideoInterviewSession = () => {
           <div className="question-display">
             <div className="question-header">
               <span className="category-badge">{currentQuestion?.category}</span>
-              <span className={`difficulty-badge ${currentQuestion?.difficulty.toLowerCase()}`}>
+              <span className={`difficulty-badge ${currentQuestion?.difficulty?.toLowerCase()}`}>
                 {currentQuestion?.difficulty}
               </span>
+              {useAIQuestions && (
+                <span className="ai-generated-badge">✨ AI Generated</span>
+              )}
             </div>
             <h3 className="question-text">{currentQuestion?.question}</h3>
             
+            {/* AI Question Tips */}
+            {useAIQuestions && currentQuestion?.expectedFocus && (
+              <div className="ai-question-tips">
+                <h4>🎯 What the interviewer is looking for:</h4>
+                <p>{currentQuestion.expectedFocus}</p>
+              </div>
+            )}
+
             {/* STAR Method Tips */}
             <div className="star-tips">
-              <h4>💡 STAR Method Tips:</h4>
-              <div className="star-grid">
-                <div className="star-tip">
-                  <strong>S</strong>ituation: Set the context
+              <h4>💡 {useAIQuestions && currentQuestion?.starPrompt ? 'Suggested Approach:' : 'STAR Method Tips:'}</h4>
+              {useAIQuestions && currentQuestion?.starPrompt ? (
+                <p className="star-prompt">{currentQuestion.starPrompt}</p>
+              ) : (
+                <div className="star-grid">
+                  <div className="star-tip">
+                    <strong>S</strong>ituation: Set the context
+                  </div>
+                  <div className="star-tip">
+                    <strong>T</strong>ask: Describe your responsibility
+                  </div>
+                  <div className="star-tip">
+                    <strong>A</strong>ction: Explain what you did
+                  </div>
+                  <div className="star-tip">
+                    <strong>R</strong>esult: Share the outcome
+                  </div>
                 </div>
-                <div className="star-tip">
-                  <strong>T</strong>ask: Describe your responsibility
-                </div>
-                <div className="star-tip">
-                  <strong>A</strong>ction: Explain what you did
-                </div>
-                <div className="star-tip">
-                  <strong>R</strong>esult: Share the outcome
-                </div>
-              </div>
+              )}
             </div>
           </div>
 

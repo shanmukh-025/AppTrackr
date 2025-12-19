@@ -269,4 +269,85 @@ router.get('/stats/overview', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/interviews/generate-questions
+ * Generate AI-powered interview questions based on domain
+ */
+router.post('/generate-questions', async (req, res) => {
+  try {
+    console.log('Generate questions route called');
+    console.log('Request body:', req.body);
+    console.log('User ID:', req.userId);
+    
+    const { domain, difficulty, count } = req.body;
+
+    if (!domain || !difficulty || !count) {
+      console.error('Missing fields:', { domain, difficulty, count });
+      return res.status(400).json({ 
+        message: 'Missing required fields: domain, difficulty, count' 
+      });
+    }
+
+    // Import AI service
+    const aiService = require('../services/aiService');
+    
+    console.log('Calling AI service to generate questions...');
+    // Generate domain-specific questions
+    const questions = await aiService.generateInterviewQuestions(domain, difficulty, count);
+
+    console.log(`Generated ${questions.length} questions`);
+    res.json({ 
+      questions,
+      domain,
+      difficulty,
+      count: questions.length
+    });
+  } catch (error) {
+    console.error('Generate questions error:', error);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ 
+      message: 'Failed to generate questions',
+      error: error.message 
+    });
+  }
+});
+
+/**
+ * POST /api/interviews/analyze-response
+ * Analyze interview response with AI
+ */
+router.post('/analyze-response', async (req, res) => {
+  try {
+    const { question, answer, transcript, duration, domain, category } = req.body;
+
+    if (!question || !answer) {
+      return res.status(400).json({ 
+        message: 'Missing required fields: question, answer' 
+      });
+    }
+
+    // Import AI service
+    const aiService = require('../services/aiService');
+    
+    // Analyze response with AI
+    const analysis = await aiService.analyzeInterviewResponse({
+      question,
+      answer,
+      transcript,
+      duration,
+      domain,
+      category
+    });
+
+    res.json({ analysis });
+  } catch (error) {
+    console.error('Analyze response error:', error);
+    res.status(500).json({ 
+      message: 'Failed to analyze response',
+      error: error.message 
+    });
+  }
+});
+
 module.exports = router;

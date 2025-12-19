@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import '../styles/VideoInterviewHome.css';
+
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_URL = API_BASE.endsWith('/api') ? API_BASE : `${API_BASE}/api`;
 
 // 40 Behavioral Questions with categories
 const BEHAVIORAL_QUESTIONS = [
@@ -75,6 +79,31 @@ const VideoInterviewHome = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sessionHistory, setSessionHistory] = useState([]);
   const [showCameraTest, setShowCameraTest] = useState(false);
+  
+  // New production-level states
+  const [selectedDomain, setSelectedDomain] = useState('');
+  const [difficulty, setDifficulty] = useState('Medium');
+  const [questionCount, setQuestionCount] = useState(5);
+  const [generatingQuestions, setGeneratingQuestions] = useState(false);
+  const [aiGeneratedQuestions, setAiGeneratedQuestions] = useState([]);
+  const [useAIQuestions, setUseAIQuestions] = useState(false);
+  const [cameraStream, setCameraStream] = useState(null);
+
+  // Available domains for interviews
+  const domains = [
+    { value: 'software-engineering', label: '💻 Software Engineering', color: '#3b82f6' },
+    { value: 'data-science', label: '📊 Data Science & ML', color: '#8b5cf6' },
+    { value: 'product-management', label: '🎯 Product Management', color: '#10b981' },
+    { value: 'project-management', label: '📋 Project Management', color: '#f59e0b' },
+    { value: 'business-analysis', label: '📈 Business Analysis', color: '#ec4899' },
+    { value: 'marketing', label: '📣 Marketing & Growth', color: '#06b6d4' },
+    { value: 'sales', label: '💼 Sales & BD', color: '#84cc16' },
+    { value: 'design', label: '🎨 UX/UI Design', color: '#f97316' },
+    { value: 'hr', label: '👥 Human Resources', color: '#a855f7' },
+    { value: 'finance', label: '💰 Finance & Accounting', color: '#14b8a6' },
+    { value: 'customer-success', label: '🤝 Customer Success', color: '#6366f1' },
+    { value: 'general', label: '🌐 General/Behavioral', color: '#64748b' }
+  ];
 
   // Get unique categories
   const categories = ['all', ...new Set(BEHAVIORAL_QUESTIONS.map(q => q.category))];
@@ -85,31 +114,55 @@ const VideoInterviewHome = () => {
     setSessionHistory(history);
   }, []);
 
+  // Attach camera stream to video element when both are ready
+  useEffect(() => {
+    if (cameraStream && videoRef.current && showCameraTest) {
+      console.log('Attaching stream to video element');
+      videoRef.current.srcObject = cameraStream;
+      videoRef.current.onloadedmetadata = () => {
+        console.log('Video metadata loaded');
+        videoRef.current.play().then(() => {
+          console.log('Video playing successfully');
+        }).catch(err => {
+          console.error('Play error:', err);
+        });
+      };
+    }
+  }, [cameraStream, showCameraTest]);
+
   // Camera test
   const startCameraTest = async () => {
     try {
+      console.log('Requesting camera access...');
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { width: 1280, height: 720 },
+        video: { 
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: 'user'
+        },
         audio: true 
       });
       
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
+      console.log('Camera stream obtained:', stream.active);
       
+      // Store stream and show video element
+      setCameraStream(stream);
       setCameraReady(true);
       setCameraError('');
       setShowCameraTest(true);
     } catch (err) {
-      setCameraError('Camera access denied. Please enable camera permissions.');
+      console.error('Camera access error:', err);
+      setCameraError(`Camera access denied: ${err.message}`);
       setCameraReady(false);
     }
   };
 
   const stopCameraTest = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject;
-      stream.getTracks().forEach(track => track.stop());
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
+    if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
     setShowCameraTest(false);
@@ -124,6 +177,46 @@ const VideoInterviewHome = () => {
     );
   };
 
+  // Generate AI questions based on domain
+  const generateAIQuestions = async () => {
+    if (!selectedDomain) {
+      alert('Please select a domain first');
+      return;
+    }
+
+    setGeneratingQuestions(true);
+    try {
+      const token = localStorage.getItem('token');
+      console.log('Generating questions with:', { domain: selectedDomain, difficulty, count: questionCount });
+      console.log('Token exists:', !!token);
+      console.log('API URL:', `${API_URL}/interviews/generate-questions`);
+      
+      const response = await axios.post(
+        `${API_URL}/interviews/generate-questions`,
+        {
+          domain: selectedDomain,
+          difficulty: difficulty,
+          count: questionCount
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      setAiGeneratedQuestions(response.data.questions);
+      setUseAIQuestions(true);
+      setSelectedQuestions(response.data.questions.map((_, idx) => idx + 1));
+      alert(`✅ Generated ${response.data.questions.length} AI questions for ${domains.find(d => d.value === selectedDomain)?.label}!`);
+    } catch (error) {
+      console.error('Failed to generate questions:', error);
+      console.error('Error details:', error.response?.data);
+      const errorMsg = error.response?.data?.message || error.message || 'Failed to generate AI questions';
+      alert(`Error: ${errorMsg}. Please try again.`);
+    } finally {
+      setGeneratingQuestions(false);
+    }
+  };
+
   // Select random questions
   const selectRandomQuestions = (count) => {
     const filtered = BEHAVIORAL_QUESTIONS.filter(q => 
@@ -132,6 +225,7 @@ const VideoInterviewHome = () => {
     const shuffled = [...filtered].sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, count).map(q => q.id);
     setSelectedQuestions(selected);
+    setUseAIQuestions(false);
   };
 
   // Start interview session
@@ -145,9 +239,14 @@ const VideoInterviewHome = () => {
       return;
     }
     
-    // Navigate to interview session
+    // Navigate to interview session with appropriate questions
     navigate('/video-interview/session', { 
-      state: { questionIds: selectedQuestions }
+      state: { 
+        questionIds: selectedQuestions,
+        useAIQuestions: useAIQuestions,
+        aiQuestions: useAIQuestions ? aiGeneratedQuestions : null,
+        domain: selectedDomain
+      }
     });
   };
 
@@ -200,7 +299,14 @@ const VideoInterviewHome = () => {
             </div>
           ) : (
             <div className="camera-preview">
-              <video ref={videoRef} autoPlay playsInline muted className="preview-video" />
+              <video 
+                ref={videoRef} 
+                autoPlay 
+                playsInline 
+                muted 
+                className="preview-video"
+                style={{ width: '100%', maxWidth: '800px', height: 'auto', minHeight: '400px' }}
+              />
               <div className="camera-controls">
                 <div className="status-indicator">
                   <span className="status-dot active"></span>
@@ -222,20 +328,118 @@ const VideoInterviewHome = () => {
           <p>Choose questions for your practice session</p>
         </div>
 
-        {/* Quick Select */}
-        <div className="quick-select">
-          <button className="btn-quick" onClick={() => selectRandomQuestions(3)}>
-            Random 3 Questions
-          </button>
-          <button className="btn-quick" onClick={() => selectRandomQuestions(5)}>
-            Random 5 Questions
-          </button>
-          <button className="btn-quick" onClick={() => selectRandomQuestions(10)}>
-            Random 10 Questions
-          </button>
-          <button className="btn-quick" onClick={() => setSelectedQuestions([])}>
-            Clear Selection
-          </button>
+        {/* AI Domain Selection - Production Level */}
+        <div className="ai-domain-section">
+          <h3 className="ai-section-title">🤖 AI-Powered Interview Questions (Recommended)</h3>
+          <p className="ai-section-subtitle">Select your domain and let AI generate personalized interview questions</p>
+          
+          <div className="domain-grid">
+            {domains.map(domain => (
+              <div
+                key={domain.value}
+                className={`domain-card ${selectedDomain === domain.value ? 'selected' : ''}`}
+                onClick={() => setSelectedDomain(domain.value)}
+                style={{ borderColor: selectedDomain === domain.value ? domain.color : '#e2e8f0' }}
+              >
+                <span className="domain-label">{domain.label}</span>
+                {selectedDomain === domain.value && (
+                  <span className="selected-check">✓</span>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {selectedDomain && (
+            <div className="ai-config-panel">
+              <div className="config-row">
+                <div className="config-item">
+                  <label>Difficulty Level</label>
+                  <select 
+                    value={difficulty} 
+                    onChange={(e) => setDifficulty(e.target.value)}
+                    className="config-select"
+                  >
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                    <option value="Mixed">Mixed (Recommended)</option>
+                  </select>
+                </div>
+                
+                <div className="config-item">
+                  <label>Number of Questions</label>
+                  <select 
+                    value={questionCount} 
+                    onChange={(e) => setQuestionCount(parseInt(e.target.value))}
+                    className="config-select"
+                  >
+                    <option value="5">5 Questions</option>
+                    <option value="8">8 Questions</option>
+                    <option value="10">10 Questions</option>
+                    <option value="15">15 Questions</option>
+                  </select>
+                </div>
+              </div>
+
+              <button 
+                className="btn-generate-ai"
+                onClick={generateAIQuestions}
+                disabled={generatingQuestions}
+              >
+                {generatingQuestions ? (
+                  <>
+                    <span className="spinner"></span>
+                    Generating Questions...
+                  </>
+                ) : (
+                  <>
+                    <span>✨</span>
+                    Generate AI Questions
+                  </>
+                )}
+              </button>
+
+              {aiGeneratedQuestions.length > 0 && (
+                <div className="ai-questions-preview">
+                  <h4>✅ Generated {aiGeneratedQuestions.length} Questions</h4>
+                  <div className="preview-list">
+                    {aiGeneratedQuestions.slice(0, 3).map((q, idx) => (
+                      <div key={idx} className="preview-item">
+                        <span className="preview-number">{idx + 1}.</span>
+                        <span className="preview-text">{q.question.substring(0, 80)}...</span>
+                      </div>
+                    ))}
+                    {aiGeneratedQuestions.length > 3 && (
+                      <p className="preview-more">+ {aiGeneratedQuestions.length - 3} more questions</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="divider-text">
+          <span>OR</span>
+        </div>
+
+        {/* Quick Select - Manual Mode */}
+        <div className="manual-selection-section">
+          <h3 className="manual-section-title">📋 Manual Question Selection</h3>
+          <div className="quick-select">
+            <button className="btn-quick" onClick={() => selectRandomQuestions(3)}>
+              Random 3 Questions
+            </button>
+            <button className="btn-quick" onClick={() => selectRandomQuestions(5)}>
+              Random 5 Questions
+            </button>
+            <button className="btn-quick" onClick={() => selectRandomQuestions(10)}>
+              Random 10 Questions
+            </button>
+            <button className="btn-quick" onClick={() => { setSelectedQuestions([]); setUseAIQuestions(false); }}>
+              Clear Selection
+            </button>
+          </div>
         </div>
 
         {/* Filters */}
