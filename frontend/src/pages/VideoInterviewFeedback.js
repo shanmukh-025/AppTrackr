@@ -41,11 +41,38 @@ const VideoInterviewFeedback = () => {
     }
   }, [sessionId]);
 
-  if (!sessionData || !analysisResults.length) {
+  if (!sessionData) {
     return (
       <div className="feedback-loading">
         <div className="loading-spinner"></div>
         <p>Loading your interview feedback...</p>
+        <p style={{fontSize: '12px', color: '#999', marginTop: '10px'}}>
+          Session ID: {sessionId} - If this persists, the session may not exist.
+        </p>
+        <button 
+          onClick={() => navigate('/behavioral')} 
+          style={{marginTop: '20px', padding: '10px 20px', cursor: 'pointer'}}
+        >
+          Back to Home
+        </button>
+      </div>
+    );
+  }
+
+  if (!analysisResults.length) {
+    return (
+      <div className="feedback-loading">
+        <div className="loading-spinner"></div>
+        <p>No analysis results found for this session.</p>
+        <p style={{fontSize: '12px', color: '#999', marginTop: '10px'}}>
+          The interview may not have been completed or analysis failed.
+        </p>
+        <button 
+          onClick={() => navigate('/behavioral')} 
+          style={{marginTop: '20px', padding: '10px 20px', cursor: 'pointer'}}
+        >
+          Back to Home
+        </button>
       </div>
     );
   }

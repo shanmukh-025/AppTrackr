@@ -250,32 +250,50 @@ const VideoInterviewHome = () => {
     });
   };
 
-  // Filter questions
-  const filteredQuestions = BEHAVIORAL_QUESTIONS.filter(q => {
+  // Filter questions - use AI questions if generated, otherwise use manual questions
+  const questionsToDisplay = useAIQuestions && aiGeneratedQuestions.length > 0 
+    ? aiGeneratedQuestions 
+    : BEHAVIORAL_QUESTIONS;
+    
+  const filteredQuestions = questionsToDisplay.filter(q => {
     const matchesCategory = categoryFilter === 'all' || q.category === categoryFilter;
     const matchesSearch = q.question.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
+  // Debug logging
+  console.log('Total questions:', questionsToDisplay.length);
+  console.log('Filtered questions:', filteredQuestions.length);
+  console.log('First question:', filteredQuestions[0]);
+  console.log('Using AI questions:', useAIQuestions);
+  console.log('AI generated questions count:', aiGeneratedQuestions.length);
+
   return (
     <div className="video-interview-home">
-      {/* Header */}
-      <div className="interview-header">
-        <div className="header-content">
-          <div className="header-left">
-            <h1>🎥 AI Video Interview</h1>
-            <p>Practice behavioral interviews with advanced AI analysis</p>
-          </div>
-          <div className="header-stats">
-            <div className="stat-card">
-              <span className="stat-value">{sessionHistory.length}</span>
-              <span className="stat-label">Sessions</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-value">{selectedQuestions.length}</span>
-              <span className="stat-label">Selected</span>
-            </div>
-          </div>
+      {/* Back Button */}
+      <button 
+        className="back-to-resources-btn" 
+        onClick={() => navigate('/resources')}
+        title="Back to Resources"
+      >
+        ← Back to Resources
+      </button>
+
+      {/* Page Header - Match Resources Style */}
+      <div className="page-header">
+        <h1>🎥 AI Video Interview</h1>
+        <p className="dashboard-subtitle">Practice behavioral interviews with advanced AI analysis</p>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="stats-row">
+        <div className="stat-card">
+          <span className="stat-value">{sessionHistory.length}</span>
+          <span className="stat-label">Total Sessions</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-value">{selectedQuestions.length}</span>
+          <span className="stat-label">Questions Selected</span>
         </div>
       </div>
 
@@ -466,7 +484,23 @@ const VideoInterviewHome = () => {
         </div>
 
         {/* Question List */}
+        {useAIQuestions && aiGeneratedQuestions.length > 0 && (
+          <div className="ai-questions-active">
+            <span className="ai-badge">✨ AI-Generated Questions Active</span>
+            <button 
+              className="btn-switch-manual" 
+              onClick={() => { setUseAIQuestions(false); setSelectedQuestions([]); }}
+            >
+              Switch to Manual Selection
+            </button>
+          </div>
+        )}
         <div className="questions-grid">
+          {filteredQuestions.length === 0 && (
+            <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
+              No questions found. {useAIQuestions ? 'Try generating AI questions.' : 'Select a category or search.'}
+            </div>
+          )}
           {filteredQuestions.map(q => (
             <div 
               key={q.id}
@@ -474,12 +508,28 @@ const VideoInterviewHome = () => {
               onClick={() => toggleQuestion(q.id)}
             >
               <div className="question-header">
-                <span className={`difficulty-badge ${q.difficulty.toLowerCase()}`}>
-                  {q.difficulty}
+                <span className={`difficulty-badge ${q.difficulty?.toLowerCase() || 'medium'}`}>
+                  {q.difficulty || 'Medium'}
                 </span>
-                <span className="category-badge">{q.category}</span>
+                <span className="category-badge">{q.category || 'General'}</span>
               </div>
-              <p className="question-text">{q.question}</p>
+              <div style={{ 
+                color: '#000000', 
+                fontSize: '15px', 
+                lineHeight: '1.6',
+                padding: '8px 0',
+                fontWeight: '500',
+                display: 'block',
+                visibility: 'visible',
+                opacity: '1',
+                height: 'auto',
+                overflow: 'visible',
+                whiteSpace: 'normal',
+                textOverflow: 'clip',
+                backgroundColor: 'transparent'
+              }}>
+                {q.question || 'No question text available'}
+              </div>
               {selectedQuestions.includes(q.id) && (
                 <div className="selected-indicator">✓ Selected</div>
               )}
@@ -505,12 +555,15 @@ const VideoInterviewHome = () => {
         )}
       </div>
 
-      {/* Session History */}
+      {/* Session History - Show Last 5 Sessions */}
       {sessionHistory.length > 0 && (
         <div className="session-history-section">
-          <h2>📊 Previous Sessions</h2>
+          <div className="section-header">
+            <h2>📊 Recent Sessions</h2>
+            <p>Your last {Math.min(5, sessionHistory.length)} interview sessions</p>
+          </div>
           <div className="history-list">
-            {sessionHistory.map((session, index) => (
+            {sessionHistory.slice(0, 5).map((session, index) => (
               <div key={index} className="history-card">
                 <div className="history-info">
                   <h3>Session {sessionHistory.length - index}</h3>
@@ -525,13 +578,22 @@ const VideoInterviewHome = () => {
                 </div>
                 <button 
                   className="btn-view"
-                  onClick={() => navigate(`/video-interview/feedback/${session.id}`)}
+                  onClick={() => {
+                    console.log('Navigating to session:', session.id);
+                    console.log('Full session data:', session);
+                    navigate(`/video-interview/feedback/${session.id}`);
+                  }}
                 >
                   View Results
                 </button>
               </div>
             ))}
           </div>
+          {sessionHistory.length > 5 && (
+            <p className="more-sessions-note">
+              + {sessionHistory.length - 5} more sessions available in history
+            </p>
+          )}
         </div>
       )}
 
