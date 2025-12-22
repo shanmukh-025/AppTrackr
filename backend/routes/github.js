@@ -218,14 +218,28 @@ router.post('/commit-improvement', authMiddleware, async (req, res) => {
 // Generate new project
 router.post('/generate-project', authMiddleware, async (req, res) => {
   try {
+    console.log('📝 [generate-project] Received request:', req.body);
     const projectSpec = req.body;
 
+    if (!projectSpec.name || !projectSpec.description || !projectSpec.techStack) {
+      console.log('❌ [generate-project] Missing required fields');
+      return res.status(400).json({ error: 'Missing required fields: name, description, techStack' });
+    }
+
+    console.log('🚀 [generate-project] Generating project code...');
     const projectData = await githubService.generateProjectCode(projectSpec);
 
+    if (!projectData) {
+      console.log('❌ [generate-project] Failed to generate project data');
+      return res.status(500).json({ error: 'Failed to generate project code' });
+    }
+
+    console.log('✅ [generate-project] Project generation successful');
     res.json({ project: projectData });
   } catch (error) {
-    console.error('Error generating project:', error);
-    res.status(500).json({ error: 'Failed to generate project' });
+    console.error('❌ [generate-project] Error:', error.message);
+    console.error(error);
+    res.status(500).json({ error: 'Failed to generate project: ' + error.message });
   }
 });
 

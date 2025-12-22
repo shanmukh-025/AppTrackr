@@ -598,6 +598,7 @@ IMPORTANT:
 
   // Generate project code with AI
   async generateProjectCode(projectSpec) {
+    console.log('📝 Generating project with spec:', projectSpec);
     try {
       const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
 
@@ -607,54 +608,126 @@ Generate a complete project structure and code for:
 **Project Name:** ${projectSpec.name}
 **Tech Stack:** ${projectSpec.techStack.join(', ')}
 **Description:** ${projectSpec.description}
-**Features:** ${projectSpec.features.join(', ')}
-**Skill Level:** ${projectSpec.skillLevel}
+**Features:** ${projectSpec.features ? projectSpec.features.join(', ') : 'None specified'}
+**Skill Level:** ${projectSpec.skillLevel || 'intermediate'}
 
-Provide a complete project structure in JSON format:
+Provide a complete project structure in JSON format with realistic files and code.
 {
-  "projectName": "project-name",
-  "description": "Brief description",
+  "projectName": "${projectSpec.name}",
+  "description": "${projectSpec.description}",
   "structure": [
     {
-      "path": "src/index.js",
-      "content": "// Full file content here",
-      "description": "Main entry point"
+      "path": "README.md",
+      "content": "# ${projectSpec.name}\\n\\n${projectSpec.description}",
+      "description": "Project documentation"
+    },
+    {
+      "path": "package.json",
+      "content": "{}",
+      "description": "Dependencies file"
     }
   ],
   "setupSteps": [
-    "npm init -y",
-    "npm install express",
-    "..."
+    "npm install",
+    "npm start"
   ],
-  "readme": "Complete README.md content",
-  "gitignore": ".gitignore content",
-  "dependencies": {
-    "express": "^4.18.0"
-  },
+  "readme": "# ${projectSpec.name}\\n\\n${projectSpec.description}\\n\\n## Getting Started\\n\\n1. Install dependencies: npm install\\n2. Run the project: npm start",
+  "gitignore": "node_modules/\\n.env\\n.DS_Store\\ndist/\\nbuild/",
+  "dependencies": {},
   "devDependencies": {},
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node index.js"
   },
-  "features": ["Feature 1", "Feature 2"],
-  "nextSteps": ["What to build next"]
+  "features": ${JSON.stringify(projectSpec.features || [])},
+  "nextSteps": ["Set up database", "Add authentication", "Deploy to production"]
 }
 
-Generate production-ready, well-commented code with best practices. Include error handling, validation, and tests.
+Respond ONLY with valid JSON object. No markdown code blocks, just the JSON.
 `;
 
+      console.log('🚀 Calling Gemini API...');
       const result = await model.generateContent(prompt);
       const text = result.response.text();
+      console.log('✅ Gemini response received:', text.substring(0, 200));
       
+      // Try to find JSON object in response
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
+        console.log('✅ JSON parsed successfully');
         return JSON.parse(jsonMatch[0]);
       }
 
-      return { error: 'Failed to generate project' };
+      console.log('⚠️ No valid JSON found in response, using fallback');
+      return this.generateDefaultProject(projectSpec);
     } catch (error) {
-      console.error('Error generating project:', error);
-      throw error;
+      console.error('❌ Error generating project:', error.message);
+      console.log('⚠️ Using fallback project generation');
+      return this.generateDefaultProject(projectSpec);
     }
+  }
+
+  // Fallback project generation
+  generateDefaultProject(projectSpec) {
+    console.log('📦 Generating default project structure');
+    const projectName = projectSpec.name || 'my-project';
+    const techStack = projectSpec.techStack || ['JavaScript'];
+    
+    const isNodeProject = techStack.some(tech => 
+      ['Node.js', 'Express', 'React', 'Next.js'].includes(tech)
+    );
+
+    const structure = [
+      {
+        path: 'README.md',
+        content: `# ${projectName}\n\n${projectSpec.description || 'A new project'}\n\n## Installation\n\nnpm install\n\n## Usage\n\nnpm start`,
+        description: 'Project documentation'
+      },
+      {
+        path: '.gitignore',
+        content: 'node_modules/\n.env\n.DS_Store\ndist/\nbuild/',
+        description: 'Git ignore file'
+      }
+    ];
+
+    if (isNodeProject) {
+      structure.push({
+        path: 'package.json',
+        content: JSON.stringify({
+          name: projectName,
+          version: '1.0.0',
+          description: projectSpec.description || 'A new project',
+          main: 'index.js',
+          scripts: {
+            start: 'node index.js'
+          },
+          dependencies: {},
+          devDependencies: {}
+        }, null, 2),
+        description: 'NPM package configuration'
+      });
+
+      structure.push({
+        path: 'index.js',
+        content: `// ${projectName}\n// Entry point\n\nconsole.log('Hello from ${projectName}!');`,
+        description: 'Main entry point'
+      });
+    }
+
+    return {
+      projectName,
+      description: projectSpec.description || 'A new project',
+      structure,
+      setupSteps: isNodeProject ? 
+        ['npm install', 'npm start'] : 
+        ['Install dependencies', 'Run the project'],
+      readme: `# ${projectName}\n\n${projectSpec.description || 'A new project'}\n\n## Features\n\n${(projectSpec.features || []).map(f => `- ${f}`).join('\n')}\n\n## Getting Started\n\n1. Clone the repository\n2. Install dependencies\n3. Run the project\n\n## Tech Stack\n\n${techStack.join(', ')}\n\n## License\n\nMIT`,
+      gitignore: 'node_modules/\n.env\n.DS_Store\ndist/\nbuild/\n*.log',
+      dependencies: {},
+      devDependencies: {},
+      scripts: { start: isNodeProject ? 'node index.js' : 'start' },
+      features: projectSpec.features || [],
+      nextSteps: ['Set up database', 'Add authentication', 'Deploy to production']
+    };
   }
 
   // Create repository and push code

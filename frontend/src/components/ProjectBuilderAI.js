@@ -277,13 +277,14 @@ const ProjectBuilderAI = () => {
   // Generate new project
   const generateProject = async () => {
     if (!projectName || !projectDescription || techStack.length === 0) {
-      alert('Please fill all required fields');
+      alert('❌ Please fill all required fields');
       return;
     }
 
     setLoading(true);
     
     try {
+      console.log('📝 Sending project generation request...');
       const response = await fetch(`${API_URL}/api/github/generate-project`, {
         method: 'POST',
         headers: {
@@ -299,11 +300,24 @@ const ProjectBuilderAI = () => {
         })
       });
       
+      console.log('📊 Response status:', response.status);
       const data = await response.json();
-      setGeneratedProject(data.project);
-      setActiveTab('review');
+      console.log('📦 Response data:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate project');
+      }
+      
+      if (data.project) {
+        console.log('✅ Project generated successfully');
+        setGeneratedProject(data.project);
+        setActiveTab('review');
+      } else {
+        throw new Error('Invalid response from server');
+      }
     } catch (error) {
-      console.error('Error generating project:', error);
+      console.error('❌ Error generating project:', error);
+      alert('❌ Error generating project: ' + error.message + '\n\nPlease check the browser console and backend logs for details.');
     }
     setLoading(false);
   };
@@ -313,6 +327,7 @@ const ProjectBuilderAI = () => {
     setLoading(true);
     
     try {
+      console.log('🚀 Pushing project to GitHub...');
       const response = await fetch(`${API_URL}/api/github/create-repository`, {
         method: 'POST',
         headers: {
@@ -323,16 +338,20 @@ const ProjectBuilderAI = () => {
       });
       
       const data = await response.json();
+      console.log('📊 GitHub response:', data);
       
       if (data.success) {
+        console.log('✅ Project pushed successfully!');
         alert('✅ Project pushed to GitHub!\n\n' + data.repoUrl);
         window.open(data.repoUrl, '_blank');
         fetchRepositories();
         resetProjectCreation();
+      } else {
+        throw new Error(data.error || 'Failed to push project to GitHub');
       }
     } catch (error) {
-      console.error('Error pushing to GitHub:', error);
-      alert('❌ Failed to push project');
+      console.error('❌ Error pushing to GitHub:', error);
+      alert('❌ Failed to push project: ' + error.message);
     }
     setLoading(false);
   };
@@ -507,6 +526,14 @@ const ProjectBuilderAI = () => {
                   <p>AI will generate a complete project with code and push to GitHub</p>
                 </div>
 
+                {loading && (
+                  <div className="loading-state">
+                    <div className="spinner"></div>
+                    <p>✨ Generating your project with AI...</p>
+                  </div>
+                )}
+
+                {!loading && (
                 <div className="create-form">
                   <div className="form-group">
                     <label>Project Name *</label>
@@ -582,6 +609,7 @@ const ProjectBuilderAI = () => {
                     {loading ? 'Generating...' : '✨ Generate Project'}
                   </button>
                 </div>
+                )}
               </div>
             )}
 
