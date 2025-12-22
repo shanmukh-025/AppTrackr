@@ -360,18 +360,24 @@
   display: flex;
   gap: 0.75rem;
   margin-top: auto;
+  align-items: stretch;
 }
 
 .analyze-btn,
 .view-btn {
   flex: 1;
-  padding: 0.7rem 1rem;
+  padding: 0.75rem 1rem;
   border: none;
   border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.9rem;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 }
 
 .analyze-btn {
