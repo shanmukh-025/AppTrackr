@@ -14,13 +14,7 @@ const ProjectBuilderAI = () => {
   const [selectedRepo, setSelectedRepo] = useState(null);
   const [repoAnalysis, setRepoAnalysis] = useState(null);
   
-  // Project Creation State
-  const [projectName, setProjectName] = useState('');
-  const [projectDescription, setProjectDescription] = useState('');
-  const [techStack, setTechStack] = useState([]);
-  const [projectFeatures, setProjectFeatures] = useState(['']);
-  const [skillLevel, setSkillLevel] = useState('intermediate');
-  const [generatedProject, setGeneratedProject] = useState(null);
+
   
   // Improvement State
   const [selectedImprovement, setSelectedImprovement] = useState(null);
@@ -38,14 +32,7 @@ const ProjectBuilderAI = () => {
     }
   }, []);
 
-  const techStackOptions = [
-    'React', 'Node.js', 'Express', 'MongoDB', 'PostgreSQL', 
-    'Python', 'Django', 'Flask', 'FastAPI',
-    'TypeScript', 'Next.js', 'Vue.js', 'Angular',
-    'Docker', 'Kubernetes', 'AWS', 'Azure',
-    'Redis', 'GraphQL', 'REST API', 'Socket.io',
-    'TailwindCSS', 'Material-UI', 'Bootstrap'
-  ];
+
 
   // Save resource to learning tracker
   const saveResource = (resource) => {
@@ -275,118 +262,6 @@ const ProjectBuilderAI = () => {
   };
 
   // Generate new project
-  const generateProject = async () => {
-    if (!projectName || !projectDescription || techStack.length === 0) {
-      alert('❌ Please fill all required fields');
-      return;
-    }
-
-    setLoading(true);
-    
-    try {
-      console.log('📝 Sending project generation request...');
-      const response = await fetch(`${API_URL}/api/github/generate-project`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({
-          name: projectName,
-          description: projectDescription,
-          techStack,
-          features: projectFeatures.filter(f => f.trim()),
-          skillLevel
-        })
-      });
-      
-      console.log('📊 Response status:', response.status);
-      const data = await response.json();
-      console.log('📦 Response data:', data);
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate project');
-      }
-      
-      if (data.project) {
-        console.log('✅ Project generated successfully');
-        setGeneratedProject(data.project);
-        setActiveTab('review');
-      } else {
-        throw new Error('Invalid response from server');
-      }
-    } catch (error) {
-      console.error('❌ Error generating project:', error);
-      alert('❌ Error generating project: ' + error.message + '\n\nPlease check the browser console and backend logs for details.');
-    }
-    setLoading(false);
-  };
-
-  // Push project to GitHub
-  const pushToGitHub = async () => {
-    setLoading(true);
-    
-    try {
-      console.log('🚀 Pushing project to GitHub...');
-      const response = await fetch(`${API_URL}/api/github/create-repository`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({ projectData: generatedProject })
-      });
-      
-      const data = await response.json();
-      console.log('📊 GitHub response:', data);
-      
-      if (data.success) {
-        console.log('✅ Project pushed successfully!');
-        alert('✅ Project pushed to GitHub!\n\n' + data.repoUrl);
-        window.open(data.repoUrl, '_blank');
-        fetchRepositories();
-        resetProjectCreation();
-      } else {
-        throw new Error(data.error || 'Failed to push project to GitHub');
-      }
-    } catch (error) {
-      console.error('❌ Error pushing to GitHub:', error);
-      alert('❌ Failed to push project: ' + error.message);
-    }
-    setLoading(false);
-  };
-
-  const resetProjectCreation = () => {
-    setProjectName('');
-    setProjectDescription('');
-    setTechStack([]);
-    setProjectFeatures(['']);
-    setGeneratedProject(null);
-    setActiveTab('overview');
-  };
-
-  const toggleTechStack = (tech) => {
-    setTechStack(prev =>
-      prev.includes(tech)
-        ? prev.filter(t => t !== tech)
-        : [...prev, tech]
-    );
-  };
-
-  const addFeature = () => {
-    setProjectFeatures([...projectFeatures, '']);
-  };
-
-  const updateFeature = (index, value) => {
-    const newFeatures = [...projectFeatures];
-    newFeatures[index] = value;
-    setProjectFeatures(newFeatures);
-  };
-
-  const removeFeature = (index) => {
-    setProjectFeatures(projectFeatures.filter((_, i) => i !== index));
-  };
-
   return (
     <div className="builder-container">
       {/* Header with Title and Navigation */}
@@ -406,13 +281,6 @@ const ProjectBuilderAI = () => {
             >
               <span className="tab-icon">📊</span>
               My Projects
-            </button>
-            <button
-              className={'builder-tab ' + (activeTab === 'create' ? 'active' : '')}
-              onClick={() => setActiveTab('create')}
-            >
-              <span className="tab-icon">✨</span>
-              Create New
             </button>
             <button
               className={'builder-tab ' + (activeTab === 'tracker' ? 'active' : '')}
@@ -519,100 +387,6 @@ const ProjectBuilderAI = () => {
             )}
 
             {/* CREATE NEW PROJECT TAB */}
-            {activeTab === 'create' && (
-              <div className="create-tab">
-                <div className="section-header">
-                  <h2>Create New Project</h2>
-                  <p>AI will generate a complete project with code and push to GitHub</p>
-                </div>
-
-                {loading && (
-                  <div className="loading-state">
-                    <div className="spinner"></div>
-                    <p>✨ Generating your project with AI...</p>
-                  </div>
-                )}
-
-                {!loading && (
-                <div className="create-form">
-                  <div className="form-group">
-                    <label>Project Name *</label>
-                    <input
-                      type="text"
-                      value={projectName}
-                      onChange={(e) => setProjectName(e.target.value)}
-                      placeholder="e.g., task-manager-app"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Description *</label>
-                    <textarea
-                      value={projectDescription}
-                      onChange={(e) => setProjectDescription(e.target.value)}
-                      placeholder="Describe what your project does..."
-                      rows="4"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Tech Stack * (Select all that apply)</label>
-                    <div className="tech-stack-grid">
-                      {techStackOptions.map((tech) => (
-                        <button
-                          key={tech}
-                          className={'tech-chip ' + (techStack.includes(tech) ? 'selected' : '')}
-                          onClick={() => toggleTechStack(tech)}
-                        >
-                          {tech}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Features</label>
-                    {projectFeatures.map((feature, index) => (
-                      <div key={index} className="feature-input">
-                        <input
-                          type="text"
-                          value={feature}
-                          onChange={(e) => updateFeature(index, e.target.value)}
-                          placeholder="e.g., User authentication"
-                        />
-                        {projectFeatures.length > 1 && (
-                          <button onClick={() => removeFeature(index)} className="remove-btn">
-                            ✕
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                    <button onClick={addFeature} className="add-feature-btn">
-                      + Add Feature
-                    </button>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Skill Level</label>
-                    <select value={skillLevel} onChange={(e) => setSkillLevel(e.target.value)}>
-                      <option value="beginner">Beginner - Simple & well-commented</option>
-                      <option value="intermediate">Intermediate - Standard patterns</option>
-                      <option value="advanced">Advanced - Complex architecture</option>
-                    </select>
-                  </div>
-
-                  <button
-                    onClick={generateProject}
-                    disabled={loading}
-                    className="generate-btn"
-                  >
-                    {loading ? 'Generating...' : '✨ Generate Project'}
-                  </button>
-                </div>
-                )}
-              </div>
-            )}
-
             {/* ANALYSIS TAB */}
             {activeTab === 'analysis' && repoAnalysis && (
               <div className="analysis-tab">
@@ -801,67 +575,6 @@ const ProjectBuilderAI = () => {
             )}
 
             {/* REVIEW PROJECT TAB */}
-            {activeTab === 'review' && generatedProject && (
-              <div className="review-tab">
-                <h2>Review Your Project</h2>
-
-                <div className="project-overview">
-                  <h3>{generatedProject.projectName}</h3>
-                  <p>{generatedProject.description}</p>
-                </div>
-
-                {/* Project Structure */}
-                <div className="project-structure">
-                  <h3>📂 Project Structure</h3>
-                  <div className="file-tree">
-                    {generatedProject.structure && generatedProject.structure.map((file, index) => (
-                      <div key={index} className="file-item">
-                        <span className="file-path">📄 {file.path}</span>
-                        <details>
-                          <summary>View Code</summary>
-                          <pre className="code-block">
-                            <code>{file.content}</code>
-                          </pre>
-                        </details>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* README Preview */}
-                {generatedProject.readme && (
-                  <div className="readme-preview">
-                    <h3>📖 README.md</h3>
-                    <pre className="readme-content">{generatedProject.readme}</pre>
-                  </div>
-                )}
-
-                {/* Setup Instructions */}
-                {generatedProject.setupSteps && (
-                  <div className="setup-instructions">
-                    <h3>🚀 Setup Instructions</h3>
-                    <ol>
-                      {generatedProject.setupSteps.map((step, index) => (
-                        <li key={index}>
-                          <code>{step}</code>
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                )}
-
-                {/* Actions */}
-                <div className="review-actions">
-                  <button onClick={pushToGitHub} disabled={loading} className="push-btn">
-                    {loading ? 'Pushing...' : '🚀 Push to GitHub'}
-                  </button>
-                  <button onClick={resetProjectCreation} className="cancel-btn">
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
-
             {/* LEARNING TRACKER TAB */}
             {activeTab === 'tracker' && (
               <div className="learning-tracker">

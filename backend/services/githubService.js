@@ -658,11 +658,11 @@ Respond ONLY with valid JSON object. No markdown code blocks, just the JSON.
       }
 
       console.log('⚠️ No valid JSON found in response, using fallback');
-      return this.generateDefaultProject(projectSpec);
+      return this.generateComprehensiveProject(projectSpec);
     } catch (error) {
       console.error('❌ Error generating project:', error.message);
       console.log('⚠️ Using fallback project generation');
-      return this.generateDefaultProject(projectSpec);
+      return this.generateComprehensiveProject(projectSpec);
     }
   }
 
