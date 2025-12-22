@@ -268,7 +268,12 @@ const ProjectBuilderAI = () => {
       {githubConnected && (
         <div className="builder-header">
           <div className="builder-header-left">
-            <div className="builder-header-icon">�</div>
+            <img 
+              src="/apptrackr-icon.png" 
+              alt="AppTrackr" 
+              className="builder-header-icon"
+              style={{ width: '40px', height: '40px', objectFit: 'contain' }}
+            />
             <div>
               <h1 className="builder-header-title">AppTrackr</h1>
               <p className="builder-header-subtitle">AI-Powered Project Analysis & Job Tracker - Land Your Dream Job</p>

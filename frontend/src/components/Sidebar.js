@@ -124,21 +124,16 @@ function Sidebar() {
       {/* Logo Section */}
       <LogoSection>
         <Box
+          component="img"
+          src="/apptrackr-icon.png"
+          alt="AppTrackr Logo"
           sx={{
-            width: 40,
-            height: 40,
-            borderRadius: '10px',
-            background: 'linear-gradient(135deg, #0052a3 0%, #00b4d8 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '20px',
-            fontWeight: 'bold',
-            color: 'white',
+            width: 45,
+            height: 45,
+            borderRadius: '8px',
+            objectFit: 'contain',
           }}
-        >
-          A🚀
-        </Box>
+        />
         <Typography variant="h5" sx={{ fontWeight: 700, flexGrow: 1 }}>
           AppTrackr
         </Typography>
