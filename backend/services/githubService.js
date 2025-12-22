@@ -666,67 +666,831 @@ Respond ONLY with valid JSON object. No markdown code blocks, just the JSON.
     }
   }
 
-  // Fallback project generation
-  generateDefaultProject(projectSpec) {
-    console.log('📦 Generating default project structure');
+  async generateProjectCode(projectSpec) {
+    console.log('📝 Generating project with spec:', projectSpec);
+    try {
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+
+      const prompt = `You are an expert full-stack developer. Generate a COMPLETE, production-ready project structure and code.
+
+**Project Details:**
+- Name: ${projectSpec.name}
+- Tech Stack: ${projectSpec.techStack.join(', ')}
+- Description: ${projectSpec.description}
+- Features: ${projectSpec.features ? projectSpec.features.filter(f => f.trim()).join(', ') : 'Basic functionality'}
+- Skill Level: ${projectSpec.skillLevel || 'intermediate'}
+
+Generate a COMPLETE project with real, working code in JSON format:
+
+{
+  "projectName": "${projectSpec.name}",
+  "description": "${projectSpec.description}",
+  "structure": [
+    {
+      "path": "package.json",
+      "content": "complete package.json with all dependencies"
+    },
+    {
+      "path": "server.js",
+      "content": "complete express server setup code"
+    },
+    {
+      "path": ".env.example",
+      "content": "environment variables template"
+    },
+    {
+      "path": "routes/tasks.js",
+      "content": "complete CRUD routes"
+    },
+    {
+      "path": "models/Task.js",
+      "content": "complete data model with validation"
+    }
+  ],
+  "setupSteps": ["npm install", "npm start"],
+  "readme": "complete README with usage examples",
+  "gitignore": "node_modules/\\n.env\\n.DS_Store\\n...",
+  "dependencies": {"express": "^4.18.0", ...},
+  "devDependencies": {...},
+  "scripts": {"start": "node server.js", "dev": "nodemon server.js"},
+  "features": ${JSON.stringify(projectSpec.features || [])},
+  "nextSteps": ["Add database", "Add authentication", "Add tests"]
+}
+
+REQUIREMENTS:
+1. Generate ACTUAL, working code - not placeholders
+2. Include all files needed (server, routes, models, middleware)
+3. Use ${projectSpec.techStack.includes('Express') ? 'Express.js for API' : 'appropriate framework'}
+4. Include proper error handling and validation
+5. Add detailed comments in code
+6. Make it ready to run with "npm install && npm start"
+7. Respond ONLY with valid JSON - no markdown, no explanations
+
+Example structure for ${projectSpec.name}:
+- server.js: Main Express app with routes
+- routes/: API endpoints for CRUD operations
+- models/: Data schemas and validation
+- middleware/: Error handling, logging, validation
+- public/ or views/: Frontend files if applicable
+- .env.example: Configuration template
+- package.json: All dependencies and scripts
+- README.md: Complete documentation
+`;
+
+      console.log('🚀 Calling Gemini API...');
+      const result = await model.generateContent(prompt);
+      const text = result.response.text();
+      console.log('✅ Gemini response received:', text.substring(0, 300));
+      
+      // Try to find JSON object in response
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        console.log('✅ JSON parsed successfully');
+        const parsed = JSON.parse(jsonMatch[0]);
+        if (parsed.structure && Array.isArray(parsed.structure) && parsed.structure.length > 2) {
+          console.log(`✅ Generated ${parsed.structure.length} files`);
+          return parsed;
+        }
+      }
+
+      console.log('⚠️ Gemini response incomplete, using enhanced fallback');
+      return this.generateComprehensiveProject(projectSpec);
+    } catch (error) {
+      console.error('❌ Error generating project:', error.message);
+      console.log('⚠️ Using enhanced fallback project generation');
+      return this.generateComprehensiveProject(projectSpec);
+    }
+  }
+
+  // Comprehensive fallback project generation
+  generateComprehensiveProject(projectSpec) {
+    console.log('📦 Generating comprehensive project structure');
     const projectName = projectSpec.name || 'my-project';
     const techStack = projectSpec.techStack || ['JavaScript'];
+    const features = projectSpec.features?.filter(f => f.trim()) || [];
     
     const isNodeProject = techStack.some(tech => 
-      ['Node.js', 'Express', 'React', 'Next.js'].includes(tech)
+      ['Node.js', 'Express', 'React', 'Next.js', 'TypeScript'].includes(tech)
     );
 
-    const structure = [
-      {
-        path: 'README.md',
-        content: `# ${projectName}\n\n${projectSpec.description || 'A new project'}\n\n## Installation\n\nnpm install\n\n## Usage\n\nnpm start`,
-        description: 'Project documentation'
-      },
-      {
-        path: '.gitignore',
-        content: 'node_modules/\n.env\n.DS_Store\ndist/\nbuild/',
-        description: 'Git ignore file'
-      }
-    ];
+    const structure = [];
 
-    if (isNodeProject) {
-      structure.push({
-        path: 'package.json',
-        content: JSON.stringify({
-          name: projectName,
-          version: '1.0.0',
-          description: projectSpec.description || 'A new project',
-          main: 'index.js',
-          scripts: {
-            start: 'node index.js'
-          },
-          dependencies: {},
-          devDependencies: {}
-        }, null, 2),
-        description: 'NPM package configuration'
+    // 1. package.json
+    structure.push({
+      path: 'package.json',
+      content: JSON.stringify({
+        name: projectName.toLowerCase().replace(/\s+/g, '-'),
+        version: '1.0.0',
+        description: projectSpec.description,
+        main: 'server.js',
+        scripts: {
+          start: 'node server.js',
+          dev: 'nodemon server.js',
+          test: 'jest --coverage'
+        },
+        keywords: features.slice(0, 3),
+        author: 'Your Name',
+        license: 'MIT',
+        dependencies: isNodeProject ? {
+          'express': '^4.18.2',
+          'cors': '^2.8.5',
+          'dotenv': '^16.0.3',
+          'uuid': '^9.0.0'
+        } : {},
+        devDependencies: {
+          'nodemon': '^2.0.22',
+          'jest': '^29.5.0'
+        }
+      }, null, 2),
+      description: 'Project configuration and dependencies'
+    });
+
+    // 2. Main server file
+    structure.push({
+      path: 'server.js',
+      content: `const express = require('express');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const { v4: uuidv4 } = require('uuid');
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(\`[\${new Date().toISOString()}] \${req.method} \${req.path}\`);
+  next();
+});
+
+// In-memory data store (replace with database in production)
+let data = [];
+
+// API Routes
+
+// GET all items
+app.get('/api/items', (req, res) => {
+  try {
+    res.json({ success: true, data, count: data.length });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// GET single item
+app.get('/api/items/:id', (req, res) => {
+  try {
+    const item = data.find(d => d.id === req.params.id);
+    if (!item) {
+      return res.status(404).json({ success: false, error: 'Item not found' });
+    }
+    res.json({ success: true, data: item });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// CREATE new item
+app.post('/api/items', (req, res) => {
+  try {
+    const { title, description } = req.body;
+    
+    if (!title) {
+      return res.status(400).json({ success: false, error: 'Title is required' });
+    }
+
+    const newItem = {
+      id: uuidv4(),
+      title,
+      description: description || '',
+      createdAt: new Date().toISOString(),
+      completed: false
+    };
+
+    data.push(newItem);
+    res.status(201).json({ success: true, data: newItem });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// UPDATE item
+app.put('/api/items/:id', (req, res) => {
+  try {
+    const item = data.find(d => d.id === req.params.id);
+    if (!item) {
+      return res.status(404).json({ success: false, error: 'Item not found' });
+    }
+
+    const { title, description, completed } = req.body;
+    if (title) item.title = title;
+    if (description !== undefined) item.description = description;
+    if (completed !== undefined) item.completed = completed;
+    item.updatedAt = new Date().toISOString();
+
+    res.json({ success: true, data: item });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// DELETE item
+app.delete('/api/items/:id', (req, res) => {
+  try {
+    const index = data.findIndex(d => d.id === req.params.id);
+    if (index === -1) {
+      return res.status(404).json({ success: false, error: 'Item not found' });
+    }
+
+    const deleted = data.splice(index, 1);
+    res.json({ success: true, message: 'Item deleted', data: deleted[0] });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(err.status || 500).json({
+    success: false,
+    error: err.message || 'Internal server error'
+  });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(\`✅ Server running on http://localhost:\${PORT}\`);
+  console.log(\`📚 API Documentation: http://localhost:\${PORT}/api\`);
+});`,
+      description: 'Main Express server with API routes'
+    });
+
+    // 3. .env.example
+    structure.push({
+      path: '.env.example',
+      content: `# Server Configuration
+PORT=5000
+NODE_ENV=development
+
+# Database Configuration
+DATABASE_URL=mongodb://localhost:27017/${projectName.toLowerCase()}
+DB_HOST=localhost
+DB_PORT=27017
+DB_NAME=${projectName.toLowerCase()}
+
+# API Configuration
+API_TIMEOUT=30000
+MAX_REQUEST_SIZE=10mb
+
+# Authentication (if needed)
+JWT_SECRET=your-secret-key-here
+JWT_EXPIRE=7d
+
+# CORS Configuration
+CORS_ORIGIN=http://localhost:3000`,
+      description: 'Environment variables template'
+    });
+
+    // 4. Models file
+    structure.push({
+      path: 'models/Item.js',
+      content: `/**
+ * Item Model
+ * Represents a data item with validation
+ */
+
+class Item {
+  constructor(data = {}) {
+    this.id = data.id || this.generateId();
+    this.title = data.title || '';
+    this.description = data.description || '';
+    this.completed = data.completed || false;
+    this.priority = data.priority || 'medium'; // low, medium, high
+    this.tags = data.tags || [];
+    this.createdAt = data.createdAt || new Date().toISOString();
+    this.updatedAt = data.updatedAt || new Date().toISOString();
+  }
+
+  // Validation
+  validate() {
+    const errors = [];
+    
+    if (!this.title || this.title.trim().length === 0) {
+      errors.push('Title is required');
+    }
+    if (this.title && this.title.length > 255) {
+      errors.push('Title must be less than 255 characters');
+    }
+    if (!['low', 'medium', 'high'].includes(this.priority)) {
+      errors.push('Priority must be low, medium, or high');
+    }
+    
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
+  }
+
+  generateId() {
+    return \`item_\${Date.now()}_\${Math.random().toString(36).substr(2, 9)}\`;
+  }
+
+  toJSON() {
+    return {
+      id: this.id,
+      title: this.title,
+      description: this.description,
+      completed: this.completed,
+      priority: this.priority,
+      tags: this.tags,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt
+    };
+  }
+}
+
+module.exports = Item;`,
+      description: 'Item data model with validation'
+    });
+
+    // 5. Routes file
+    structure.push({
+      path: 'routes/items.js',
+      content: `const express = require('express');
+const router = express.Router();
+const Item = require('../models/Item');
+
+// In-memory store (replace with database)
+let items = [];
+
+/**
+ * GET /api/items - Get all items
+ * Query params: completed (boolean), priority (string), sort (created, priority)
+ */
+router.get('/', (req, res) => {
+  try {
+    let result = [...items];
+    
+    // Filter by completed status
+    if (req.query.completed !== undefined) {
+      result = result.filter(item => 
+        item.completed === (req.query.completed === 'true')
+      );
+    }
+    
+    // Filter by priority
+    if (req.query.priority) {
+      result = result.filter(item => item.priority === req.query.priority);
+    }
+    
+    // Sort
+    if (req.query.sort === 'priority') {
+      const priorityOrder = { high: 1, medium: 2, low: 3 };
+      result.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+    } else {
+      result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+    
+    res.json({
+      success: true,
+      count: result.length,
+      data: result
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * GET /api/items/:id - Get single item
+ */
+router.get('/:id', (req, res) => {
+  try {
+    const item = items.find(i => i.id === req.params.id);
+    if (!item) {
+      return res.status(404).json({ success: false, error: 'Item not found' });
+    }
+    res.json({ success: true, data: item });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * POST /api/items - Create new item
+ */
+router.post('/', (req, res) => {
+  try {
+    const item = new Item(req.body);
+    const validation = item.validate();
+    
+    if (!validation.isValid) {
+      return res.status(400).json({ 
+        success: false, 
+        errors: validation.errors 
       });
+    }
+    
+    items.push(item);
+    res.status(201).json({ success: true, data: item });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
-      structure.push({
-        path: 'index.js',
-        content: `// ${projectName}\n// Entry point\n\nconsole.log('Hello from ${projectName}!');`,
-        description: 'Main entry point'
+/**
+ * PUT /api/items/:id - Update item
+ */
+router.put('/:id', (req, res) => {
+  try {
+    const item = items.find(i => i.id === req.params.id);
+    if (!item) {
+      return res.status(404).json({ success: false, error: 'Item not found' });
+    }
+
+    Object.assign(item, req.body);
+    item.updatedAt = new Date().toISOString();
+    
+    const validation = item.validate();
+    if (!validation.isValid) {
+      return res.status(400).json({ 
+        success: false, 
+        errors: validation.errors 
       });
     }
 
+    res.json({ success: true, data: item });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * DELETE /api/items/:id - Delete item
+ */
+router.delete('/:id', (req, res) => {
+  try {
+    const index = items.findIndex(i => i.id === req.params.id);
+    if (index === -1) {
+      return res.status(404).json({ success: false, error: 'Item not found' });
+    }
+
+    const deleted = items.splice(index, 1);
+    res.json({ success: true, message: 'Item deleted', data: deleted[0] });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * PATCH /api/items/:id/toggle - Toggle completion status
+ */
+router.patch('/:id/toggle', (req, res) => {
+  try {
+    const item = items.find(i => i.id === req.params.id);
+    if (!item) {
+      return res.status(404).json({ success: false, error: 'Item not found' });
+    }
+
+    item.completed = !item.completed;
+    item.updatedAt = new Date().toISOString();
+
+    res.json({ success: true, data: item });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+module.exports = router;`,
+      description: 'API routes with CRUD operations'
+    });
+
+    // 6. Comprehensive README
+    structure.push({
+      path: 'README.md',
+      content: `# ${projectName}
+
+${projectSpec.description}
+
+## Features
+
+${features.length > 0 ? features.map(f => `- ✅ ${f}`).join('\n') : `- ✅ Create, Read, Update, Delete operations
+- ✅ Data validation
+- ✅ Error handling
+- ✅ RESTful API design
+- ✅ CORS support
+- ✅ Environment configuration`}
+
+## Tech Stack
+
+${techStack.map(t => `- **${t}**`).join('\n')}
+
+## Installation
+
+### Prerequisites
+- Node.js (v14 or higher)
+- npm or yarn
+
+### Steps
+
+1. **Clone the repository**
+   \`\`\`bash
+   git clone <repository-url>
+   cd ${projectName.toLowerCase().replace(/\s+/g, '-')}
+   \`\`\`
+
+2. **Install dependencies**
+   \`\`\`bash
+   npm install
+   \`\`\`
+
+3. **Setup environment variables**
+   \`\`\`bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   \`\`\`
+
+4. **Start the server**
+   \`\`\`bash
+   npm start
+   \`\`\`
+
+5. **For development (with auto-reload)**
+   \`\`\`bash
+   npm run dev
+   \`\`\`
+
+## API Documentation
+
+### Base URL
+\`http://localhost:5000\`
+
+### Endpoints
+
+#### Get All Items
+\`\`\`
+GET /api/items
+\`\`\`
+
+Query Parameters:
+- \`completed\` (boolean) - Filter by completion status
+- \`priority\` (string) - Filter by priority (low, medium, high)
+- \`sort\` (string) - Sort by (created, priority)
+
+Response:
+\`\`\`json
+{
+  "success": true,
+  "count": 5,
+  "data": [
+    {
+      "id": "item_123456",
+      "title": "Sample Item",
+      "description": "Item description",
+      "completed": false,
+      "priority": "high",
+      "tags": ["important"],
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    }
+  ]
+}
+\`\`\`
+
+#### Get Single Item
+\`\`\`
+GET /api/items/:id
+\`\`\`
+
+#### Create Item
+\`\`\`
+POST /api/items
+
+Body:
+{
+  "title": "New Item",
+  "description": "Optional description",
+  "priority": "medium",
+  "tags": ["tag1"]
+}
+\`\`\`
+
+#### Update Item
+\`\`\`
+PUT /api/items/:id
+
+Body:
+{
+  "title": "Updated Title",
+  "completed": true,
+  "priority": "low"
+}
+\`\`\`
+
+#### Delete Item
+\`\`\`
+DELETE /api/items/:id
+\`\`\`
+
+#### Toggle Completion
+\`\`\`
+PATCH /api/items/:id/toggle
+\`\`\`
+
+## Project Structure
+
+\`\`\`
+${projectName.toLowerCase().replace(/\s+/g, '-')}/
+├── server.js                 # Main application entry point
+├── package.json              # Dependencies and scripts
+├── .env.example              # Environment variables template
+├── .gitignore                # Git ignore rules
+├── README.md                 # This file
+├── models/
+│   └── Item.js              # Data model with validation
+├── routes/
+│   └── items.js             # API routes and endpoints
+├── middleware/
+│   └── errorHandler.js      # Error handling middleware
+└── tests/
+    └── items.test.js        # Unit tests
+\`\`\`
+
+## Development
+
+### Running Tests
+\`\`\`bash
+npm test
+\`\`\`
+
+### Code Style
+This project follows ESLint configuration. Run linter:
+\`\`\`bash
+npm run lint
+\`\`\`
+
+## Environment Variables
+
+See \`.env.example\` for all available configuration options.
+
+Key variables:
+- \`PORT\` - Server port (default: 5000)
+- \`NODE_ENV\` - Environment (development/production)
+- \`DATABASE_URL\` - Database connection string
+- \`API_TIMEOUT\` - API request timeout in milliseconds
+
+## Deployment
+
+### Using Docker
+\`\`\`bash
+docker build -t ${projectName.toLowerCase()} .
+docker run -p 5000:5000 ${projectName.toLowerCase()}
+\`\`\`
+
+### Using Heroku
+\`\`\`bash
+heroku create ${projectName.toLowerCase()}
+git push heroku main
+\`\`\`
+
+## Troubleshooting
+
+### Port already in use
+Change the PORT in .env or use:
+\`\`\`bash
+PORT=3001 npm start
+\`\`\`
+
+### Dependencies issue
+Clear cache and reinstall:
+\`\`\`bash
+rm -rf node_modules package-lock.json
+npm install
+\`\`\`
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (\`git checkout -b feature/AmazingFeature\`)
+3. Commit changes (\`git commit -m 'Add AmazingFeature'\`)
+4. Push to branch (\`git push origin feature/AmazingFeature\`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see LICENSE file for details.
+
+## Support
+
+For issues and questions:
+- Create an issue on GitHub
+- Check existing documentation
+- Review API examples
+
+## Next Steps
+
+1. ✅ Set up database connection
+2. ✅ Add user authentication
+3. ✅ Implement unit tests
+4. ✅ Add API documentation (Swagger)
+5. ✅ Deploy to production
+
+---
+
+Made with ❤️ by Your Name`,
+      description: 'Complete project documentation'
+    });
+
+    // 7. .gitignore
+    structure.push({
+      path: '.gitignore',
+      content: `# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+coverage/
+.nyc_output/
+
+# Build
+dist/
+build/
+*.tgz
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*`,
+      description: 'Git ignore rules'
+    });
+
     return {
       projectName,
-      description: projectSpec.description || 'A new project',
+      description: projectSpec.description,
       structure,
-      setupSteps: isNodeProject ? 
-        ['npm install', 'npm start'] : 
-        ['Install dependencies', 'Run the project'],
-      readme: `# ${projectName}\n\n${projectSpec.description || 'A new project'}\n\n## Features\n\n${(projectSpec.features || []).map(f => `- ${f}`).join('\n')}\n\n## Getting Started\n\n1. Clone the repository\n2. Install dependencies\n3. Run the project\n\n## Tech Stack\n\n${techStack.join(', ')}\n\n## License\n\nMIT`,
-      gitignore: 'node_modules/\n.env\n.DS_Store\ndist/\nbuild/\n*.log',
-      dependencies: {},
-      devDependencies: {},
-      scripts: { start: isNodeProject ? 'node index.js' : 'start' },
-      features: projectSpec.features || [],
-      nextSteps: ['Set up database', 'Add authentication', 'Deploy to production']
+      setupSteps: [
+        'npm install',
+        'cp .env.example .env',
+        'npm run dev  # for development',
+        'npm start    # for production'
+      ],
+      readme: structure.find(s => s.path === 'README.md').content,
+      gitignore: structure.find(s => s.path === '.gitignore').content,
+      dependencies: {
+        'express': '^4.18.2',
+        'cors': '^2.8.5',
+        'dotenv': '^16.0.3',
+        'uuid': '^9.0.0'
+      },
+      devDependencies: {
+        'nodemon': '^2.0.22',
+        'jest': '^29.5.0'
+      },
+      scripts: {
+        start: 'node server.js',
+        dev: 'nodemon server.js',
+        test: 'jest --coverage'
+      },
+      features: features.length > 0 ? features : ['CRUD Operations', 'Data Validation', 'Error Handling'],
+      nextSteps: [
+        'Set up MongoDB or PostgreSQL database',
+        'Add JWT authentication',
+        'Implement API documentation (Swagger)',
+        'Add comprehensive unit tests',
+        'Deploy to production (Heroku/AWS)'
+      ]
     };
   }
 
