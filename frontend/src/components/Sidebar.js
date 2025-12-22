@@ -134,9 +134,14 @@ function Sidebar() {
             objectFit: 'contain',
           }}
         />
-        <Typography variant="h5" sx={{ fontWeight: 700, flexGrow: 1 }}>
-          AppTrackr
-        </Typography>
+        <Box sx={{ flexGrow: 1 }}>
+          <Typography variant="h5" sx={{ fontWeight: 700, margin: 0, lineHeight: 1.2 }}>
+            AppTrackr - Job Tracker
+          </Typography>
+          <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.7rem' }}>
+            Job Preparation Hub
+          </Typography>
+        </Box>
         <IconButton
           onClick={closeMobileMenu}
           sx={{

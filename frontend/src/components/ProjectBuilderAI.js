@@ -275,8 +275,8 @@ const ProjectBuilderAI = () => {
               style={{ width: '40px', height: '40px', objectFit: 'contain' }}
             />
             <div>
-              <h1 className="builder-header-title">AppTrackr</h1>
-              <p className="builder-header-subtitle">AI-Powered Project Analysis & Job Tracker - Land Your Dream Job</p>
+              <h1 className="builder-header-title">AppTrackr - Job Tracker</h1>
+              <p className="builder-header-subtitle">Job Preparation Hub</p>
             </div>
           </div>
           <div className="builder-tabs">
