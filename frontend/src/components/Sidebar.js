@@ -26,8 +26,6 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import PersonIcon from '@mui/icons-material/Person';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import LogoutIcon from '@mui/icons-material/Logout';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import LightModeIcon from '@mui/icons-material/LightMode';
 
 const drawerWidth = 280;
 
@@ -221,31 +219,8 @@ function Sidebar() {
 
       <Divider />
 
-      {/* Footer - Theme Toggle & Logout */}
+      {/* Footer - Logout */}
       <Box sx={{ p: 2 }}>
-        <ListItemButton
-          onClick={colorMode.toggleColorMode}
-          sx={{
-            borderRadius: 1,
-            mb: 1,
-            '&:hover': {
-              backgroundColor: theme.palette.mode === 'light'
-                ? 'rgba(99, 102, 241, 0.05)'
-                : 'rgba(99, 102, 241, 0.1)',
-            },
-          }}
-        >
-          <ListItemIcon sx={{ minWidth: 40 }}>
-            {theme.palette.mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
-          </ListItemIcon>
-          <ListItemText
-            primary={theme.palette.mode === 'dark' ? 'Light Mode' : 'Dark Mode'}
-            primaryTypographyProps={{
-              fontSize: '0.95rem',
-              fontWeight: 500,
-            }}
-          />
-        </ListItemButton>
         <ListItemButton
           onClick={logout}
           sx={{
