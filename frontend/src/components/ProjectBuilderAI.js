@@ -370,34 +370,56 @@ const ProjectBuilderAI = () => {
 
   return (
     <div className="builder-container">
-      {/* Hero Section */}
-      <div className="builder-hero">
-        <div className="builder-hero-content">
-          <div className="builder-icon-large">🛠️</div>
-          <h1 className="builder-title">AI Project Builder</h1>
-          <p className="builder-subtitle">
-            Build impressive projects and improve your existing repositories with intelligent AI-powered analysis
-          </p>
-          
-          {/* Stats Row */}
-          {githubConnected && repositories.length > 0 && (
-            <div className="builder-stats-row">
-              <div className="builder-stat-badge">
-                <span className="stat-icon">📦</span>
-                <span>{repositories.length} Repositories</span>
-              </div>
-              <div className="builder-stat-badge">
-                <span className="stat-icon">⭐</span>
-                <span>{repositories.reduce((sum, r) => sum + (r.stars || 0), 0)} Total Stars</span>
-              </div>
-              <div className="builder-stat-badge">
-                <span className="stat-icon">👤</span>
-                <span>{githubUsername}</span>
-              </div>
+      {/* Header with Title and Navigation */}
+      {githubConnected && (
+        <div className="builder-header">
+          <div className="builder-header-left">
+            <div className="builder-header-icon">🛠️</div>
+            <div>
+              <h1 className="builder-header-title">AI Project Builder</h1>
+              <p className="builder-header-subtitle">Powered by Advanced AI - Analyze & improve your projects</p>
             </div>
-          )}
+          </div>
+          <div className="builder-tabs">
+            <button
+              className={'builder-tab ' + (activeTab === 'overview' ? 'active' : '')}
+              onClick={() => setActiveTab('overview')}
+            >
+              <span className="tab-icon">📊</span>
+              My Projects
+            </button>
+            <button
+              className={'builder-tab ' + (activeTab === 'create' ? 'active' : '')}
+              onClick={() => setActiveTab('create')}
+            >
+              <span className="tab-icon">✨</span>
+              Create New
+            </button>
+            <button
+              className={'builder-tab ' + (activeTab === 'tracker' ? 'active' : '')}
+              onClick={() => setActiveTab('tracker')}
+            >
+              <span className="tab-icon">📚</span>
+              Learning
+            </button>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Hero Section (only when not connected) */}
+      {!githubConnected && (
+        <div className="builder-hero">
+          <div className="builder-hero-content">
+            <div className="builder-icon-large">🛠️</div>
+            <h1 className="builder-title">AI Project Builder</h1>
+            <p className="builder-subtitle">
+              Build impressive projects and improve your existing repositories with intelligent AI-powered analysis
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className="builder-main">
 
       {/* GitHub Connection Card */}
       {!githubConnected ? (
@@ -431,58 +453,6 @@ const ProjectBuilderAI = () => {
               </button>
             </div>
           </div>
-
-        {/* Tab Navigation */}
-        <div className="builder-tabs">
-          <button
-            className={'builder-tab ' + (activeTab === 'overview' ? 'active' : '')}
-            onClick={() => setActiveTab('overview')}
-          >
-            <span className="tab-icon">📊</span>
-            My Projects
-          </button>
-          <button
-            className={'builder-tab ' + (activeTab === 'create' ? 'active' : '')}
-            onClick={() => setActiveTab('create')}
-          >
-            <span className="tab-icon">✨</span>
-            Create New
-          </button>
-          {selectedRepo && (
-            <button
-              className={'builder-tab ' + (activeTab === 'analysis' ? 'active' : '')}
-              onClick={() => setActiveTab('analysis')}
-            >
-              <span className="tab-icon">🔍</span>
-              Analysis
-            </button>
-          )}
-          {improvementCode && (
-            <button
-              className={'builder-tab ' + (activeTab === 'implement' ? 'active' : '')}
-              onClick={() => setActiveTab('implement')}
-            >
-              <span className="tab-icon">💻</span>
-              Implement
-            </button>
-          )}
-          <button
-            className={'builder-tab ' + (activeTab === 'tracker' ? 'active' : '')}
-            onClick={() => setActiveTab('tracker')}
-          >
-            <span className="tab-icon">📚</span>
-            Learning {savedResources.length > 0 && `(${savedResources.length})`}
-          </button>
-          {generatedProject && (
-            <button
-              className={'builder-tab ' + (activeTab === 'review' ? 'active' : '')}
-              onClick={() => setActiveTab('review')}
-            >
-              <span className="tab-icon">👀</span>
-              Review
-            </button>
-          )}
-        </div>
 
           {/* Tab Content */}
           <div className="builder-tab-content">
@@ -960,6 +930,7 @@ const ProjectBuilderAI = () => {
           </div>
         </>
       )}
+      </div>
 
       {loading && <div className="loading-overlay">Loading...</div>}
     </div>
