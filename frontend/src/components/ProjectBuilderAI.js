@@ -268,10 +268,10 @@ const ProjectBuilderAI = () => {
       {githubConnected && (
         <div className="builder-header">
           <div className="builder-header-left">
-            <div className="builder-header-icon">🛠️</div>
+            <div className="builder-header-icon">�</div>
             <div>
-              <h1 className="builder-header-title">AI Project Builder</h1>
-              <p className="builder-header-subtitle">Powered by Advanced AI - Analyze & improve your projects</p>
+              <h1 className="builder-header-title">AppTrackr</h1>
+              <p className="builder-header-subtitle">AI-Powered Project Analysis & Job Tracker - Land Your Dream Job</p>
             </div>
           </div>
           <div className="builder-tabs">
