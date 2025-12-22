@@ -432,63 +432,60 @@ const ProjectBuilderAI = () => {
             </div>
           </div>
 
-          {/* Tab Navigation */}
-          <div className="builder-section">
-            <div className="builder-tabs">
-              <button
-                className={'builder-tab ' + (activeTab === 'overview' ? 'active' : '')}
-                onClick={() => setActiveTab('overview')}
-              >
-                <span className="tab-icon">📊</span>
-                My Projects
-              </button>
-              <button
-                className={'builder-tab ' + (activeTab === 'create' ? 'active' : '')}
-                onClick={() => setActiveTab('create')}
-              >
-                <span className="tab-icon">✨</span>
-                Create New
-              </button>
-              {selectedRepo && (
-                <button
-                  className={'builder-tab ' + (activeTab === 'analysis' ? 'active' : '')}
-                  onClick={() => setActiveTab('analysis')}
-                >
-                  <span className="tab-icon">🔍</span>
-                  Analysis
-                </button>
-              )}
-              {improvementCode && (
-                <button
-                  className={'builder-tab ' + (activeTab === 'implement' ? 'active' : '')}
-                  onClick={() => setActiveTab('implement')}
-                >
-                  <span className="tab-icon">💻</span>
-                  Implement
-                </button>
-              )}
-              <button
-                className={'builder-tab ' + (activeTab === 'tracker' ? 'active' : '')}
-                onClick={() => setActiveTab('tracker')}
-              >
-                <span className="tab-icon">📚</span>
-                Learning {savedResources.length > 0 && `(${savedResources.length})`}
-              </button>
-              {generatedProject && (
-                <button
-                  className={'builder-tab ' + (activeTab === 'review' ? 'active' : '')}
-                  onClick={() => setActiveTab('review')}
-                >
-                  <span className="tab-icon">👀</span>
-                  Review
-                </button>
-              )}
-            </div>
-          </div>
+        {/* Tab Navigation */}
+        <div className="builder-tabs">
+          <button
+            className={'builder-tab ' + (activeTab === 'overview' ? 'active' : '')}
+            onClick={() => setActiveTab('overview')}
+          >
+            <span className="tab-icon">📊</span>
+            My Projects
+          </button>
+          <button
+            className={'builder-tab ' + (activeTab === 'create' ? 'active' : '')}
+            onClick={() => setActiveTab('create')}
+          >
+            <span className="tab-icon">✨</span>
+            Create New
+          </button>
+          {selectedRepo && (
+            <button
+              className={'builder-tab ' + (activeTab === 'analysis' ? 'active' : '')}
+              onClick={() => setActiveTab('analysis')}
+            >
+              <span className="tab-icon">🔍</span>
+              Analysis
+            </button>
+          )}
+          {improvementCode && (
+            <button
+              className={'builder-tab ' + (activeTab === 'implement' ? 'active' : '')}
+              onClick={() => setActiveTab('implement')}
+            >
+              <span className="tab-icon">💻</span>
+              Implement
+            </button>
+          )}
+          <button
+            className={'builder-tab ' + (activeTab === 'tracker' ? 'active' : '')}
+            onClick={() => setActiveTab('tracker')}
+          >
+            <span className="tab-icon">📚</span>
+            Learning {savedResources.length > 0 && `(${savedResources.length})`}
+          </button>
+          {generatedProject && (
+            <button
+              className={'builder-tab ' + (activeTab === 'review' ? 'active' : '')}
+              onClick={() => setActiveTab('review')}
+            >
+              <span className="tab-icon">👀</span>
+              Review
+            </button>
+          )}
+        </div>
 
           {/* Tab Content */}
-          <div className="builder-section">
-            <div className="builder-tab-content">
+          <div className="builder-tab-content">
             {/* OVERVIEW TAB */}
             {activeTab === 'overview' && (
               <div className="overview-tab">
