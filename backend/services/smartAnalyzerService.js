@@ -172,6 +172,8 @@ class SmartAnalyzerService {
 
   async analyzeRepository(octokit, owner, repo, repoData, contents, dependencies) {
     try {
+      console.log(`\n🔍 ANALYZING: ${owner}/${repo}`);
+      
       // Initialize detection results
       const detected = {
         hasTests: false,
@@ -188,54 +190,122 @@ class SmartAnalyzerService {
 
       // Detect features from contents
       if (contents && Array.isArray(contents)) {
+        console.log(`📁 Found ${contents.length} root items:`);
         for (const item of contents) {
           if (!item.name) continue;
 
-          // Test files
-          if (item.name.includes('test') || item.name.includes('spec') || item.name === '__tests__') {
+          const nameLower = item.name.toLowerCase();
+          console.log(`   - ${item.name}`);
+
+          // Test files/dirs (case-insensitive)
+          if (nameLower.includes('test') || nameLower.includes('spec') || nameLower === '__tests__' || nameLower === 'tests') {
             detected.hasTests = true;
+            console.log(`     ✅ Tests detected`);
           }
           // CI/CD
-          if (item.name === '.github') {
+          if (nameLower === '.github' || nameLower === '.gitlab-ci.yml' || nameLower === '.circleci') {
             detected.hasCICD = true;
+            console.log(`     ✅ CI/CD detected`);
           }
           // TypeScript
-          if (item.name === 'tsconfig.json') {
+          if (nameLower === 'tsconfig.json') {
             detected.hasTypeScript = true;
+            console.log(`     ✅ TypeScript detected`);
           }
           // Docker
-          if (item.name === 'Dockerfile' || item.name === 'docker-compose.yml') {
+          if (nameLower === 'dockerfile' || nameLower === 'docker-compose.yml' || nameLower === 'docker-compose.yaml') {
             detected.hasDocker = true;
+            console.log(`     ✅ Docker detected`);
           }
-          // Linting
-          if (item.name === '.eslintrc.js' || item.name === '.eslintrc.json' || item.name === '.prettierrc') {
+          // Linting (case-insensitive)
+          if (nameLower === '.eslintrc.js' || nameLower === '.eslintrc.json' || nameLower === '.eslintrc' || nameLower === '.prettierrc' || nameLower === '.prettierrc.json') {
             detected.hasLinting = true;
+            console.log(`     ✅ Linting detected`);
           }
-          // Security
-          if (item.name === '.env.example' || item.name === '.env') {
+          // Security config
+          if (nameLower === '.env.example' || nameLower === '.env') {
             detected.hasSecurity = true;
+            console.log(`     ✅ Security detected`);
           }
           // API Docs
-          if (item.name === 'swagger.json' || item.name === 'openapi.json') {
+          if (nameLower === 'swagger.json' || nameLower === 'openapi.json') {
             detected.hasAPIDocumentation = true;
+            console.log(`     ✅ API Docs detected`);
           }
-          // Error handling & docs
-          if (item.name === 'README.md' || item.name === 'docs') {
+          // Documentation & Error handling
+          if (nameLower === 'readme.md' || nameLower === 'readme.txt' || nameLower === 'docs') {
             detected.hasDocumentation = true;
+            console.log(`     ✅ Documentation detected`);
           }
         }
+      } else {
+        console.log(`⚠️ No contents array provided`);
       }
 
-      // Detect from dependencies
-      if (dependencies) {
-        detected.hasTests = detected.hasTests || !!dependencies.jest || !!dependencies.mocha;
-        detected.hasTypeScript = detected.hasTypeScript || !!dependencies.typescript;
-        detected.hasLinting = detected.hasLinting || !!dependencies.eslint || !!dependencies.prettier;
-        detected.hasSecurity = detected.hasSecurity || !!dependencies['helmet'] || !!dependencies['express-rate-limit'];
-        detected.hasAPIDocumentation = detected.hasAPIDocumentation || !!dependencies['swagger-jsdoc'] || !!dependencies['swagger-ui-express'];
-        detected.hasErrorHandling = !!dependencies['winston'] || !!dependencies['pino'];
-        detected.hasDocker = detected.hasDocker || !!dependencies['docker'];
+      // Detect from dependencies (most reliable)
+      if (dependencies && typeof dependencies === 'object') {
+        const depCount = Object.keys(dependencies).length;
+        console.log(`\n📦 Analyzing ${depCount} dependencies:`);
+        
+        // Extract just the package names (keys) - dependencies can have version info
+        const depList = Object.keys(dependencies).map(d => d.toLowerCase());
+        console.log(`   All deps: ${depList.join(', ')}`);
+        
+        // Check each category
+        const testLibs = depList.filter(d => d.includes('jest') || d.includes('mocha') || d.includes('vitest') || d.includes('jasmine'));
+        if (testLibs.length > 0) {
+          detected.hasTests = true;
+          console.log(`   ✅ Tests: ${testLibs.join(', ')}`);
+        }
+        
+        if (depList.includes('typescript')) {
+          detected.hasTypeScript = true;
+          console.log(`   ✅ TypeScript found`);
+        }
+        
+        const lintLibs = depList.filter(d => d.includes('eslint') || d.includes('prettier'));
+        if (lintLibs.length > 0) {
+          detected.hasLinting = true;
+          console.log(`   ✅ Linting: ${lintLibs.join(', ')}`);
+        }
+        
+        const secLibs = depList.filter(d => d.includes('helmet') || d.includes('rate-limit') || d.includes('csrf'));
+        if (secLibs.length > 0) {
+          detected.hasSecurity = true;
+          console.log(`   ✅ Security: ${secLibs.join(', ')}`);
+        }
+        
+        const apiLibs = depList.filter(d => d.includes('swagger') || d.includes('openapi'));
+        if (apiLibs.length > 0) {
+          detected.hasAPIDocumentation = true;
+          console.log(`   ✅ API Docs: ${apiLibs.join(', ')}`);
+        }
+        
+        const logLibs = depList.filter(d => d.includes('winston') || d.includes('pino') || d.includes('sentry') || d.includes('bunyan'));
+        if (logLibs.length > 0) {
+          detected.hasErrorHandling = true;
+          console.log(`   ✅ Error Handling: ${logLibs.join(', ')}`);
+        }
+
+        // Docker check
+        if (depList.includes('docker')) {
+          detected.hasDocker = true;
+          console.log(`   ✅ Docker in dependencies`);
+        }
+      } else {
+        console.log(`⚠️ No dependencies object provided`);
       }
+
+      console.log(`\n📊 FINAL DETECTION SUMMARY:`);
+      console.log(`   Tests: ${detected.hasTests ? '✅' : '❌'}`);
+      console.log(`   CI/CD: ${detected.hasCICD ? '✅' : '❌'}`);
+      console.log(`   TypeScript: ${detected.hasTypeScript ? '✅' : '❌'}`);
+      console.log(`   Docker: ${detected.hasDocker ? '✅' : '❌'}`);
+      console.log(`   Linting: ${detected.hasLinting ? '✅' : '❌'}`);
+      console.log(`   Security: ${detected.hasSecurity ? '✅' : '❌'}`);
+      console.log(`   API Docs: ${detected.hasAPIDocumentation ? '✅' : '❌'}`);
+      console.log(`   Error Handling: ${detected.hasErrorHandling ? '✅' : '❌'}`);
+      console.log(`   Documentation: ${detected.hasDocumentation ? '✅' : '❌'}`);
 
       // Generate improvements based on detection
       const improvements = this.generateImprovements(detected);
@@ -305,17 +375,54 @@ class SmartAnalyzerService {
   generateImprovements(detected) {
     const needed = [];
 
+    // Primary tier - Critical missing features
     if (!detected.hasTests) needed.push(this.improvementsDB.unitTesting);
     if (!detected.hasCICD) needed.push(this.improvementsDB.cicdPipeline);
     if (!detected.hasTypeScript) needed.push(this.improvementsDB.typescript);
-    if (!detected.hasDocumentation) needed.push(this.improvementsDB.documentation);
-    if (!detected.hasDocker) needed.push(this.improvementsDB.docker);
-    if (!detected.hasLinting) needed.push(this.improvementsDB.linting);
-    if (!detected.hasAPIDocumentation) needed.push(this.improvementsDB.apiDocs);
-    if (!detected.hasErrorHandling) needed.push(this.improvementsDB.errorHandling);
-    if (!detected.hasSecurity) needed.push(this.improvementsDB.security);
+    
+    // Secondary tier - Add diversity based on what's present
+    if (detected.hasTests && !detected.hasDocumentation) {
+      needed.push(this.improvementsDB.documentation);
+    }
+    if (detected.hasCICD && !detected.hasDocker) {
+      needed.push(this.improvementsDB.docker);
+    }
+    if (detected.hasTypeScript && !detected.hasLinting) {
+      needed.push(this.improvementsDB.linting);
+    }
+    if (detected.hasTests && !detected.hasErrorHandling) {
+      needed.push(this.improvementsDB.errorHandling);
+    }
+    if (!detected.hasDocumentation) {
+      needed.push(this.improvementsDB.documentation);
+    }
+    if (!detected.hasDocker) {
+      needed.push(this.improvementsDB.docker);
+    }
+    if (!detected.hasLinting) {
+      needed.push(this.improvementsDB.linting);
+    }
+    if (!detected.hasAPIDocumentation) {
+      needed.push(this.improvementsDB.apiDocs);
+    }
+    if (!detected.hasErrorHandling) {
+      needed.push(this.improvementsDB.errorHandling);
+    }
+    if (!detected.hasSecurity) {
+      needed.push(this.improvementsDB.security);
+    }
 
-    return needed.slice(0, 6); // Return top 6 improvements
+    // Remove duplicates by title
+    const uniqueByTitle = [];
+    const seenTitles = new Set();
+    for (const improvement of needed) {
+      if (!seenTitles.has(improvement.title)) {
+        uniqueByTitle.push(improvement);
+        seenTitles.add(improvement.title);
+      }
+    }
+
+    return uniqueByTitle.slice(0, 6); // Return top 6 improvements
   }
 
   calculateScores(detected) {

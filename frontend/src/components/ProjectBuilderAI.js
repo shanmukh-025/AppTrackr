@@ -369,102 +369,126 @@ const ProjectBuilderAI = () => {
   };
 
   return (
-    <div className="project-builder-container">
-      <div className="project-builder-header">
-        <h1>🛠️ AI Project Builder</h1>
-        <p>Build impressive projects or improve existing ones with AI assistance</p>
+    <div className="builder-container">
+      {/* Hero Section */}
+      <div className="builder-hero">
+        <div className="builder-hero-content">
+          <div className="builder-icon-large">🛠️</div>
+          <h1 className="builder-title">AI Project Builder</h1>
+          <p className="builder-subtitle">
+            Build impressive projects and improve your existing repositories with intelligent AI-powered analysis
+          </p>
+          
+          {/* Stats Row */}
+          {githubConnected && repositories.length > 0 && (
+            <div className="builder-stats-row">
+              <div className="builder-stat-badge">
+                <span className="stat-icon">📦</span>
+                <span>{repositories.length} Repositories</span>
+              </div>
+              <div className="builder-stat-badge">
+                <span className="stat-icon">⭐</span>
+                <span>{repositories.reduce((sum, r) => sum + (r.stars || 0), 0)} Total Stars</span>
+              </div>
+              <div className="builder-stat-badge">
+                <span className="stat-icon">👤</span>
+                <span>{githubUsername}</span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* GitHub Connection Status */}
-      <div className={'github-status ' + (githubConnected ? 'connected' : 'disconnected')}>
-        {githubConnected ? (
-          <div className="status-connected">
-            <span className="github-icon">✅</span>
-            <span>Connected as <strong>{githubUsername}</strong></span>
-            <button onClick={() => window.open('https://github.com/' + githubUsername, '_blank')}>
-              View Profile
+      {/* GitHub Connection Card */}
+      {!githubConnected ? (
+        <div className="builder-section">
+          <div className="connection-card">
+            <div className="connection-icon">🔗</div>
+            <h2>Connect Your GitHub Account</h2>
+            <p>Link your GitHub account to analyze your repositories and get personalized improvement suggestions</p>
+            <button onClick={connectGitHub} className="connect-github-btn">
+              🔗 Connect with GitHub
             </button>
           </div>
-        ) : (
-          <div className="status-disconnected">
-            <span className="github-icon">⚠️</span>
-            <span>Connect GitHub to analyze and improve your projects</span>
-            <button onClick={connectGitHub} className="connect-btn">
-              🔗 Connect GitHub
-            </button>
-          </div>
-        )}
-      </div>
-
-      {githubConnected && (
+        </div>
+      ) : (
         <>
-          {/* TEST BUTTON */}
-          <div style={{position: 'fixed', top: '10px', right: '10px', zIndex: 99999}}>
-            <button 
-              onClick={() => alert('TEST BUTTON WORKS!')}
-              style={{
-                padding: '20px 40px',
-                backgroundColor: '#FF0000',
-                color: 'white',
-                border: '3px solid yellow',
-                borderRadius: '10px',
-                fontSize: '20px',
-                fontWeight: 'bold',
-                cursor: 'pointer'
-              }}
-            >
-              TEST CLICK ME
-            </button>
+          {/* Connected Status Card */}
+          <div className="builder-section">
+            <div className="connected-status-card">
+              <div className="status-left">
+                <span className="status-icon">✅</span>
+                <div className="status-text">
+                  <p className="status-label">Connected as</p>
+                  <p className="status-value">{githubUsername}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => window.open('https://github.com/' + githubUsername, '_blank')}
+                className="view-profile-btn"
+              >
+                View GitHub Profile
+              </button>
+            </div>
           </div>
 
           {/* Tab Navigation */}
-          <div className="tab-navigation">
-            <button
-              className={'tab-btn ' + (activeTab === 'overview' ? 'active' : '')}
-              onClick={() => setActiveTab('overview')}
-            >
-              📊 My Projects
-            </button>
-            <button
-              className={'tab-btn ' + (activeTab === 'create' ? 'active' : '')}
-              onClick={() => setActiveTab('create')}
-            >
-              ✨ Create New
-            </button>
-            {selectedRepo && (
+          <div className="builder-section">
+            <div className="builder-tabs">
               <button
-                className={'tab-btn ' + (activeTab === 'analysis' ? 'active' : '')}
-                onClick={() => setActiveTab('analysis')}
+                className={'builder-tab ' + (activeTab === 'overview' ? 'active' : '')}
+                onClick={() => setActiveTab('overview')}
               >
-                🔍 Analysis
+                <span className="tab-icon">📊</span>
+                My Projects
               </button>
-            )}
-            {improvementCode && (
               <button
-                className={'tab-btn ' + (activeTab === 'implement' ? 'active' : '')}
-                onClick={() => setActiveTab('implement')}
+                className={'builder-tab ' + (activeTab === 'create' ? 'active' : '')}
+                onClick={() => setActiveTab('create')}
               >
-                💻 Implement
+                <span className="tab-icon">✨</span>
+                Create New
               </button>
-            )}
-            <button
-              className={'tab-btn ' + (activeTab === 'tracker' ? 'active' : '')}
-              onClick={() => setActiveTab('tracker')}
-            >
-              📚 Learning Tracker {savedResources.length > 0 && `(${savedResources.length})`}
-            </button>
-            {generatedProject && (
+              {selectedRepo && (
+                <button
+                  className={'builder-tab ' + (activeTab === 'analysis' ? 'active' : '')}
+                  onClick={() => setActiveTab('analysis')}
+                >
+                  <span className="tab-icon">🔍</span>
+                  Analysis
+                </button>
+              )}
+              {improvementCode && (
+                <button
+                  className={'builder-tab ' + (activeTab === 'implement' ? 'active' : '')}
+                  onClick={() => setActiveTab('implement')}
+                >
+                  <span className="tab-icon">💻</span>
+                  Implement
+                </button>
+              )}
               <button
-                className={'tab-btn ' + (activeTab === 'review' ? 'active' : '')}
-                onClick={() => setActiveTab('review')}
+                className={'builder-tab ' + (activeTab === 'tracker' ? 'active' : '')}
+                onClick={() => setActiveTab('tracker')}
               >
-                👀 Review
+                <span className="tab-icon">📚</span>
+                Learning {savedResources.length > 0 && `(${savedResources.length})`}
               </button>
-            )}
+              {generatedProject && (
+                <button
+                  className={'builder-tab ' + (activeTab === 'review' ? 'active' : '')}
+                  onClick={() => setActiveTab('review')}
+                >
+                  <span className="tab-icon">👀</span>
+                  Review
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Tab Content */}
-          <div className="tab-content">
+          <div className="builder-section">
+            <div className="builder-tab-content">
             {/* OVERVIEW TAB */}
             {activeTab === 'overview' && (
               <div className="overview-tab">
