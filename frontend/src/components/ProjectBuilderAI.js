@@ -398,6 +398,25 @@ const ProjectBuilderAI = () => {
 
       {githubConnected && (
         <>
+          {/* TEST BUTTON */}
+          <div style={{position: 'fixed', top: '10px', right: '10px', zIndex: 99999}}>
+            <button 
+              onClick={() => alert('TEST BUTTON WORKS!')}
+              style={{
+                padding: '20px 40px',
+                backgroundColor: '#FF0000',
+                color: 'white',
+                border: '3px solid yellow',
+                borderRadius: '10px',
+                fontSize: '20px',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}
+            >
+              TEST CLICK ME
+            </button>
+          </div>
+
           {/* Tab Navigation */}
           <div className="tab-navigation">
             <button
@@ -628,56 +647,65 @@ const ProjectBuilderAI = () => {
                           {improvement.resources && improvement.resources.length > 0 && (
                             <div className="improvement-resources">
                               <h5>📚 Learning Resources</h5>
-                              <div className="resources-grid">
+                              <div className="resources-grid" style={{pointerEvents: 'auto', position: 'relative', zIndex: 1000}}>
                                 {improvement.resources.map((resource, idx) => {
                                   const resourceObj = typeof resource === 'object' ? resource : { title: resource, url: '' };
                                   const url = resourceObj.url || resource;
                                   const title = resourceObj.title || (typeof resource === 'string' ? resource : 'Resource');
                                   
-                                  console.log('Resource:', idx, 'Title:', title, 'URL:', url, 'Type:', typeof resource);
-                                  
                                   return (
-                                    <div key={idx} className="resource-item-card">
+                                    <div key={idx} className="resource-item-card" style={{pointerEvents: 'auto', position: 'relative', zIndex: 1001}}>
                                       <div className="resource-title">{title}</div>
-                                      <div className="resource-button-group">
-                                        <button
+                                      <div style={{display: 'flex', gap: '0.5rem', pointerEvents: 'auto', position: 'relative', zIndex: 1002}}>
+                                        <a
+                                          href={url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
                                           style={{
-                                            padding: '10px 20px',
-                                            backgroundColor: '#4CAF50',
+                                            flex: 1,
+                                            padding: '12px 20px',
+                                            backgroundColor: '#FF6B6B',
                                             color: 'white',
                                             border: 'none',
                                             borderRadius: '5px',
                                             cursor: 'pointer',
-                                            fontSize: '14px',
-                                            fontWeight: 'bold'
-                                          }}
-                                          onClick={() => {
-                                            alert('BUTTON CLICKED! URL: ' + url);
-                                            if (url && typeof url === 'string' && url.startsWith('http')) {
-                                              window.open(url, '_blank');
-                                            }
+                                            fontSize: '16px',
+                                            fontWeight: 'bold',
+                                            textDecoration: 'none',
+                                            display: 'block',
+                                            textAlign: 'center',
+                                            transition: 'all 0.2s',
+                                            pointerEvents: 'auto',
+                                            position: 'relative',
+                                            zIndex: 10000
                                           }}
                                         >
-                                          🔗 CLICK ME
-                                        </button>
+                                          🔗 OPEN
+                                        </a>
                                         <button 
+                                          type="button"
                                           style={{
-                                            padding: '10px 20px',
-                                            backgroundColor: '#2196F3',
+                                            flex: 1,
+                                            padding: '12px 20px',
+                                            backgroundColor: '#4ECDC4',
                                             color: 'white',
                                             border: 'none',
                                             borderRadius: '5px',
                                             cursor: 'pointer',
-                                            fontSize: '14px',
-                                            fontWeight: 'bold'
+                                            fontSize: '16px',
+                                            fontWeight: 'bold',
+                                            textAlign: 'center',
+                                            transition: 'all 0.2s',
+                                            pointerEvents: 'auto',
+                                            position: 'relative',
+                                            zIndex: 10000
                                           }}
-                                          onClick={(e) => {
-                                            e.preventDefault();
-                                            console.log('Saving resource:', resourceObj);
+                                          onClick={() => {
+                                            alert('Saved: ' + title);
                                             saveResource(resourceObj);
                                           }}
                                         >
-                                          💾 Save
+                                          💾 SAVE
                                         </button>
                                       </div>
                                     </div>

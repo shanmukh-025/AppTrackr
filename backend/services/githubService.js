@@ -1,6 +1,7 @@
 const axios = require('axios');
 const { Octokit } = require('@octokit/rest');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const smartAnalyzer = require('./smartAnalyzerService');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -170,14 +171,14 @@ class GitHubService {
       // Get repository structure
       const contents = await this.getRepositoryContents(accessToken, owner, repo);
 
-      // Analyze with AI
-      const analysis = await this.analyzeProjectWithAI(
+      // Use Smart Analyzer (faster, no API quota issues, project-specific)
+      const analysis = await smartAnalyzer.analyzeRepository(
+        octokit,
+        owner,
+        repo,
         repoData,
-        languages,
-        readmeContent,
-        dependencies,
         contents,
-        userSkills
+        dependencies
       );
 
       return analysis;
