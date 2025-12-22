@@ -99,6 +99,9 @@ app.use('/api/ai', aiRoutes);
 // GitHub Integration routes
 app.use('/api/github', githubRoutes);
 
+// Project Generation routes
+app.use('/', require('./routes/projects'));
+
 // Notification routes (Email settings, saved searches)
 app.use('/api/notifications', notificationRoutes);
 
