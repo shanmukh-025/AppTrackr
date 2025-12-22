@@ -461,7 +461,7 @@ const ProjectBuilderAI = () => {
               <div className="overview-tab">
                 <div className="section-header">
                   <h2>Your GitHub Repositories</h2>
-                  <button onClick={fetchRepositories} disabled={loading}>
+                  <button onClick={() => !loading && fetchRepositories()} className="refresh-btn">
                     🔄 Refresh
                   </button>
                 </div>
