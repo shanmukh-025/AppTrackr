@@ -223,7 +223,10 @@ router.post('/generate-project', authMiddleware, async (req, res) => {
 
     if (!projectSpec.name || !projectSpec.description || !projectSpec.techStack) {
       console.log('❌ [generate-project] Missing required fields');
-      return res.status(400).json({ error: 'Missing required fields: name, description, techStack' });
+      return res.status(400).json({ 
+        success: false,
+        error: 'Missing required fields: name, description, techStack' 
+      });
     }
 
     console.log('🚀 [generate-project] Generating project code...');
@@ -231,15 +234,25 @@ router.post('/generate-project', authMiddleware, async (req, res) => {
 
     if (!projectData) {
       console.log('❌ [generate-project] Failed to generate project data');
-      return res.status(500).json({ error: 'Failed to generate project code' });
+      return res.status(500).json({ 
+        success: false,
+        error: 'Failed to generate project code' 
+      });
     }
 
     console.log('✅ [generate-project] Project generation successful');
-    res.json({ project: projectData });
+    // Send response with proper headers
+    res.status(200).json({ 
+      success: true,
+      project: projectData 
+    });
   } catch (error) {
     console.error('❌ [generate-project] Error:', error.message);
-    console.error(error);
-    res.status(500).json({ error: 'Failed to generate project: ' + error.message });
+    console.error(error.stack);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to generate project: ' + error.message 
+    });
   }
 });
 

@@ -680,7 +680,7 @@ Respond ONLY with valid JSON object. No markdown code blocks, just the JSON.
 - Features: ${projectSpec.features ? projectSpec.features.filter(f => f.trim()).join(', ') : 'Basic functionality'}
 - Skill Level: ${projectSpec.skillLevel || 'intermediate'}
 
-Generate a COMPLETE project with real, working code in JSON format:
+Generate a COMPLETE project with real, working code in JSON format with at least 7 files:
 
 {
   "projectName": "${projectSpec.name}",
@@ -720,25 +720,23 @@ Generate a COMPLETE project with real, working code in JSON format:
 REQUIREMENTS:
 1. Generate ACTUAL, working code - not placeholders
 2. Include all files needed (server, routes, models, middleware)
-3. Use ${projectSpec.techStack.includes('Express') ? 'Express.js for API' : 'appropriate framework'}
+3. Use appropriate framework for the tech stack
 4. Include proper error handling and validation
 5. Add detailed comments in code
-6. Make it ready to run with "npm install && npm start"
-7. Respond ONLY with valid JSON - no markdown, no explanations
+6. Respond ONLY with valid JSON - no markdown
 
-Example structure for ${projectSpec.name}:
-- server.js: Main Express app with routes
-- routes/: API endpoints for CRUD operations
-- models/: Data schemas and validation
-- middleware/: Error handling, logging, validation
-- public/ or views/: Frontend files if applicable
-- .env.example: Configuration template
-- package.json: All dependencies and scripts
-- README.md: Complete documentation
-`;
+Max 30 seconds timeout.`;
 
-      console.log('🚀 Calling Gemini API...');
-      const result = await model.generateContent(prompt);
+      console.log('🚀 Calling Gemini API with timeout...');
+      
+      // Create a timeout promise
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Gemini API timeout after 25 seconds')), 25000)
+      );
+      
+      const generationPromise = model.generateContent(prompt);
+      const result = await Promise.race([generationPromise, timeoutPromise]);
+      
       const text = result.response.text();
       console.log('✅ Gemini response received:', text.substring(0, 300));
       
