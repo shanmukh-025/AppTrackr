@@ -647,56 +647,21 @@ const ProjectBuilderAI = () => {
                                   return (
                                     <div key={idx} className="resource-item-card" style={{pointerEvents: 'auto', position: 'relative', zIndex: 1001}}>
                                       <div className="resource-title">{title}</div>
-                                      <div style={{display: 'flex', gap: '0.5rem', pointerEvents: 'auto', position: 'relative', zIndex: 1002}}>
+                                      <div>
                                         <a
                                           href={url}
                                           target="_blank"
                                           rel="noopener noreferrer"
-                                          style={{
-                                            flex: 1,
-                                            padding: '12px 20px',
-                                            backgroundColor: '#FF6B6B',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '5px',
-                                            cursor: 'pointer',
-                                            fontSize: '16px',
-                                            fontWeight: 'bold',
-                                            textDecoration: 'none',
-                                            display: 'block',
-                                            textAlign: 'center',
-                                            transition: 'all 0.2s',
-                                            pointerEvents: 'auto',
-                                            position: 'relative',
-                                            zIndex: 10000
-                                          }}
                                         >
-                                          🔗 OPEN
+                                          🔗 Open
                                         </a>
                                         <button 
                                           type="button"
-                                          style={{
-                                            flex: 1,
-                                            padding: '12px 20px',
-                                            backgroundColor: '#4ECDC4',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '5px',
-                                            cursor: 'pointer',
-                                            fontSize: '16px',
-                                            fontWeight: 'bold',
-                                            textAlign: 'center',
-                                            transition: 'all 0.2s',
-                                            pointerEvents: 'auto',
-                                            position: 'relative',
-                                            zIndex: 10000
-                                          }}
                                           onClick={() => {
-                                            alert('Saved: ' + title);
                                             saveResource(resourceObj);
                                           }}
                                         >
-                                          💾 SAVE
+                                          💾 Save
                                         </button>
                                       </div>
                                     </div>
