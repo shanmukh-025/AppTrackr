@@ -1,5 +1,25 @@
 const { PrismaClient } = require('@prisma/client');
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const isTransientDatabaseError = (error) => {
+  if (!error) return false;
+
+  const text = `${error.code || ''} ${error.message || ''}`.toLowerCase();
+  const transientHints = [
+    'p1001',
+    'p1002',
+    'p2024',
+    'timeout',
+    'timed out',
+    'connection',
+    'econnrefused',
+    'pool'
+  ];
+
+  return transientHints.some((hint) => text.includes(hint));
+};
+
 // Create Prisma client with connection pooling optimized
 const prisma = new PrismaClient({
   log: ['error'],
@@ -23,6 +43,7 @@ class ConnectionPoolManager {
     this.maxConcurrent = maxConcurrent;
     this.active = 0;
     this.queue = [];
+    this.maxRetries = 2;
   }
 
   async execute(fn) {
@@ -33,12 +54,29 @@ class ConnectionPoolManager {
     
     this.active++;
     try {
-      return await Promise.race([
-        fn(),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Query timeout (180s)')), 180000)
-        )
-      ]);
+      let lastError;
+
+      for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+        try {
+          return await Promise.race([
+            fn(),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('Query timeout (180s)')), 180000)
+            )
+          ]);
+        } catch (error) {
+          lastError = error;
+
+          if (!isTransientDatabaseError(error) || attempt === this.maxRetries) {
+            throw error;
+          }
+
+          // Short backoff for transient pool/connection issues.
+          await sleep(150 * (attempt + 1));
+        }
+      }
+
+      throw lastError;
     } finally {
       this.active--;
       const next = this.queue.shift();

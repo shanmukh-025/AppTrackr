@@ -6,6 +6,26 @@ const prisma = require('../prisma/client');
 
 const router = express.Router();
 
+const DATABASE_UNAVAILABLE_MESSAGE = 'Database services are temporarily unavailable. Please try again later.';
+
+function isDatabaseUnavailableError(error) {
+  if (!error) return false;
+
+  const text = `${error.code || ''} ${error.message || ''}`.toLowerCase();
+  const dbErrorHints = [
+    'p1001',
+    'p1002',
+    'database',
+    'connection',
+    'timeout',
+    'timed out',
+    'econnrefused',
+    'pool'
+  ];
+
+  return dbErrorHints.some((hint) => text.includes(hint));
+}
+
 // Register
 router.post(
   '/register',
@@ -63,6 +83,9 @@ router.post(
       });
     } catch (error) {
       console.error('Register error:', error);
+      if (isDatabaseUnavailableError(error)) {
+        return res.status(503).json({ message: DATABASE_UNAVAILABLE_MESSAGE });
+      }
       res.status(500).json({ message: 'Server error' });
     }
   }
@@ -97,7 +120,7 @@ router.post(
         console.log('✅ Database query successful');
       } catch (dbError) {
         console.error('❌ Database error finding user:', dbError.message);
-        return res.status(503).json({ message: 'Database service temporarily unavailable' });
+        return res.status(503).json({ message: DATABASE_UNAVAILABLE_MESSAGE });
       }
 
       if (!user) {
@@ -184,6 +207,11 @@ router.get('/me', async (req, res) => {
     res.json({ user });
   } catch (error) {
     console.error('Get user error:', error);
+
+    if (isDatabaseUnavailableError(error)) {
+      return res.status(503).json({ message: DATABASE_UNAVAILABLE_MESSAGE });
+    }
+
     res.status(401).json({ message: 'Invalid token' });
   }
 });

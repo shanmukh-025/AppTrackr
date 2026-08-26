@@ -1,4 +1,5 @@
 const express = require('express');
+const prisma = require('../prisma/client');
 const router = express.Router();
 
 /**
@@ -138,6 +139,29 @@ router.get('/detailed', (req, res) => {
   };
   
   res.json(detailed);
+});
+
+/**
+ * GET /api/health/db
+ * Verifies database connectivity with a lightweight query.
+ */
+router.get('/db', async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    return res.status(200).json({
+      status: 'healthy',
+      database: 'reachable',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Database health check failed:', error.message);
+    return res.status(503).json({
+      status: 'degraded',
+      database: 'unreachable',
+      message: 'Database services are temporarily unavailable. Please try again later.',
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 module.exports = router;
