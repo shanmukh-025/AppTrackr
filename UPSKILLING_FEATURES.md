@@ -19,7 +19,7 @@ These features transform AppTrackr from a simple job tracker into a **complete c
 - Live market skill comparison against peers and top performers
 - Adaptive weekly goals based on progress
 
-### Key Differentiators
+### Key Differentiator/Diferentiators
 
 | Feature | LinkedIn Learning | Coursera | Udemy | **Skill Mentor AI** |
 |---------|------------------|----------|-------|-------------------|

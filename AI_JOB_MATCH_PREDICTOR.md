@@ -12,7 +12,7 @@ The **AI Job Match Predictor** is a groundbreaking feature that uses artificial 
 - ❌ **Glassdoor**: Company info but no personal fit analysis
 - ✅ **AppTrackr**: AI-powered hiring probability with actionable insights
 
-## 🎨 Features
+##  Features
 
 ### 1. **Profile Strength Analysis**
 - Real-time profile score (0-100%)

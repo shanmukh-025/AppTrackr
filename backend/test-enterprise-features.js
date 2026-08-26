@@ -419,5 +419,4 @@ async function runTests() {
 // Run tests
 runTests().catch(error => {
   log.error(`Test suite failed: ${error.message}`);
-  process.exit(1);
-});
+  process.exit(1);});
