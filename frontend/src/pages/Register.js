@@ -44,12 +44,10 @@ function Register() {
     if (result.success) {
       navigate('/dashboard');
     } else {
-      setError(result.message);
+      setError(result.error || 'Registration failed');
       setLoading(false);
     }
   };
-
-  console.log('Register function:', register); // Debugging line
 
   return (
     <div className="auth-container">

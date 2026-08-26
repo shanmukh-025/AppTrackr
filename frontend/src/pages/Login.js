@@ -31,7 +31,7 @@ function Login() {
     if (result.success) {
       navigate('/dashboard');
     } else {
-      setError(result.message);
+      setError(result.error || 'Login failed');
       setLoading(false);
     }
   };

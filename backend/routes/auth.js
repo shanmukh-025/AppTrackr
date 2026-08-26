@@ -99,12 +99,10 @@ router.post(
     body('password').notEmpty().withMessage('Password is required')
   ],
   async (req, res) => {
-    console.log('🔐 Login attempt for:', req.body.email);
     try {
       // Validate input
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        console.log('❌ Validation errors:', errors.array());
         return res.status(400).json({ errors: errors.array() });
       }
 
@@ -113,53 +111,44 @@ router.post(
       // Find user
       let user;
       try {
-        console.log('Querying database for user:', email);
         user = await prisma.user.findUnique({
           where: { email }
         });
-        console.log('✅ Database query successful');
       } catch (dbError) {
         console.error('❌ Database error finding user:', dbError.message);
         return res.status(503).json({ message: DATABASE_UNAVAILABLE_MESSAGE });
       }
 
       if (!user) {
-        console.log('❌ User not found:', email);
         return res.status(401).json({ message: 'Invalid credentials' });
       }
 
       // Check password
       let isValidPassword = false;
       try {
-        console.log('Comparing passwords...');
         isValidPassword = await bcrypt.compare(password, user.password);
-        console.log('✅ Password comparison successful');
       } catch (bcryptError) {
         console.error('❌ Bcrypt error:', bcryptError.message);
         return res.status(500).json({ message: 'Authentication service error' });
       }
 
       if (!isValidPassword) {
-        console.log('❌ Invalid password for:', email);
         return res.status(401).json({ message: 'Invalid credentials' });
       }
 
       // Generate JWT
       let token;
       try {
-        console.log('Generating JWT token...');
         token = jwt.sign(
           { userId: user.id },
           process.env.JWT_SECRET,
           { expiresIn: '7d' }
         );
-        console.log('✅ JWT token generated successfully');
       } catch (tokenError) {
         console.error('❌ Token generation error:', tokenError.message);
         return res.status(500).json({ message: 'Token generation failed' });
       }
 
-      console.log('✅ Login successful for:', email);
       res.json({
         message: 'Login successful',
         token,
@@ -171,13 +160,15 @@ router.post(
       });
     } catch (error) {
       console.error('❌ Login error:', error);
-      res.status(500).json({ message: 'Server error', details: error.message });
+      res.status(500).json({ message: 'Server error' });
     }
   }
 );
 
 // Get current user (protected route)
 router.get('/me', async (req, res) => {
+  let decoded;
+
   try {
     // Get token from header
     const token = req.headers.authorization?.split(' ')[1];
@@ -187,7 +178,12 @@ router.get('/me', async (req, res) => {
     }
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (error) {
+    return res.status(401).json({ message: 'Invalid token' });
+  }
+
+  try {
 
     // Get user from database
     const user = await prisma.user.findUnique({
@@ -212,7 +208,7 @@ router.get('/me', async (req, res) => {
       return res.status(503).json({ message: DATABASE_UNAVAILABLE_MESSAGE });
     }
 
-    res.status(401).json({ message: 'Invalid token' });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

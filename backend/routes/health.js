@@ -117,21 +117,17 @@ router.get('/detailed', (req, res) => {
     
     apis: {
       gemini: process.env.GEMINI_API_KEY ? {
-        status: '✅ Configured',
-        keyLength: process.env.GEMINI_API_KEY.length,
-        keyPrefix: process.env.GEMINI_API_KEY.substring(0, 10) + '...'
+        status: '✅ Configured'
       } : '❌ Not configured',
       
       jooble: process.env.JOOBLE_API_KEY ? {
         status: '✅ Configured',
-        url: process.env.JOOBLE_API_URL,
-        keyPrefix: process.env.JOOBLE_API_KEY.substring(0, 8) + '...'
+        url: process.env.JOOBLE_API_URL
       } : '❌ Not configured',
       
       apijobs: process.env.APIJOBS_API_KEY ? {
         status: '✅ Configured',
-        url: process.env.APIJOBS_API_URL,
-        keyPrefix: process.env.APIJOBS_API_KEY.substring(0, 8) + '...'
+        url: process.env.APIJOBS_API_URL
       } : '❌ Not configured'
     },
     

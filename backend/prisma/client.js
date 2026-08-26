@@ -20,6 +20,13 @@ const isTransientDatabaseError = (error) => {
   return transientHints.some((hint) => text.includes(hint));
 };
 
+const MODEL_METHOD_HINTS = ['findUnique', 'findMany', 'create', 'update', 'delete', 'upsert', 'count', 'aggregate', 'groupBy'];
+
+const isModelDelegate = (value) => {
+  if (!value || typeof value !== 'object') return false;
+  return MODEL_METHOD_HINTS.some((method) => typeof value[method] === 'function');
+};
+
 // Create Prisma client with connection pooling optimized
 const prisma = new PrismaClient({
   log: ['error'],
@@ -90,18 +97,10 @@ const poolManager = new ConnectionPoolManager(100);
 // Wrap Prisma to use connection pool
 const wrappedPrisma = new Proxy(prisma, {
   get(target, prop) {
-    // For database operations, wrap in pool manager - include ALL models
-    const dbModels = [
-      'application', 'user', 'interviewSession', 'interviewResponse', 'resume',
-      'resumeAnalysis', 'coverLetter', 'interviewPrep', 'savedSearch', 
-      'applicationActivity', 'jobShare', 'referral', 'companyReview',
-      'forumPost', 'forumComment', 'autofillData', 'premiumJob',
-      'jobBookmark', 'note', 'userPreference', 'companyCareerPage',
-      'savedLearningPath'  // Added missing model
-    ];
-    
-    if (dbModels.includes(prop)) {
-      return new Proxy(target[prop], {
+    const delegate = target[prop];
+
+    if (isModelDelegate(delegate)) {
+      return new Proxy(delegate, {
         get(t, method) {
           if (typeof t[method] === 'function') {
             return function(...args) {
@@ -112,7 +111,8 @@ const wrappedPrisma = new Proxy(prisma, {
         }
       });
     }
-    return target[prop];
+
+    return delegate;
   }
 });
 
