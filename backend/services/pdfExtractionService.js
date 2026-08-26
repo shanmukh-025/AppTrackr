@@ -70,7 +70,7 @@ class PDFExtractionService {
    */
   extractProblemId(text) {
     // Try to extract from /problems/problem-name format
-    const match = text.match(/\/problems\/([a-z0-9\-]+)/i);
+    const match = text.match(/\/problems\/([a-z0-9-]+)/i);
     if (match) {
       return match[1];
     }
@@ -420,7 +420,7 @@ class PDFExtractionService {
       
       // Difficulty count - normalize difficulty to lowercase
       const difficulty = (q.difficulty || 'medium').toLowerCase();
-      if (stats.byDifficulty.hasOwnProperty(difficulty)) {
+      if (Object.prototype.hasOwnProperty.call(stats.byDifficulty, difficulty)) {
         stats.byDifficulty[difficulty]++;
       }
 

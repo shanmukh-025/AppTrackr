@@ -266,7 +266,7 @@ Return as JSON:
         salutation: 'Dear Hiring Manager,',
         opening: `I am excited to apply for the ${targetRole} position at ${targetCompany}. With my background in software development and passion for technology, I believe I would be a valuable addition to your team.`,
         bodyParagraph1: `Throughout my career, I have developed strong skills in ${userProfile.skills?.slice(0, 2).join(' and ')}. In my current role, I have successfully led projects and contributed to team success.`,
-        bodyParagraph2: `I am particularly drawn to ${targetCompany} because of your company\'s commitment to innovation and excellence. I am confident that my skills and experience align well with the role requirements.`,
+        bodyParagraph2: `I am particularly drawn to ${targetCompany} because of your company's commitment to innovation and excellence. I am confident that my skills and experience align well with the role requirements.`,
         bodyParagraph3: `I would welcome the opportunity to discuss how I can contribute to your team. Thank you for considering my application.`,
         closing: 'I look forward to hearing from you.',
         signature: `Best regards,\n${userProfile.name}`,

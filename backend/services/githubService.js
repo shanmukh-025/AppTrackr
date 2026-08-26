@@ -597,7 +597,7 @@ IMPORTANT:
   }
 
   // Generate project code with AI
-  async generateProjectCode(projectSpec) {
+  async generateBasicProjectCode(projectSpec) {
     console.log('📝 Generating project with spec:', projectSpec);
     try {
       const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });

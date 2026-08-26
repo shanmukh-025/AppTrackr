@@ -349,9 +349,9 @@ router.post('/generate-resume-pdf', auth, async (req, res) => {
       }
 
       // Detect bullet points
-      if (line.match(/^[\*\-•]\s/) || line.match(/^\d+\.\s/)) {
+      if (line.match(/^[*-•]\s/) || line.match(/^\d+\.\s/)) {
         isInBulletList = true;
-        const bulletText = line.replace(/^[\*\-•]\s*/, '').replace(/^\d+\.\s*/, '');
+        const bulletText = line.replace(/^[*-•]\s*/, '').replace(/^\d+\.\s*/, '');
         
         doc.fontSize(10).font('Helvetica').fillColor('#000000');
         doc.list([bulletText], {

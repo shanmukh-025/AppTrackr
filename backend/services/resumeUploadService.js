@@ -187,7 +187,7 @@ class ResumeUploadService {
    */
   extractEducation(text) {
     const education = [];
-    const eduPattern = /([A-Za-z\.]+)\s+(?:in\s+)?([^,\n]+)(?:\s+(?:from|at)\s+([^,\n]+))?/gi;
+    const eduPattern = /([A-Za-z.]+)\s+(?:in\s+)?([^,\n]+)(?:\s+(?:from|at)\s+([^,\n]+))?/gi;
 
     const degreeText = text.match(/(?:education|degree)[\s\S]*?(?=\n\n|EXPERIENCE|SKILL|$)/i)?.[0] || '';
 

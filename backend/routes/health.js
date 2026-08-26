@@ -21,32 +21,32 @@ router.get('/', (req, res) => {
     
     // Authentication
     auth: {
-      jwtSecret: !!process.env.JWT_SECRET ? 'configured' : 'missing'
+      jwtSecret: process.env.JWT_SECRET ? 'configured' : 'missing'
     },
     
     // AI Services
     ai: {
-      gemini: !!process.env.GEMINI_API_KEY ? 'configured' : 'missing'
+      gemini: process.env.GEMINI_API_KEY ? 'configured' : 'missing'
     },
     
     // Job APIs
     jobAPIs: {
       jooble: {
-        apiKey: !!process.env.JOOBLE_API_KEY ? 'configured' : 'missing',
-        apiUrl: !!process.env.JOOBLE_API_URL ? 'configured' : 'missing'
+        apiKey: process.env.JOOBLE_API_KEY ? 'configured' : 'missing',
+        apiUrl: process.env.JOOBLE_API_URL ? 'configured' : 'missing'
       },
       apijobs: {
-        apiKey: !!process.env.APIJOBS_API_KEY ? 'configured' : 'missing',
-        apiUrl: !!process.env.APIJOBS_API_URL ? 'configured' : 'missing'
+        apiKey: process.env.APIJOBS_API_KEY ? 'configured' : 'missing',
+        apiUrl: process.env.APIJOBS_API_URL ? 'configured' : 'missing'
       },
       arbeitnow: {
-        apiUrl: !!process.env.ARBEITNOW_API_URL ? 'configured' : 'missing'
+        apiUrl: process.env.ARBEITNOW_API_URL ? 'configured' : 'missing'
       }
     },
     
     // Google Drive
     googleDrive: {
-      folderId: !!process.env.GOOGLE_DRIVE_FOLDER_ID ? 'configured' : 'missing'
+      folderId: process.env.GOOGLE_DRIVE_FOLDER_ID ? 'configured' : 'missing'
     },
     
     // Cache Settings

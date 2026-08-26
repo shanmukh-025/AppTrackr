@@ -187,7 +187,7 @@ router.get('/status-distribution', auth, async (req, res) => {
     };
 
     applications.forEach(app => {
-      if (distribution.hasOwnProperty(app.status)) {
+      if (Object.prototype.hasOwnProperty.call(distribution, app.status)) {
         distribution[app.status]++;
       }
     });
